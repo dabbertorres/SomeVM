@@ -1,6 +1,7 @@
 #include "VM.hpp"
 
 #include "Instruction.hpp"
+
 #include <fstream>
 #include <iostream>
 
@@ -96,7 +97,7 @@ namespace lng
 
 					it += 2;
 					break;
-
+					
 				case Instruction::Erase:
 					if(!variables.empty() && *(it + 1) < variables.size())
 						variables.erase(variables.begin() + *(it + 1));
@@ -146,7 +147,7 @@ namespace lng
 					it++;
 					break;
 				}
-
+				
 				case Instruction::Sub:
 				{
 					Value<float> one;
@@ -310,7 +311,7 @@ namespace lng
 					it++;
 					break;
 				}
-
+				
 				case Instruction::Greater:
 				{
 					Value<float> one;
@@ -347,7 +348,7 @@ namespace lng
 				{
 					Value<float> one;
 					Value<float> two;
-
+					
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
@@ -496,7 +497,7 @@ namespace lng
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
-
+					
 					stack.emplace(new Value<bool>(one.getValue() != two.getValue()));
 
 					it++;
