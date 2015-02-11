@@ -177,7 +177,12 @@ namespace lng
 			{
 				bytecode.push_back(static_cast<byte>(Instruction::PushLiteral));
 				bytecode.push_back(static_cast<byte>(ValueType::Number));
-				bytecode.push_back(static_cast<byte>(std::stod(*it)));
+				Float f;
+				f.value = std::stof(*it);
+				bytecode.push_back(static_cast<byte>(f.bytes[0]));
+				bytecode.push_back(static_cast<byte>(f.bytes[1]));
+				bytecode.push_back(static_cast<byte>(f.bytes[2]));
+				bytecode.push_back(static_cast<byte>(f.bytes[3]));
 			}
 			else if(operators.find(*it) != operators.end())
 			{

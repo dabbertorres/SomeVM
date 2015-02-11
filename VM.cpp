@@ -24,24 +24,40 @@ namespace lng
 					switch(static_cast<ValueType>(*(it + 1)))
 					{
 						case ValueType::None:
-							stack.push(new Value<nil>(nullptr));
+						{
+							None none;
+							none.value = nullptr;
+							stack.push(new Value<nil>(none.value));
+							it += 2;
 							break;
-
+						}
+						
 						case ValueType::Bool:
-							stack.push(new Value<bool>(static_cast<bool>(*(it + 2))));
+						{
+							Bool b;
+							b.bytes[0] = *(it + 2);
+							stack.push(new Value<bool>(b.value));
+							it += 3;
 							break;
-
+						}
 						case ValueType::Number:
-							stack.push(new Value<double>(static_cast<double>(*(it + 2))));
+						{
+							Float f;
+							f.bytes[0] = *(it + 2);
+							f.bytes[1] = *(it + 3);
+							f.bytes[2] = *(it + 4);
+							f.bytes[3] = *(it + 5);
+							stack.push(new Value<float>(f.value));
+							it += 6;
 							break;
-
+						}
 						default:
+						{
 							std::cerr << "Invalid Value in bytecode. OP: " << it - bytecode.begin() << '\n';
 							throw std::runtime_error("");
 							break;
+						}
 					}
-					
-					it += 3;
 					break;
 
 				case Instruction::PushVariable:
@@ -92,14 +108,14 @@ namespace lng
 
 				case Instruction::Add:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 					
 					if(stack.size() >= 2)
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -110,7 +126,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -125,7 +141,7 @@ namespace lng
 						throw std::runtime_error("");
 					}
 
-					stack.push(new Value<double>(two.getValue() + one.getValue()));
+					stack.push(new Value<float>(two.getValue() + one.getValue()));
 
 					it++;
 					break;
@@ -133,14 +149,14 @@ namespace lng
 
 				case Instruction::Sub:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(stack.size() >= 2)
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -151,7 +167,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -166,7 +182,7 @@ namespace lng
 						throw std::runtime_error("");
 					}
 
-					stack.push(new Value<double>(two.getValue() - one.getValue()));
+					stack.push(new Value<float>(two.getValue() - one.getValue()));
 
 					it++;
 					break;
@@ -174,14 +190,14 @@ namespace lng
 
 				case Instruction::Mult:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(stack.size() >= 2)
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -192,7 +208,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -207,7 +223,7 @@ namespace lng
 						throw std::runtime_error("");
 					}
 
-					stack.push(new Value<double>(two.getValue() * one.getValue()));
+					stack.push(new Value<float>(two.getValue() * one.getValue()));
 
 					it++;
 					break;
@@ -215,14 +231,14 @@ namespace lng
 
 				case Instruction::Div:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(stack.size() >= 2)
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -233,7 +249,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -248,7 +264,7 @@ namespace lng
 						throw std::runtime_error("");
 					}
 
-					stack.push(new Value<double>(two.getValue() / one.getValue()));
+					stack.push(new Value<float>(two.getValue() / one.getValue()));
 
 					it++;
 					break;
@@ -256,14 +272,14 @@ namespace lng
 
 				case Instruction::Mod:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(stack.size() >= 2)
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -274,7 +290,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -289,7 +305,7 @@ namespace lng
 						throw std::runtime_error("");
 					}
 
-					stack.emplace(new Value<double>(static_cast<int>(two.getValue()) % static_cast<int>(one.getValue())));
+					stack.emplace(new Value<float>(static_cast<int>(two.getValue()) % static_cast<int>(one.getValue())));
 
 					it++;
 					break;
@@ -297,14 +313,14 @@ namespace lng
 
 				case Instruction::Greater:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -312,7 +328,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -329,14 +345,14 @@ namespace lng
 
 				case Instruction::Lesser:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -344,7 +360,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -361,14 +377,14 @@ namespace lng
 
 				case Instruction::GreaterOrEqual:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -376,7 +392,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -393,14 +409,14 @@ namespace lng
 
 				case Instruction::LesserOrEqual:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -408,7 +424,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -425,14 +441,14 @@ namespace lng
 
 				case Instruction::Equal:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -440,7 +456,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -457,14 +473,14 @@ namespace lng
 
 				case Instruction::NotEqual:
 				{
-					Value<double> one;
-					Value<double> two;
+					Value<float> one;
+					Value<float> two;
 
 					if(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							one = *static_cast<const Value<double>*>(stack.top());
+							one = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -472,7 +488,7 @@ namespace lng
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
-							two = *static_cast<const Value<double>*>(stack.top());
+							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
@@ -510,9 +526,9 @@ namespace lng
 
 				case Instruction::End:
 					if(!stack.empty())
-						std::cerr << "Result: " << static_cast<const Value<double>*>(stack.top())->getValue() << '\n';
+						std::cerr << "Result: " << static_cast<const Value<float>*>(stack.top())->getValue() << '\n';
 					else
-						std::cerr << "Variable: " << static_cast<const Value<double>*>(variables.back())->getValue() << '\n';
+						std::cerr << "Variable: " << static_cast<const Value<float>*>(variables.back())->getValue() << '\n';
 					while(!stack.empty())
 						stack.pop();
 

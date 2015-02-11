@@ -1,5 +1,5 @@
 #include "Value.hpp"
-#include <iostream>
+
 namespace lng
 {
 	BaseValue::BaseValue()
@@ -14,6 +14,21 @@ namespace lng
 	ValueType BaseValue::getValueType() const
 	{
 		return type;
+	}
+	
+	unsigned int BaseValue::getSizeOf() const
+	{
+		switch(type)
+		{
+			case ValueType::None:
+				return 1;
+			case ValueType::Bool:
+				return sizeof(bool);
+			case ValueType::Number:
+				return sizeof(float);
+			default:
+				return 0;
+		}
 	}
 	
 	template<>
@@ -31,13 +46,13 @@ namespace lng
 	}
 
 	template<>
-	Value<double>::Value(const double& n)
+	Value<float>::Value(const float& n)
 	{
 		value = n;
 		setValueType(ValueType::Number);
 	}
 
-	template<>
+	/*template<>
 	Value<Array>::Value(const Array& ar)
 	{
 		value = ar;
@@ -56,5 +71,5 @@ namespace lng
 	{
 		value = f;
 		setValueType(ValueType::Function);
-	}
+	}*/
 }

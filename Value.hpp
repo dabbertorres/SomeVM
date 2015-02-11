@@ -3,10 +3,6 @@
 
 #include <string>
 
-#include "Array.hpp"
-#include "Object.hpp"
-#include "Function.hpp"
-
 using byte = unsigned char;
 using nil = std::nullptr_t;
 
@@ -17,9 +13,24 @@ namespace lng
 	    None,
 	    Bool,
 	    Number,
-	    Array,
-	    Function,
-	    Object
+	};
+	
+	union None
+	{
+		char bytes[1];
+		std::nullptr_t value;
+	};
+	
+	union Bool
+	{
+		char bytes[1];
+		bool value;
+	};
+	
+	union Float
+	{
+		char bytes[sizeof(float)];
+		float value;
 	};
 
 	class BaseValue
@@ -29,6 +40,7 @@ namespace lng
 
 			void setValueType(ValueType t);
 			ValueType getValueType() const;
+			unsigned int getSizeOf() const;
 
 		private:
 			ValueType type;
