@@ -24,10 +24,6 @@ namespace lng
 			
 			unsigned int getStackSize() const;
 
-			// stack operations
-			void push(const BaseValue& var);
-			void pop();
-
 		private:
 			std::stack<const BaseValue*> stack;
 			std::vector<BaseValue*> variables;
