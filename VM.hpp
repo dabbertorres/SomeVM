@@ -22,6 +22,8 @@ namespace lng
 
 			void run(const Bytecode& bytecode);
 			
+			static Bytecode loadBytes(const std::string& f);
+			
 			unsigned int getStackSize() const;
 
 		private:

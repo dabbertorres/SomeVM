@@ -1,6 +1,7 @@
 #include "VM.hpp"
 
 #include "Instruction.hpp"
+#include <fstream>
 #include <iostream>
 
 namespace lng
@@ -524,6 +525,22 @@ namespace lng
 					break;
 			}
 		}
+	}
+	
+	VM::Bytecode VM::loadBytes(const std::string& f)
+	{
+		std::ifstream fin(f, std::ios::binary);
+		
+		if(fin.bad())
+			return {};
+		
+		Bytecode bytecode;
+		
+		char b = ' ';
+		while(fin.read(&b, 1))
+			bytecode.push_back(static_cast<byte>(b));
+		
+		return bytecode;
 	}
 
 	unsigned int VM::getStackSize() const
