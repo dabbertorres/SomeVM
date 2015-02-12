@@ -93,7 +93,10 @@ namespace lng
 						stack.pop();
 					}
 					else
-						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
+					{
+						std::cerr << "Stack is empty. OP: " << (it - bytecode.begin()) << '\n';
+						throw std::runtime_error("");
+					}
 
 					it += 2;
 					break;
@@ -325,20 +328,26 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + std::distance(bytecode.begin(), it));
-
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
+						
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
 							two = *static_cast<const Value<float>*>(stack.top());
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + std::distance(bytecode.begin(), it));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + std::distance(bytecode.begin(), it));
 
-					stack.emplace(new Value<bool>(one.getValue() > two.getValue()));
+					stack.emplace(new Value<bool>(two.getValue() > one.getValue()));
 
 					it++;
 					break;
@@ -357,7 +366,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
@@ -365,12 +377,15 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
 
-					stack.emplace(new Value<bool>(one.getValue() < two.getValue()));
+					stack.emplace(new Value<bool>(two.getValue() < one.getValue()));
 
 					it++;
 					break;
@@ -389,7 +404,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
@@ -397,12 +415,15 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
 
-					stack.emplace(new Value<bool>(one.getValue() >= two.getValue()));
+					stack.emplace(new Value<bool>(two.getValue() >= one.getValue()));
 
 					it++;
 					break;
@@ -421,7 +442,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
@@ -429,12 +453,15 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
 
-					stack.emplace(new Value<bool>(one.getValue() <= two.getValue()));
+					stack.emplace(new Value<bool>(two.getValue() <= one.getValue()));
 
 					it++;
 					break;
@@ -453,7 +480,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
@@ -461,7 +491,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
@@ -485,7 +518,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 
 						if(stack.top()->getValueType() == ValueType::Number)
 						{
@@ -493,7 +529,10 @@ namespace lng
 							stack.pop();
 						}
 						else
-							throw std::runtime_error("Value on stack is not a number. OP: " + (it - bytecode.begin()));
+						{
+							std::cerr << "Value on stack is not a number. OP: " << std::distance(bytecode.begin(), it) << '\n';
+							throw std::runtime_error("");
+						}
 					}
 					else
 						throw std::runtime_error("Stack is empty. OP: " + (it - bytecode.begin()));
@@ -513,7 +552,10 @@ namespace lng
 							it = bytecode.begin() + static_cast<unsigned int>(*(it + 2));
 					}
 					else
-						throw std::runtime_error("Value on top of stack does not evaluate to bool. OP: " + (it - bytecode.begin()));
+					{
+						std::cerr << "Value on stack is not a bool. OP: " << std::distance(bytecode.begin(), it) << '\n';
+						throw std::runtime_error("");
+					}
 					break;
 
 				case Instruction::Goto:
@@ -527,9 +569,20 @@ namespace lng
 
 				case Instruction::End:
 					if(!stack.empty())
-						std::cerr << "Result: " << static_cast<const Value<float>*>(stack.top())->getValue() << '\n';
+					{
+						if(stack.top()->getValueType() == ValueType::Bool)
+							std::cerr << "Result: " << static_cast<const Value<bool>*>(stack.top())->getValue() << '\n';
+						else
+							std::cerr << "Result: " << static_cast<const Value<float>*>(stack.top())->getValue() << '\n';
+					}
 					else
-						std::cerr << "Variable: " << static_cast<const Value<float>*>(variables.back())->getValue() << '\n';
+					{
+						if(variables.back()->getValueType() == ValueType::Bool)
+							std::cerr << "Variable: " << static_cast<const Value<bool>*>(variables.back())->getValue() << '\n';
+						else
+							std::cerr << "Variable: " << static_cast<const Value<float>*>(variables.back())->getValue() << '\n';
+					}
+					
 					while(!stack.empty())
 						stack.pop();
 

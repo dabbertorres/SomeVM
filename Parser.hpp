@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <functional>
 
 #include "Value.hpp"
 #include "Instruction.hpp"
@@ -15,7 +16,7 @@ namespace lng
 		public:
 			using Bytecode = std::vector<byte>;
 
-			Bytecode parseFile(const std::string& f, bool save);
+			Bytecode parseFile(const std::string& f);
 			Bytecode parseLine(const std::string& l);
 
 			class Operator
@@ -39,6 +40,7 @@ namespace lng
 			
 			std::map<std::string, unsigned int> variables;
 			
+			static const std::map<std::string, std::function<void(const std::string& e, Bytecode& bytecode)>> keywords;
 			static const std::map<std::string, Operator> operators;
 	};
 }

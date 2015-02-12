@@ -4,7 +4,7 @@
 #include <stack>
 #include <fstream>
 #include <sstream>
-
+#include <iostream>
 namespace lng
 {
 	const std::map<std::string, Parser::Operator> Parser::operators = 
@@ -16,8 +16,24 @@ namespace lng
 		{"<", {8, Parser::Operator::Associativity::Left}}, {">", {8, Parser::Operator::Associativity::Left}},
 		{"<=", {8, Parser::Operator::Associativity::Left}}, {">=", {8, Parser::Operator::Associativity::Left}},
 	};
+	
+	const std::map<std::string, std::function<void(const std::string& e, Parser::Bytecode& bytecode)>> Parser::keywords = 
+	{
+		{"true", [](const std::string& e, Bytecode& bytecode)
+		{
+			
+		}},
+		{"false", [](const std::string& e, Bytecode& bytecode)
+		{
+			
+		}},
+		{"if", [](const std::string& e, Bytecode& bytecode)
+		{
+			
+		}},
+	};
 														
-	Parser::Bytecode Parser::parseFile(const std::string& f, bool save)
+	Parser::Bytecode Parser::parseFile(const std::string& f)
 	{
 		Bytecode instructions;
 		
@@ -75,25 +91,38 @@ namespace lng
 				else
 					tokens.emplace_back(std::string(1, *it));
 			}
-			else if((operators.find(std::string(1, *it)) != operators.end()) || *it == '(' || *it == ')')
-			{
-				if(tokens.back().empty())
-				{
-					tokens.back().push_back(*it);
-					tokens.emplace_back();
-				}
-				else
-				{
-					tokens.emplace_back();
-					tokens.back().push_back(*it);
-				}
-			}
 			else if(std::isalpha(*it))	// is variable
 			{
 				if(std::isalpha(tokens.back().back()) || tokens.back().empty())
 					tokens.back().push_back(*it);
 				else
 					tokens.emplace_back(std::string(1, *it));
+			}
+			// operators
+			else
+			{
+				std::string multiCharOp;
+				multiCharOp += *it;
+				multiCharOp += *(it + 1);
+				
+				if(operators.find(multiCharOp) != operators.end())
+				{
+					tokens.emplace_back(multiCharOp);
+					it++;
+				}
+				else if((operators.find(std::string(1, *it)) != operators.end()) || *it == '(' || *it == ')')
+				{
+					if(tokens.back().empty())
+					{
+						tokens.back().push_back(*it);
+						tokens.emplace_back();
+					}
+					else
+					{
+						tokens.emplace_back();
+						tokens.back().push_back(*it);
+					}
+				}
 			}
 		}
 		
@@ -218,6 +247,30 @@ namespace lng
 					{
 						bytecode.push_back(static_cast<byte>(variables.size()));
 					}
+				}
+				else if(*it == "==")
+				{
+					bytecode.push_back(static_cast<byte>(Instruction::Equal));
+				}
+				else if(*it == "!=")
+				{
+					bytecode.push_back(static_cast<byte>(Instruction::NotEqual));
+				}
+				else if(*it == "<")
+				{
+					bytecode.push_back(static_cast<byte>(Instruction::Lesser));
+				}
+				else if(*it == ">")
+				{
+					bytecode.push_back(static_cast<byte>(Instruction::Greater));
+				}
+				else if(*it == "<=")
+				{
+					bytecode.push_back(static_cast<byte>(Instruction::LesserOrEqual));
+				}
+				else if(*it == ">=")
+				{
+					bytecode.push_back(static_cast<byte>(Instruction::GreaterOrEqual));
 				}
 			}
 			else	// is variable
