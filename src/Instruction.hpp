@@ -30,7 +30,7 @@ namespace lng
 		If,
 	    Goto,
 		Return,
-		End
+		End,
 	};
 }
 

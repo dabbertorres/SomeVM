@@ -26,9 +26,9 @@ namespace lng
 					{
 						case ValueType::None:
 						{
-							None none;
-							none.value = nullptr;
-							stack.push(new Value<nil>(none.value));
+//							None none;
+//							none.value = nullptr;
+//							stack.push(new Value<nil>(none.value));
 							it += 2;
 							break;
 						}
@@ -41,6 +41,7 @@ namespace lng
 							it += 3;
 							break;
 						}
+						
 						case ValueType::Number:
 						{
 							Float f;
@@ -52,6 +53,7 @@ namespace lng
 							it += 6;
 							break;
 						}
+						
 						default:
 						{
 							std::cerr << "Invalid Value in bytecode. OP: " << it - bytecode.begin() << '\n';
@@ -550,6 +552,8 @@ namespace lng
 							it = bytecode.begin() + static_cast<unsigned int>(*(it + 1));
 						else
 							it = bytecode.begin() + static_cast<unsigned int>(*(it + 2));
+						
+						stack.pop();
 					}
 					else
 					{
@@ -568,19 +572,21 @@ namespace lng
 					break;
 
 				case Instruction::End:
-					if(!stack.empty())
+					std::cerr << std::boolalpha;
+					while(!stack.empty())
 					{
 						if(stack.top()->getValueType() == ValueType::Bool)
-							std::cerr << "Result: " << static_cast<const Value<bool>*>(stack.top())->getValue() << '\n';
+							std::cerr << "Stack: " << static_cast<const Value<bool>*>(stack.top())->getValue() << '\n';
 						else
-							std::cerr << "Result: " << static_cast<const Value<float>*>(stack.top())->getValue() << '\n';
+							std::cerr << "Stack: " << static_cast<const Value<float>*>(stack.top())->getValue() << '\n';
+						stack.pop();
 					}
-					else
+					for(auto& v : variables)
 					{
-						if(variables.back()->getValueType() == ValueType::Bool)
-							std::cerr << "Variable: " << static_cast<const Value<bool>*>(variables.back())->getValue() << '\n';
+						if(v->getValueType() == ValueType::Bool)
+							std::cerr << "Variable: " << static_cast<const Value<bool>*>(v)->getValue() << '\n';
 						else
-							std::cerr << "Variable: " << static_cast<const Value<float>*>(variables.back())->getValue() << '\n';
+							std::cerr << "Variable: " << static_cast<const Value<float>*>(v)->getValue() << '\n';
 					}
 					
 					while(!stack.empty())

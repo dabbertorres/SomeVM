@@ -40,8 +40,9 @@ namespace lng
 			
 			std::map<std::string, unsigned int> variables;
 			
-			static const std::map<std::string, std::function<void(const std::string& e, Bytecode& bytecode)>> keywords;
 			static const std::map<std::string, Operator> operators;
+			static const std::map<std::string, std::function<void(Bytecode& bytecode)>> keywords;
+			static const std::map<std::string, std::function<void(Bytecode& bytecode)>> functions;
 	};
 }
 

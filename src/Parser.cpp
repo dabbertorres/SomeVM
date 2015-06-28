@@ -2,9 +2,12 @@
 
 #include <vector>
 #include <stack>
+#include <regex>
+#include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <iostream>
+
 namespace lng
 {
 	const std::map<std::string, Parser::Operator> Parser::operators = 
@@ -15,19 +18,38 @@ namespace lng
 		{"==", {9, Parser::Operator::Associativity::Left}}, {"!=", {9, Parser::Operator::Associativity::Left}},
 		{"<", {8, Parser::Operator::Associativity::Left}}, {">", {8, Parser::Operator::Associativity::Left}},
 		{"<=", {8, Parser::Operator::Associativity::Left}}, {">=", {8, Parser::Operator::Associativity::Left}},
+		{"()", {2, Parser::Operator::Associativity::Left}},
 	};
 	
-	const std::map<std::string, std::function<void(const std::string& e, Parser::Bytecode& bytecode)>> Parser::keywords = 
+	const std::map<std::string, std::function<void(Parser::Bytecode& bytecode)>> Parser::keywords = 
 	{
-		{"true", [](const std::string& e, Bytecode& bytecode)
+		{"true", [](Bytecode& bytecode)
+		{
+			bytecode.push_back(static_cast<byte>(Instruction::PushLiteral));
+			bytecode.push_back(static_cast<byte>(ValueType::Bool));
+			bytecode.push_back(static_cast<byte>(true));
+		}},
+		{"false", [](Bytecode& bytecode)
+		{
+			bytecode.push_back(static_cast<byte>(Instruction::PushLiteral));
+			bytecode.push_back(static_cast<byte>(ValueType::Bool));
+			bytecode.push_back(static_cast<byte>(false));
+		}},
+	};
+	
+	const std::map<std::string, std::function<void(Parser::Bytecode& bytecode)>> Parser::functions = 
+	{
+		{"if", [](Bytecode& bytecode)
+		{
+			bytecode.push_back(static_cast<byte>(Instruction::If));
+			bytecode.push_back(static_cast<byte>(bytecode.size() + 1));
+			bytecode.push_back(static_cast<byte>(bytecode.size() + 1));
+		}},
+		{"while", [](Bytecode& bytecode)
 		{
 			
 		}},
-		{"false", [](const std::string& e, Bytecode& bytecode)
-		{
-			
-		}},
-		{"if", [](const std::string& e, Bytecode& bytecode)
+		{"include", [](Bytecode& bytecode)
 		{
 			
 		}},
@@ -46,12 +68,31 @@ namespace lng
 		variables.clear();
 		
 		while(std::getline(fin, lines.back()))
-			lines.emplace_back();
+		{
+			if(!lines.back().empty() && lines.back().substr(0, 2) != "//")
+			{
+				auto toRemove = std::remove_if(lines.back().begin(), lines.back().end(), [](const char c)
+				{
+					return c == ' ' || c == '\n' || c == '\t';
+				});
+				lines.back().erase(toRemove, lines.back().end());
+				
+				lines.emplace_back();
+			}
+		}
 		
+		// remove empty last line
 		lines.erase(lines.end() - 1);
 		
 		for(auto& l : lines)
+		{
+			std::cout << "line: " << l << '\n';
+		}
+		
+		for(auto& l : lines)
+		{
 			parseExp(l, instructions);
+		}
 		
 		instructions.push_back(static_cast<byte>(lng::Instruction::End));
 		
@@ -62,7 +103,7 @@ namespace lng
 		
 		return instructions;
 	}
-
+	
 	Parser::Bytecode Parser::parseLine(const std::string& l)
 	{
 		Bytecode instructions;
@@ -76,7 +117,7 @@ namespace lng
 	:	precedence(prec),
 		associativity(a)
 	{}
-
+	
 	void Parser::parseExp(const std::string& e, Bytecode& bytecode)
 	{
 		std::vector<std::string> tokens(1);
@@ -84,22 +125,21 @@ namespace lng
 		// lexer/tokenizer
 		for(auto it = e.begin(); it != e.end(); it++)
 		{
-			if(std::isdigit(*it))
+			if(std::isdigit(*it) || *it == '.')
 			{
-				if(std::isdigit(tokens.back().back()) || tokens.back().empty())
+				if(std::isdigit(tokens.back().back()) || tokens.back().back() == '.' || tokens.back().empty())
 					tokens.back().push_back(*it);
 				else
 					tokens.emplace_back(std::string(1, *it));
 			}
-			else if(std::isalpha(*it))	// is variable
+			else if(std::isalpha(*it))	// is variable/keyword/function
 			{
 				if(std::isalpha(tokens.back().back()) || tokens.back().empty())
 					tokens.back().push_back(*it);
 				else
 					tokens.emplace_back(std::string(1, *it));
 			}
-			// operators
-			else
+			else	// operators
 			{
 				std::string multiCharOp;
 				multiCharOp += *it;
@@ -132,6 +172,7 @@ namespace lng
 		// Shunting-yard algorithm for parsing to Reverse-Polish Notation
 		for(auto& t : tokens)
 		{
+			std::cout << "token: " << t << '\n';
 			if(isNumber(t))
 			{
 				output.append(t);
@@ -157,7 +198,12 @@ namespace lng
 				const Operator o1 = operators.at(t);
 				Operator o2(0, Operator::Associativity::Left);
 				if(!operations.empty() && operations.top() != "(")
-					o2 = operators.at(operations.top());
+				{
+					if(functions.find(operations.top()) != functions.end())
+						o2 = operators.at("()");
+					else
+						o2 = operators.at(operations.top());
+				}
 				
 				while(!operations.empty() && operations.top() != "(" &&
 					((o1.associativity == Operator::Associativity::Left && o1.precedence >= o2.precedence) || 
@@ -168,9 +214,18 @@ namespace lng
 					operations.pop();
 					
 					if(!operations.empty())
-						o2 = operators.at(operations.top());
+					{
+						if(functions.find(operations.top()) != functions.end())
+							o2 = operators.at("()");
+						else
+							o2 = operators.at(operations.top());
+					}
 				}
 					
+				operations.push(t);
+			}
+			else if(functions.find(t) != functions.end())
+			{
 				operations.push(t);
 			}
 			else	// is variable
@@ -207,6 +262,7 @@ namespace lng
 				bytecode.push_back(static_cast<byte>(Instruction::PushLiteral));
 				bytecode.push_back(static_cast<byte>(ValueType::Number));
 				Float f;
+				std::cout << "stof: " << *it << '\n';
 				f.value = std::stof(*it);
 				bytecode.push_back(static_cast<byte>(f.bytes[0]));
 				bytecode.push_back(static_cast<byte>(f.bytes[1]));
@@ -273,6 +329,14 @@ namespace lng
 					bytecode.push_back(static_cast<byte>(Instruction::GreaterOrEqual));
 				}
 			}
+			else if(keywords.find(*it) != keywords.end())
+			{
+				keywords.at(*it)(bytecode);
+			}
+			else if(functions.find(*it) != functions.end())
+			{
+				functions.at(*it)(bytecode);
+			}
 			else	// is variable
 			{
 				// if the first token is this variable, then we're assigning, not reading
@@ -290,8 +354,12 @@ namespace lng
 	bool Parser::isNumber(const std::string& str)
 	{
 		for(auto& c : str)
+		{
+			std::cout << "char: " << c << '\n';
 			if(!std::isdigit(c) && c != '.')
 				return false;
+		}
+		std::cout << "isNumber: " << str << '\n';
 		return true;
 	}
 }
