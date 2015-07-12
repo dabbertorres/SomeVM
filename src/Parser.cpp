@@ -4,9 +4,10 @@
 #include <stack>
 #include <regex>
 #include <algorithm>
-#include <fstream>
 #include <sstream>
 #include <iostream>
+
+#include "Token.hpp"
 
 namespace lng
 {
@@ -54,62 +55,18 @@ namespace lng
 			
 		}},
 	};
-														
-	Parser::Bytecode Parser::parseFile(const std::string& f)
+	
+	Parser::Bytecode Parser::parse(const Lexer::TokenCode& tokens)
 	{
 		Bytecode instructions;
 		
-		std::ifstream fin(f);
-		
-		if(fin.bad())
-			return instructions;
-		
-		std::vector<std::string> lines(1);
-		variables.clear();
-		
-		while(std::getline(fin, lines.back()))
+		for(auto it = tokens.begin(); it != tokens.end(); ++it)
 		{
-			if(!lines.back().empty() && lines.back().substr(0, 2) != "//")
-			{
-				auto toRemove = std::remove_if(lines.back().begin(), lines.back().end(), [](const char c)
-				{
-					return c == ' ' || c == '\n' || c == '\t';
-				});
-				lines.back().erase(toRemove, lines.back().end());
-				
-				lines.emplace_back();
-			}
-		}
-		
-		// remove empty last line
-		lines.erase(lines.end() - 1);
-		
-		for(auto& l : lines)
-		{
-			std::cout << "line: " << l << '\n';
-		}
-		
-		for(auto& l : lines)
-		{
-			parseExp(l, instructions);
+			
 		}
 		
 		instructions.push_back(static_cast<byte>(lng::Instruction::End));
 		
-		std::ofstream fout(f + ".run", std::ios::binary);
-		
-		for(auto& i : instructions)
-			fout << i;
-		
-		return instructions;
-	}
-	
-	Parser::Bytecode Parser::parseLine(const std::string& l)
-	{
-		Bytecode instructions;
-		
-		parseExp(l, instructions);
-
 		return instructions;
 	}
 	
@@ -355,11 +312,10 @@ namespace lng
 	{
 		for(auto& c : str)
 		{
-			std::cout << "char: " << c << '\n';
 			if(!std::isdigit(c) && c != '.')
 				return false;
 		}
-		std::cout << "isNumber: " << str << '\n';
+		
 		return true;
 	}
 }

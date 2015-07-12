@@ -6,6 +6,8 @@
 #include <string>
 #include <functional>
 
+#include "Lexer.hpp"
+
 #include "Value.hpp"
 #include "Instruction.hpp"
 
@@ -16,8 +18,7 @@ namespace lng
 		public:
 			using Bytecode = std::vector<byte>;
 
-			Bytecode parseFile(const std::string& f);
-			Bytecode parseLine(const std::string& l);
+			Bytecode parse(const Lexer::TokenCode&);
 
 			class Operator
 			{
@@ -28,21 +29,21 @@ namespace lng
 						Right
 					};
 					
-					Operator(unsigned int prec, Associativity a);
+					Operator(unsigned int, Associativity);
 					
 					unsigned int precedence;
 					Associativity associativity;
 			};
 			
 		private:
-			void parseExp(const std::string& e, Bytecode& bytecode);
-			static bool isNumber(const std::string& str);
+			void parseExp(const std::string&, Bytecode&);
+			static bool isNumber(const std::string&);
 			
 			std::map<std::string, unsigned int> variables;
 			
 			static const std::map<std::string, Operator> operators;
-			static const std::map<std::string, std::function<void(Bytecode& bytecode)>> keywords;
-			static const std::map<std::string, std::function<void(Bytecode& bytecode)>> functions;
+			static const std::map<std::string, std::function<void(Bytecode&)>> keywords;
+			static const std::map<std::string, std::function<void(Bytecode&)>> functions;
 	};
 }
 

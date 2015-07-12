@@ -1,2 +1,8 @@
-int five = 5
-float threePointTwo = 3.2
+// void main(string[] args)
+{
+	int five = 5
+	float threePointTwo = 3.2
+	
+	// hello world!
+	float res = five + threePointTwo
+}

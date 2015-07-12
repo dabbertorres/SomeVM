@@ -2,7 +2,6 @@
 #define LNG_PARSER_HPP
 
 #include <regex>
-#include <map>
 #include <vector>
 #include <string>
 
@@ -15,14 +14,14 @@ namespace lng
 		public:
 			using TokenCode = std::vector<Token>;
 			using Words = std::vector<std::string>;
-
-			Lexer();
+			
+			Lexer() = default;
 			~Lexer() = default;
-
-			TokenCode run(const Words&);
+			
+			TokenCode run(const std::string&);
 			
 		private:
-			std::vector<std::pair<Token::Type, std::regex>> tokenValues;
+			const static std::vector<std::pair<Token::Type, std::regex>> tokenValues;
 	};
 }
 

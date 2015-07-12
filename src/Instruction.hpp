@@ -13,12 +13,14 @@ namespace lng
 	    Pop,
 		Store,
 		Erase,
+		
 		// math ops
 		Add,
 		Sub,
 		Mult,
 		Div,
 		Mod,
+		
 		// comparison
 		Greater,
 		Lesser,
@@ -26,10 +28,14 @@ namespace lng
 		LesserOrEqual,
 		Equal,
 		NotEqual,
-		// branching
+		
+		// conditions
 		If,
+		
+		// branching
 	    Goto,
 		Return,
+		
 		End,
 	};
 }

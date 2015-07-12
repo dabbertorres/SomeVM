@@ -1,30 +1,12 @@
 #include <iostream>
+#include <iomanip>
 #include <fstream>
+
 #include "Lexer.hpp"
 #include "VM.hpp"
 
 int main(int argc, char** argv)
 {
-	std::ifstream fin("../tests/test.lng");
-	
-	lng::Lexer::Words words;
-	
-	std::string temp;
-	while(fin >> temp)
-	{
-		words.push_back(temp);
-	}
-	
-	lng::Lexer lexer;
-	lng::Lexer::TokenCode tokens = lexer.run(words);
-	
-	for(auto& t : tokens)
-	{
-		std::cout << "type: " << static_cast<int>(t.type) << "\tvalue: " << t.value << '\n';
-	}
-	
-	return 0;
-	
 	std::vector<std::string> args = {argv + 1, argv + argc};
 	std::string file = "";
 
@@ -35,7 +17,7 @@ int main(int argc, char** argv)
 	if(args.size() == 0)
 	{
 		std::cout << "No arguments, use \'-h\' for help\n";
-		return 1;
+		//return 1;
 	}
 
 	for(auto it = args.begin(); it != args.end();)
@@ -70,6 +52,28 @@ int main(int argc, char** argv)
 			std::cout << "Unknown argument\n";
 		}
 	}
+	
+	std::ifstream fin("tests/test.lng", std::ios::ate);
+	
+	if(!fin)
+	{
+		std::cout << "Couldn't open file\n";
+		return 1;
+	}
+	
+	auto length = fin.tellg();
+	fin.seekg(0);
+	
+	std::string inputFile(length, 0);
+	fin.read(&inputFile[0], length);
+	
+	lng::Lexer lexer;
+	lng::Lexer::TokenCode tokens = lexer.run(inputFile);
+	
+	for(auto& t : tokens)
+	{
+		std::cout << "type: " << std::setw(24) << std::left << lng::Token::typeMap.at(t.type) << "value: " << t.value << '\n';
+	}
 
 	lng::VM vm(stackSize);
 
@@ -79,7 +83,7 @@ int main(int argc, char** argv)
 
 	if(compile)
 	{
-		bytes = parser.parseFile(file);
+		bytes = parser.parse(tokens);
 	}
 
 	if(run)

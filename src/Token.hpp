@@ -2,13 +2,14 @@
 #define TOKEN_HPP
 
 #include <string>
+#include <map>
 
 namespace lng
 {
 	class Token
 	{
 		public:
-			enum class Type : int
+			enum class Type : unsigned int
 			{
 				// Primitive Values
 				ValueInteger,
@@ -26,8 +27,6 @@ namespace lng
 				TypeObject,
 				TypeFunction,
 				TypeArray,
-				
-				Identifier,
 				
 				// Memory Operations
 				MemoryAllocate,
@@ -90,8 +89,9 @@ namespace lng
 				OperatorAddressOf,
 				OperatorDereference,
 				
-				// Commentss
+				// Comments
 				LineComment,
+				BlockComment,
 				
 				// Symbols
 				SymbolOpenParen,
@@ -102,12 +102,18 @@ namespace lng
 				SymbolEndCurlyBrace,
 				SymbolOpenAngleBracket,
 				SymbolEndAngleBracket,
+				SymbolSingleQuote,
+				SymbolDoubleQuote,
+				
+				Identifier,
 			};
 
 			Token(Type t, const std::string& v = "");
 			
 			const Type type;
 			const std::string value;
+			
+			const static std::map<Type, std::string> typeMap;
 	};
 }
 
