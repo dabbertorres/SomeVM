@@ -18,22 +18,14 @@ namespace lng
 				ValueString,
 				ValueBool,
 				
-				// Types
-				TypeInteger,
-				TypeFloat,
-				TypeChar,
-				TypeString,
-				TypeBool,
-				TypeObject,
+				// Type modifiers
+				TypePointer,
 				TypeFunction,
 				TypeArray,
 				
 				// Memory Operations
 				MemoryAllocate,
 				MemoryDeallocate,
-				
-				// Type Modifiers
-				Pointer,
 				
 				/* Operators */
 				// arithmetic
@@ -50,8 +42,8 @@ namespace lng
 				OperatorBitwiseNot,
 				
 				// Bitshift
-				OperatorShiftLeft,
-				OperatorShiftRight,
+				OperatorBitshiftLeft,
+				OperatorBitshiftRight,
 				
 				// Relational
 				OperatorEqual,
@@ -78,8 +70,8 @@ namespace lng
 				OperatorBitwiseOrAssign,
 				OperatorBitwiseXorAssign,
 				OperatorBitwiseNotAssign,
-				OperatorShiftLeftAssign,
-				OperatorShiftRightAssign,
+				OperatorBitshiftLeftAssign,
+				OperatorBitshiftRightAssign,
 				
 				// increment/decrement
 				Increment,

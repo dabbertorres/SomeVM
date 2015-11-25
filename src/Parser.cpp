@@ -82,16 +82,16 @@ namespace lng
 		// lexer/tokenizer
 		for(auto it = e.begin(); it != e.end(); it++)
 		{
-			if(std::isdigit(*it) || *it == '.')
+			if(std::isdigit(*it, std::locale()) || *it == '.')
 			{
-				if(std::isdigit(tokens.back().back()) || tokens.back().back() == '.' || tokens.back().empty())
+				if(std::isdigit(tokens.back().back(), std::locale()) || tokens.back().back() == '.' || tokens.back().empty())
 					tokens.back().push_back(*it);
 				else
 					tokens.emplace_back(std::string(1, *it));
 			}
-			else if(std::isalpha(*it))	// is variable/keyword/function
+			else if(std::isalpha(*it, std::locale()))	// is variable/keyword/function
 			{
-				if(std::isalpha(tokens.back().back()) || tokens.back().empty())
+				if(std::isalpha(tokens.back().back(), std::locale()) || tokens.back().empty())
 					tokens.back().push_back(*it);
 				else
 					tokens.emplace_back(std::string(1, *it));
@@ -310,9 +310,11 @@ namespace lng
 	
 	bool Parser::isNumber(const std::string& str)
 	{
+		static const std::locale locale;
+
 		for(auto& c : str)
 		{
-			if(!std::isdigit(c) && c != '.')
+			if(!std::isdigit(c, locale) && c != '.')
 				return false;
 		}
 		

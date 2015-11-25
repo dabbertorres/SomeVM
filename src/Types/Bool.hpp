@@ -6,10 +6,9 @@ namespace val
 	class Bool
 	{
 		public:
+			Bool();
 			Bool(bool v);
 			~Bool();
-			
-			
 			
 			bool value;
 	};

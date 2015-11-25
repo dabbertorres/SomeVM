@@ -2,6 +2,74 @@
 
 #include <stdexcept>
 
+namespace
+{
+	using TokenCheck = bool(const std::string&);
+
+	static TokenCheck isIntegerValue;
+	static TokenCheck isFloatValue;
+	static TokenCheck isCharValue;
+	static TokenCheck isStringValue;
+	static TokenCheck isBoolValue;
+
+	static TokenCheck isPointer;
+	static TokenCheck isFunction;
+	static TokenCheck isArray;
+
+	static TokenCheck isMemoryAllocation;
+	static TokenCheck isMemoryDeallocation;
+	
+	static TokenCheck isOperatorAdd;
+	static TokenCheck isOperatorSub;
+	static TokenCheck isOperatorMult;
+	static TokenCheck isOperatorDiv;
+	static TokenCheck isOperatorMod;
+
+	static TokenCheck isOperatorBitwiseAnd;
+	static TokenCheck isOperatorBitwiseOr;
+	static TokenCheck isOperatorBitwiseXor;
+	static TokenCheck isOperatorBitwiseNot;
+
+	static TokenCheck isOperatorBitshiftLeft;
+	static TokenCheck isOperatorBitshiftRight;
+
+	static TokenCheck isOperatorEqual;
+	static TokenCheck isOperatorNotEqual;
+	static TokenCheck isOperatorLesser;
+	static TokenCheck isOperatorGreater;
+	static TokenCheck isOperatorLesserEqual;
+	static TokenCheck isOperatorGreaterEqual;
+
+	static TokenCheck isOperatorAnd;
+	static TokenCheck isOperatorOr;
+	static TokenCheck isOperatorXor;
+	static TokenCheck isOperatorNot;
+
+	static TokenCheck isOperatorAssign;
+	static TokenCheck isOperatorAddAssign;
+	static TokenCheck isOperatorSubAssign;
+	static TokenCheck isOperatorMultAssign;
+	static TokenCheck isOperatorDivAssign;
+	static TokenCheck isOperatorModAssign;
+	static TokenCheck isOperatorBitwiseAndAssign;
+	static TokenCheck isOperatorBitwiseOrAssign;
+	static TokenCheck isOperatorBitXorAssign;
+	static TokenCheck isOperatorBitwiseNotAssign;
+	static TokenCheck isOperatorBitshiftLeftAssign;
+	static TokenCheck isOperatorBitshiftRightAssign;
+
+	static TokenCheck isOperatorIncrement;
+	static TokenCheck isOperatorDecrement;
+
+	static TokenCheck isOperatorAddressOf;
+	static TokenCheck isOperatorDereference;
+
+	static TokenCheck isLineComment;
+	static TokenCheck isBlockComment;
+
+	static TokenCheck isIdentifier;
+}
+
 namespace lng
 {
 	Lexer::TokenCode Lexer::run(const std::string& input)
@@ -21,29 +89,7 @@ namespace lng
 			
 			bool matchFound = false;
 			
-			for(auto& p : tokenValues)
-			{
-				if(std::regex_match(sub, p.second))
-				{
-					if(p.first == Token::Type::LineComment)
-					{
-						i = input.find_first_of('\n', i);
-					}
-					else if(p.first == Token::Type::BlockComment)
-					{
-						i = input.find("*/", i);
-					}
-					else
-					{
-						i += sub.length();
-					}
-					
-					tokens.emplace_back(p.first, sub);
-					
-					matchFound = true;
-					break;
-				}
-			}
+			
 			
 			if(!matchFound)
 			{
@@ -142,3 +188,70 @@ namespace lng
 	
 	#undef RGX
 }
+
+static bool isIntegerValue(const std::string& input)
+{
+
+}
+
+static TokenCheck isFloatValue;
+static TokenCheck isCharValue;
+static TokenCheck isStringValue;
+static TokenCheck isBoolValue;
+
+static TokenCheck isPointer;
+static TokenCheck isFunction;
+static TokenCheck isArray;
+
+static TokenCheck isMemoryAllocation;
+static TokenCheck isMemoryDeallocation;
+
+static TokenCheck isOperatorAdd;
+static TokenCheck isOperatorSub;
+static TokenCheck isOperatorMult;
+static TokenCheck isOperatorDiv;
+static TokenCheck isOperatorMod;
+
+static TokenCheck isOperatorBitwiseAnd;
+static TokenCheck isOperatorBitwiseOr;
+static TokenCheck isOperatorBitwiseXor;
+static TokenCheck isOperatorBitwiseNot;
+
+static TokenCheck isOperatorBitshiftLeft;
+static TokenCheck isOperatorBitshiftRight;
+
+static TokenCheck isOperatorEqual;
+static TokenCheck isOperatorNotEqual;
+static TokenCheck isOperatorLesser;
+static TokenCheck isOperatorGreater;
+static TokenCheck isOperatorLesserEqual;
+static TokenCheck isOperatorGreaterEqual;
+
+static TokenCheck isOperatorAnd;
+static TokenCheck isOperatorOr;
+static TokenCheck isOperatorXor;
+static TokenCheck isOperatorNot;
+
+static TokenCheck isOperatorAssign;
+static TokenCheck isOperatorAddAssign;
+static TokenCheck isOperatorSubAssign;
+static TokenCheck isOperatorMultAssign;
+static TokenCheck isOperatorDivAssign;
+static TokenCheck isOperatorModAssign;
+static TokenCheck isOperatorBitwiseAndAssign;
+static TokenCheck isOperatorBitwiseOrAssign;
+static TokenCheck isOperatorBitXorAssign;
+static TokenCheck isOperatorBitwiseNotAssign;
+static TokenCheck isOperatorBitshiftLeftAssign;
+static TokenCheck isOperatorBitshiftRightAssign;
+
+static TokenCheck isOperatorIncrement;
+static TokenCheck isOperatorDecrement;
+
+static TokenCheck isOperatorAddressOf;
+static TokenCheck isOperatorDereference;
+
+static TokenCheck isLineComment;
+static TokenCheck isBlockComment;
+
+static TokenCheck isIdentifier;
