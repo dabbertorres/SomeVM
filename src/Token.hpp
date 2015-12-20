@@ -1,5 +1,5 @@
-#ifndef TOKEN_HPP
-#define TOKEN_HPP
+#ifndef LNG_TOKEN_HPP
+#define LNG_TOKEN_HPP
 
 #include <string>
 #include <map>
@@ -9,7 +9,7 @@ namespace lng
 	class Token
 	{
 		public:
-			enum class Type : unsigned int
+			enum class Type
 			{
 				// Primitive Values
 				ValueInteger,
@@ -28,6 +28,7 @@ namespace lng
 				MemoryDeallocate,
 				
 				/* Operators */
+
 				// arithmetic
 				OperatorAdd,
 				OperatorSub,
@@ -77,7 +78,7 @@ namespace lng
 				Increment,
 				Decrement,
 				
-				// Memory Operations
+				// Memory
 				OperatorAddressOf,
 				OperatorDereference,
 				
@@ -109,4 +110,4 @@ namespace lng
 	};
 }
 
-#endif // TOKEN_HPP
+#endif

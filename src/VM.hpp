@@ -17,6 +17,7 @@ namespace lng
 	{
 		public:
 			using Bytecode = std::vector<byte>;
+			
 			VM(unsigned int ss);
 			~VM();
 
@@ -25,6 +26,7 @@ namespace lng
 			static Bytecode loadBytes(const std::string& f);
 			
 			unsigned int getStackSize() const;
+			
 		private:
 			std::stack<const BaseValue*> stack;
 			std::vector<BaseValue*> variables;

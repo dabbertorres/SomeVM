@@ -51,25 +51,4 @@ namespace lng
 		value = n;
 		setValueType(ValueType::Number);
 	}
-
-	/*template<>
-	Value<Array>::Value(const Array& ar)
-	{
-		value = ar;
-		setValueType(ValueType::Array);
-	}
-
-	template<>
-	Value<Object>::Value(const Object& o)
-	{
-		value = o;
-		setValueType(ValueType::Object);
-	}
-	
-	template<>
-	Value<Function>::Value(const Function& f)
-	{
-		value = f;
-		setValueType(ValueType::Function);
-	}*/
 }

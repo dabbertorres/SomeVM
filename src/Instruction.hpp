@@ -5,38 +5,47 @@ using byte = unsigned char;
 	
 namespace lng
 {
-	enum class Instruction : byte
+	class Instruction
 	{
-		// memory ops
-	    PushLiteral,
-	    PushVariable,
-	    Pop,
-		Store,
-		Erase,
-		
-		// math ops
-		Add,
-		Sub,
-		Mult,
-		Div,
-		Mod,
-		
-		// comparison
-		Greater,
-		Lesser,
-		GreaterOrEqual,
-		LesserOrEqual,
-		Equal,
-		NotEqual,
-		
-		// conditions
-		If,
-		
-		// branching
-	    Goto,
-		Return,
-		
-		End,
+		public:
+			enum class Type
+			{
+				// memory ops
+				PushLiteral,
+				PushVariable,
+				Pop,
+				Store,
+				Erase,
+
+				// math ops
+				Add,
+				Sub,
+				Mult,
+				Div,
+				Mod,
+
+				// comparison
+				Not,
+				Lesser,
+				LesserOrEqual,
+				Equal,
+				// Greater = Not LesserOrEqual
+				// GreaterOrEqual = Not Lesser
+				// NotEqual = Not Equal
+
+				// conditions
+				If,
+
+				// branching
+				Goto,
+				Return,
+
+				End,
+			};
+
+			Instruction();
+			
+		private:
 	};
 }
 

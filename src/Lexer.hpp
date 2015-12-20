@@ -1,7 +1,6 @@
-#ifndef LNG_PARSER_HPP
-#define LNG_PARSER_HPP
+#ifndef LNG_LEXER_HPP
+#define LNG_LEXER_HPP
 
-#include <regex>
 #include <vector>
 #include <string>
 
@@ -13,7 +12,11 @@ namespace lng
 	{
 		public:
 			using TokenCode = std::vector<Token>;
-			using Words = std::vector<std::string>;
+
+			enum class State
+			{
+
+			};
 			
 			Lexer() = default;
 			~Lexer() = default;
@@ -21,8 +24,7 @@ namespace lng
 			TokenCode run(const std::string&);
 			
 		private:
-			const static std::vector<std::pair<Token::Type, std::regex>> tokenValues;
 	};
 }
 
-#endif // LNG_PARSER_HPP
+#endif
