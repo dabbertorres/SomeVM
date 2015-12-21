@@ -82,7 +82,7 @@ namespace dbr
 								break;
 
 							case Value::Type::Bool:
-								out << "bool: " << static_cast<bool>(val);
+								out << "bool: " << std::boolalpha << static_cast<bool>(val);
 								break;
 
 							case Value::Type::Number:
