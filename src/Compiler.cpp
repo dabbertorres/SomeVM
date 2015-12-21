@@ -2,20 +2,23 @@
 
 #include <iostream>
 
-namespace lng
+namespace dbr
 {
-	Compiler::Bytecode Compiler::run(const NewParser::Parsed& parsed)
+	namespace svm
 	{
-		Bytecode code;
-
-		std::cout << "\tCode:\n";
-		for(auto& p : parsed)
+		namespace cpl
 		{
+			Compiler::Bytecode Compiler::run(const lex::Lexer::TokenCode& parsed)
+			{
+				Bytecode code;
 
+				for(auto& p : parsed)
+				{
+
+				}
+
+				return code;
+			}
 		}
-		
-		code.push_back(static_cast<byte>(Instruction::End));
-
-		return code;
 	}
 }

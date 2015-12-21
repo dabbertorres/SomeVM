@@ -70,272 +70,278 @@ namespace
 	static TokenCheck isIdentifier;
 }
 
-namespace lng
+namespace dbr
 {
-	Lexer::TokenCode Lexer::run(const std::string& input)
+	namespace svm
 	{
-		TokenCode tokens;
-		
-		// I probably need to go character by character in a string first. If I find a Token::Type::Symbol*,
-		// I should split the string there. I could maybe even "pre-process" it. Before this for loop, iterate
-		// over the input, and modify and insert strings into input as needed to do this.
-		for(auto i = 0u; i < input.size(); ++i)
+		namespace lex
 		{
-			
+			Lexer::TokenCode Lexer::run(const std::string& input)
+			{
+				TokenCode tokens;
+
+				// I probably need to go character by character in a string first. If I find a Token::TokenType::Symbol*,
+				// I should split the string there. I could maybe even "pre-process" it. Before this for loop, iterate
+				// over the input, and modify and insert strings into input as needed to do this.
+				for(auto i = 0u; i < input.size(); ++i)
+				{
+
+				}
+
+				return tokens;
+			}
 		}
-		
-		return tokens;
 	}
 }
 
 namespace
 {
-	static bool isIntegerValue(const std::string& input)
+	bool isIntegerValue(const std::string& input)
 	{
 
 	}
 
-	static bool isFloatValue(const std::string& input)
+	bool isFloatValue(const std::string& input)
 	{
 
 	}
 
-	static bool isCharValue(const std::string& input)
+	bool isCharValue(const std::string& input)
 	{
 
 	}
 
-	static bool isStringValue(const std::string& input)
+	bool isStringValue(const std::string& input)
 	{
 
 	}
 
-	static bool isBoolValue(const std::string& input)
+	bool isBoolValue(const std::string& input)
 	{
 
 	}
 
-	static bool isPointer(const std::string& input)
+	bool isPointer(const std::string& input)
 	{
 
 	}
 
-	static bool isFunction(const std::string& input)
+	bool isFunction(const std::string& input)
 	{
 
 	}
 
-	static bool isArray(const std::string& input)
+	bool isArray(const std::string& input)
 	{
 
 	}
 
-	static bool isMemoryAllocation(const std::string& input)
+	bool isMemoryAllocation(const std::string& input)
 	{
 
 	}
 
-	static bool isMemoryDeallocation(const std::string& input)
+	bool isMemoryDeallocation(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorAdd(const std::string& input)
+	bool isOperatorAdd(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorSub(const std::string& input)
+	bool isOperatorSub(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorMult(const std::string& input)
+	bool isOperatorMult(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorDiv(const std::string& input)
+	bool isOperatorDiv(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorMod(const std::string& input)
+	bool isOperatorMod(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseAnd(const std::string& input)
+	bool isOperatorBitwiseAnd(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseOr(const std::string& input)
+	bool isOperatorBitwiseOr(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseXor(const std::string& input)
+	bool isOperatorBitwiseXor(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseNot(const std::string& input)
+	bool isOperatorBitwiseNot(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitshiftLeft(const std::string& input)
+	bool isOperatorBitshiftLeft(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitshiftRight(const std::string& input)
+	bool isOperatorBitshiftRight(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorEqual(const std::string& input)
+	bool isOperatorEqual(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorNotEqual(const std::string& input)
+	bool isOperatorNotEqual(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorLesser(const std::string& input)
+	bool isOperatorLesser(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorGreater(const std::string& input)
+	bool isOperatorGreater(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorLesserEqual(const std::string& input)
+	bool isOperatorLesserEqual(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorGreaterEqual(const std::string& input)
+	bool isOperatorGreaterEqual(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorAnd(const std::string& input)
+	bool isOperatorAnd(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorOr(const std::string& input)
+	bool isOperatorOr(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorXor(const std::string& input)
+	bool isOperatorXor(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorNot(const std::string& input)
+	bool isOperatorNot(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorAssign(const std::string& input)
+	bool isOperatorAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorAddAssign(const std::string& input)
+	bool isOperatorAddAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorSubAssign(const std::string& input)
+	bool isOperatorSubAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorMultAssign(const std::string& input)
+	bool isOperatorMultAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorDivAssign(const std::string& input)
+	bool isOperatorDivAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorModAssign(const std::string& input)
+	bool isOperatorModAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseAndAssign(const std::string& input)
+	bool isOperatorBitwiseAndAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseOrAssign(const std::string& input)
+	bool isOperatorBitwiseOrAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitXorAssign(const std::string& input)
+	bool isOperatorBitXorAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitwiseNotAssign(const std::string& input)
+	bool isOperatorBitwiseNotAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitshiftLeftAssign(const std::string& input)
+	bool isOperatorBitshiftLeftAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorBitshiftRightAssign(const std::string& input)
+	bool isOperatorBitshiftRightAssign(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorIncrement(const std::string& input)
+	bool isOperatorIncrement(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorDecrement(const std::string& input)
+	bool isOperatorDecrement(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorAddressOf(const std::string& input)
+	bool isOperatorAddressOf(const std::string& input)
 	{
 
 	}
 
-	static bool isOperatorDereference(const std::string& input)
+	bool isOperatorDereference(const std::string& input)
 	{
 
 	}
 
-	static bool isLineComment(const std::string& input)
+	bool isLineComment(const std::string& input)
 	{
 
 	}
 
-	static bool isBlockComment(const std::string& input)
+	bool isBlockComment(const std::string& input)
 	{
 
 	}
 
-	static bool isIdentifier(const std::string& input)
+	bool isIdentifier(const std::string& input)
 	{
 
 	}

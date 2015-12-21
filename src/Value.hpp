@@ -1,74 +1,67 @@
-#ifndef VALUE_HPP
-#define VALUE_HPP
+#ifndef DBR_SVM_VM_VALUE_HPP
+#define DBR_SVM_VM_VALUE_HPP
 
+#include <utility>
+#include <cstdint>
 #include <string>
+#include <vector>
 
-using byte = unsigned char;
-using nil = std::nullptr_t;
-
-namespace lng
+namespace dbr
 {
-	enum class ValueType : byte
+	namespace svm
 	{
-	    None,
-	    Bool,
-	    Number,
-	};
-	
-	union None
-	{
-		char bytes[1];
-		std::nullptr_t value;
-	};
-	
-	union Bool
-	{
-		char bytes[1];
-		bool value;
-	};
-	
-	union Float
-	{
-		char bytes[sizeof(float)];
-		float value;
-	};
+		using byte = std::uint8_t;
+		using Bytes = std::vector<byte>;
 
-	class BaseValue
-	{
-		public:
-			BaseValue();
+		using nil = std::nullptr_t;
+		using number = float;
+		using string = std::string;
 
-			void setValueType(ValueType t);
-			ValueType getValueType() const;
-			unsigned int getSizeOf() const;
+		class Value
+		{
+			public:
+				enum class Type
+				{
+					None,
+					Bool,
+					Number,
+					String,
+				};
 
-		private:
-			ValueType type;
-	};
+				Value();
+				Value(bool b);
+				Value(number f);
+				Value(const string& str);
 
-	template<typename T>
-	class Value : public BaseValue
-	{
-		public:
-			Value();
-			Value(const T& v);
+				Value(const Value& other);
+				Value(Value&& other);
 
-			T getValue() const;
+				Value& operator=(const Value& other);
+				Value& operator=(Value&& other);
 
-		private:
-			T value;
-	};
-	
-	template<typename T>
-	Value<T>::Value()
-	{
-	}
+				~Value();
 
-	template<typename T>
-	T Value<T>::getValue() const
-	{
-		return value;
+				std::size_t sizeOf() const;
+
+				void set(nil);
+				void set(bool b);
+				void set(number f);
+				void set(const string& str);
+
+				operator nil() const;
+				operator bool() const;
+				operator number() const;
+				operator string() const;
+
+				Type getType() const;
+
+			private:
+				void clean();
+				
+				void* value;
+				Type type;
+		};
 	}
 }
 
-#endif // VALUE_HPP
+#endif

@@ -3,37 +3,34 @@
 
 #include <stack>
 #include <vector>
-#include <unordered_map>
+#include <istream>
+#include <ostream>
 
-#include "Parser.hpp"
+#include "StackFrame.hpp"
 
-#include "Value.hpp"
-
-#include "Instruction.hpp"
-
-namespace lng
+namespace dbr
 {
-	class VM
+	namespace svm
 	{
-		public:
-			using Bytecode = std::vector<byte>;
-			
-			VM(unsigned int ss);
-			~VM();
+		class VM
+		{
+			public:
+				VM() = default;
+				~VM() = default;
 
-			void run(const Bytecode& bytecode);
-			
-			static Bytecode loadBytes(const std::string& f);
-			
-			unsigned int getStackSize() const;
-			
-		private:
-			std::stack<const BaseValue*> stack;
-			std::vector<BaseValue*> variables;
-			const unsigned int MAX_STACK_SIZE;
-			
-			Bytecode::const_iterator previous;
-	};
+				void run(const Bytecode& bytecode);
+
+				void interpreter(std::istream& in, std::ostream& out);
+
+				std::size_t stackSize() const;
+
+			private:
+				std::stack<StackFrame> stack;
+
+				Constants constants;
+				Functions functions;
+		};
+	}
 }
 
 #endif // VM_HPP

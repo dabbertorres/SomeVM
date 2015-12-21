@@ -3,7 +3,11 @@
 #include <fstream>
 
 #include "Lexer.hpp"
+#include "Parser.hpp"
+#include "Compiler.hpp"
 #include "VM.hpp"
+
+using namespace dbr;
 
 int main(int argc, char** argv)
 {
@@ -13,6 +17,12 @@ int main(int argc, char** argv)
 	int stackSize = 64;
 	bool compile = false;
 	bool run = false;
+
+	svm::VM vm;
+
+	vm.interpreter(std::cin, std::cout);
+
+	return 0;
 
 	if(args.size() == 0)
 	{
@@ -67,28 +77,26 @@ int main(int argc, char** argv)
 	std::string inputFile(length, 0);
 	fin.read(&inputFile[0], length);
 	
-	lng::Lexer lexer;
-	lng::Lexer::TokenCode tokens = lexer.run(inputFile);
+	svm::lex::Lexer lexer;
+	svm::lex::Lexer::TokenCode tokens = lexer.run(inputFile);
 	
 	for(auto& t : tokens)
 	{
-		std::cout << "type: " << std::setw(24) << std::left << lng::Token::typeMap.at(t.type) << "value: " << t.value << '\n';
+		std::cout << "type: " << std::setw(24) << std::left << svm::lex::Token::typeToString(t.type) << '\n';
 	}
 
-	lng::VM vm(stackSize);
-
-	lng::Parser parser;
-
-	lng::VM::Bytecode bytes;
+	svm::prs::Parser parser;
 
 	if(compile)
 	{
-		bytes = parser.parse(tokens);
+		tokens = parser.run(tokens);
 	}
+
+	svm::Bytecode bytes;
 
 	if(run)
 	{
-		bytes = vm.loadBytes(file);
+		svm::VM vm;
 		vm.run(bytes);
 	}
 

@@ -6,7 +6,7 @@ namespace lng
 	class Variable
 	{
 		public:
-			enum class Type
+			enum class TokenType
 			{
 				None,
 				Bool,
@@ -16,12 +16,12 @@ namespace lng
 				Object,
 			};
 
-			Variable(Type);
+			Variable(TokenType);
 
-			Type type();
+			TokenType type();
 
 		private:
-			Type typeVal;
+			TokenType typeVal;
 	};
 }
 

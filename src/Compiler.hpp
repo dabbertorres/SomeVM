@@ -4,19 +4,25 @@
 #include <vector>
 
 #include "Instruction.hpp"
-#include "NewParser.hpp"
+#include "Parser.hpp"
 
-namespace lng
+namespace dbr
 {
-	class Compiler
+	namespace svm
 	{
-		public:
-			using Bytecode = std::vector<byte>;
+		namespace cpl
+		{
+			class Compiler
+			{
+				public:
+					using Bytecode = std::vector<byte>;
 
-			Compiler() = default;
+					Compiler() = default;
 
-			Bytecode run(const NewParser::Parsed&);
-	};
+					Bytecode run(const lex::Lexer::TokenCode&);
+			};
+		}
+	}
 }
 
 #endif	// LNG_COMPILER_HPP

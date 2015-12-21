@@ -2,6 +2,6 @@
 
 namespace lng
 {
-	Variable::Variable(Type t)
+	Variable::Variable(TokenType t)
 	{}
 }
