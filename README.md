@@ -6,8 +6,10 @@ Currently will run only in REPL mode (though the Print part is manual!).
 REPL mode is functional, with a currently assembly-like sort of intermediate language (IL).
 example hello world:
 ```asm
-  load $0 "hello, world"
-  print $0
+  > load $0 "hello, world"
+  
+  > print $0
+  string: "hello, world"
 ```
 
 Basic arithmetic (+, -, *, /, %) is supported, as well as logical operators (!, <, <=, >, >=, ==, !=).
