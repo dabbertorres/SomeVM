@@ -1,7 +1,8 @@
-#ifndef DBR_SVM_VM_INSTRUCTIONS_HPP
-#define DBR_SVM_VM_INSTRUCTIONS_HPP
+#ifndef DBR_SVM_INSTRUCTIONS_HPP
+#define DBR_SVM_INSTRUCTIONS_HPP
 
 #include <cstdint>
+#include <vector>
 
 namespace dbr
 {
@@ -26,37 +27,38 @@ namespace dbr
 				enum class Type : std::uint8_t
 				{
 					// memory ops
-					Load,	// 1: write-to, 2x: constant index
+					Load,		// 1: write-to, 2x: constant index
 
 					// math ops
-					Add,			// 1: write-to, 2: registry index, 3: registry index
-					Subtract,		// 1: write-to, 2: registry index, 3: registry index
-					Multiply,		// 1: write-to, 2: registry index, 3: registry index
-					Divide,			// 1: write-to, 2: registry index, 3: registry index
-					Modulus,		// 1: write-to, 2: registry index, 3: registry index
-					Negative,		// 1: write-to, 2: registry index
+					Add,		// "addition" 1: write-to, 2: registry index, 3: registry index
+					Sub,		// "subtraction" 1: write-to, 2: registry index, 3: registry index
+					Mult,		// "multiplication" 1: write-to, 2: registry index, 3: registry index
+					Div,		// "division" 1: write-to, 2: registry index, 3: registry index
+					Mod,		// "modulus" 1: write-to, 2: registry index, 3: registry index
+					Neg,		// "negative" 1: write-to, 2: registry index
 
 					// comparison
-					Not,			// 1: write-to, 2: registry index
-					Lesser,			// 1: write-to, 2: registry index, 3: registry index
-					LesserOrEqual,	// 1: write-to, 2: registry index, 3: registry index
-					Greater,		// 1: write-to, 2: registry index, 3: registry index
-					GreaterOrEqual,	// 1: write-to, 2: registry index, 3: registry index
-					IsEqual,		// 1: write-to, 2: registry index, 3: registry index
-					NotEqual,		// 1: write-to, 2: registry index, 3: registry index
+					Not,		// 1: write-to, 2: registry index
+					Less,		// "less than" 1: write-to, 2: registry index, 3: registry index
+					LessEq,		// "less than or equal" 1: write-to, 2: registry index, 3: registry index
+					Gret,		// "greater than" 1: write-to, 2: registry index, 3: registry index
+					GretEq,		// "greater than or equal" 1: write-to, 2: registry index, 3: registry index
+					Eq,			// "equals" 1: write-to, 2: registry index, 3: registry index
+					Neq,		// "not equals" 1: write-to, 2: registry index, 3: registry index
 
 					// conditions
-					If,				// 1: registry index
+					If,			// 1: registry index
 					// next instruction is a jump, executed if argument is false (the "else")
 					// if argument is true, jump is skipped (the "then"). If an "else" exists, the end of the "then" will have a jump
 
 					// branching
-					Call,			// 1x: function index
-					Return,			// 1: starting registry index to return values from, 2x: ending registry index to return values from. If 2x is greater than 255, nothing is returned
-					Jump,			// 1x: instruction index (can only jump within current stack frame)
+					Call,		// 1x: function index
+					Ret,		// "return" 1: starting registry index to return values from, 2x: ending registry index to return values from. If 2x is greater than 255, nothing is returned
+					Jump,		// 1x: instruction index (can only jump within current stack frame)
 
 					// misc
-					Noop,
+					Noop,		// "No operation". Any arguments are ignored
+					Print,		// 1: registry index to print the value of
 				};
 
 				Instruction();
@@ -75,6 +77,12 @@ namespace dbr
 			private:
 				std::uint32_t value;
 		};
+
+		using Bytecode = std::vector<Instruction>;
+
+		// a function has a start index and a last index into the bytecode
+		using Function = std::pair<std::size_t, std::size_t>;
+		using Functions = std::vector<Function>;
 	}
 }
 

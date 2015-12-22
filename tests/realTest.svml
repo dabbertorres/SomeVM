@@ -1,0 +1,4 @@
+# this is a comment
+const "hello, world"
+load $0 $0
+print $0

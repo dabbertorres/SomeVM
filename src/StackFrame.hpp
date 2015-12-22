@@ -1,8 +1,8 @@
-#ifndef DBR_SVM_VM_STACK_FRAME_HPP
-#define DBR_SVM_VM_STACK_FRAME_HPP
+#ifndef DBR_SVM_STACK_FRAME_HPP
+#define DBR_SVM_STACK_FRAME_HPP
 
-#include <stack>
 #include <array>
+#include <iostream>
 
 #include "Instruction.hpp"
 #include "Value.hpp"
@@ -11,18 +11,10 @@ namespace dbr
 {
 	namespace svm
 	{
-		using Bytecode = std::vector<Instruction>;
-		using Constants = std::vector<Value>;
-
-		// a function has a start index and a last index into the bytecode
-		using Function = std::pair<std::size_t, std::size_t>;
-		using Functions = std::vector<Function>;
-
 		class StackFrame
 		{
 			public:
-				static constexpr std::size_t REGISTRY_SIZE = 256;
-				using Registry = std::array<Value, REGISTRY_SIZE>;
+				using Registry = std::array<Value, 256>;
 
 				using Return = std::pair<Registry::const_iterator, Registry::const_iterator>;
 
@@ -30,13 +22,20 @@ namespace dbr
 				StackFrame(const Bytecode& code);
 				StackFrame(Registry::const_iterator begin, Registry::const_iterator end);
 				StackFrame(const Bytecode& code, Registry::const_iterator begin, Registry::const_iterator end);
+
+				StackFrame(const StackFrame& other);
+				StackFrame(StackFrame&& other);
+
+				StackFrame& operator=(const StackFrame& other);
+				StackFrame& operator=(StackFrame&& other);
+
 				~StackFrame() = default;
 
 				// returns true when frame is finished (calling getReturn() becomes valid)
 				// otherwise, returns false
-				bool run(const Constants& constants, const Functions& functions);
+				bool run(Constants& constants, const Functions& functions, std::istream& in, std::ostream& out);
 
-				// returns valid iterators once run() returns true
+				// returns valid Registry iterators once run() returns true
 				Return getReturn() const;
 
 				void push(const Instruction& inst);
@@ -46,8 +45,6 @@ namespace dbr
 				Value read(std::size_t idx) const;
 
 			private:
-				void initRegistry(Registry::const_iterator begin, Registry::const_iterator end);
-
 				Bytecode code;
 				Bytecode::const_iterator currInst;
 				Return returnPair;

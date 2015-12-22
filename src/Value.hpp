@@ -1,7 +1,6 @@
-#ifndef DBR_SVM_VM_VALUE_HPP
-#define DBR_SVM_VM_VALUE_HPP
+#ifndef DBR_SVM_VALUE_HPP
+#define DBR_SVM_VALUE_HPP
 
-#include <utility>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -20,9 +19,9 @@ namespace dbr
 		class Value
 		{
 			public:
-				enum class Type
+				enum class Type : byte
 				{
-					None,
+					Nil,
 					Bool,
 					Number,
 					String,
@@ -52,15 +51,18 @@ namespace dbr
 				operator bool() const;
 				operator number() const;
 				operator string() const;
+				operator Bytes() const;
 
-				Type getType() const;
+				Type type() const;
 
 			private:
 				void clean();
 				
 				void* value;
-				Type type;
+				Type typeVal;
 		};
+
+		using Constants = std::vector<Value>;
 	}
 }
 

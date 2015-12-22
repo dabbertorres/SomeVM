@@ -2,36 +2,27 @@
 
 namespace
 {
-	struct Pair
+	using Type = dbr::svm::Value::Type;
+
+	static constexpr const char* typeMap[] =
 	{
-		dbr::svm::Value::Type type;
-		const char* name;
+		"Nil",
+		"Bool",
+		"Number",
+		"String",
 	};
 
-	static constexpr Pair typeMap[] =
+	static constexpr const char* asString(Type type)
 	{
-		{dbr::svm::Value::Type::None, "None"},
-		{dbr::svm::Value::Type::Bool, "Bool"},
-		{dbr::svm::Value::Type::Number, "Number"},
-		{dbr::svm::Value::Type::String, "String"},
-	};
-
-	static constexpr const char* typeToStringHelper(dbr::svm::Value::Type type, std::size_t idx)
-	{
-		return type == typeMap[idx].type ? typeMap[idx].name : typeToStringHelper(type, idx + 1);
+		return typeMap[static_cast<dbr::svm::byte>(type)];
 	}
 
-	static constexpr const char* typeToString(dbr::svm::Value::Type type)
-	{
-		return typeToStringHelper(type, 0);
-	}
-
-	static std::runtime_error errorBuilder(dbr::svm::Value::Type asked, dbr::svm::Value::Type is)
+	static std::runtime_error errorBuilder(Type asked, Type is)
 	{
 		std::string msg = "Asked for type \"";
-		msg += typeToString(asked);
+		msg += asString(asked);
 		msg += "\", when type is \"";
-		msg += typeToString(is);
+		msg += asString(is);
 		msg += '"';
 
 		return std::runtime_error{msg};
@@ -44,7 +35,7 @@ namespace dbr
 	{
 		Value::Value()
 		:	value(nullptr),
-			type(Type::None)
+			typeVal(Type::Nil)
 		{}
 
 		Value::Value(bool b)
@@ -81,9 +72,9 @@ namespace dbr
 		{
 			clean();
 
-			switch(other.type)
+			switch(other.typeVal)
 			{
-				case Type::None:
+				case Type::Nil:
 					break;
 
 				case Type::Bool:
@@ -99,7 +90,7 @@ namespace dbr
 					break;
 			}
 
-			type = other.type;
+			typeVal = other.typeVal;
 
 			return *this;
 		}
@@ -108,9 +99,9 @@ namespace dbr
 		{
 			clean();
 
-			switch(other.type)
+			switch(other.typeVal)
 			{
-				case Type::None:
+				case Type::Nil:
 					break;
 
 				case Type::Bool:
@@ -126,7 +117,7 @@ namespace dbr
 					break;
 			}
 
-			type = other.type;
+			typeVal = other.typeVal;
 
 			other.clean();
 
@@ -140,9 +131,9 @@ namespace dbr
 
 		std::size_t Value::sizeOf() const
 		{
-			switch(type)
+			switch(typeVal)
 			{
-				case Type::None:
+				case Type::Nil:
 					return 1;
 
 				case Type::Bool:
@@ -152,7 +143,7 @@ namespace dbr
 					return sizeof(number);
 
 				case Type::String:
-					return sizeof(string) + (value ? static_cast<string*>(value)->size() : 0);
+					return value ? static_cast<string*>(value)->size() : 0;
 			}
 
 			return 0;
@@ -162,18 +153,18 @@ namespace dbr
 		{
 			clean();
 
-			type = Type::None;
+			typeVal = Type::Nil;
 		}
 
 		void Value::set(bool b)
 		{
-			if(type != Type::Bool)
+			if(typeVal != Type::Bool)
 			{
 				clean();
 
 				value = new bool(b);
 
-				type = Type::Bool;
+				typeVal = Type::Bool;
 			}
 			else
 			{
@@ -183,13 +174,13 @@ namespace dbr
 
 		void Value::set(number f)
 		{
-			if(type != Type::Number)
+			if(typeVal != Type::Number)
 			{
 				clean();
 
 				value = new number(f);
 
-				type = Type::Number;
+				typeVal = Type::Number;
 			}
 			else
 			{
@@ -199,13 +190,13 @@ namespace dbr
 
 		void Value::set(const string& str)
 		{
-			if(type != Type::String)
+			if(typeVal != Type::String)
 			{
 				clean();
 
 				value = new string(str);
 
-				type = Type::String;
+				typeVal = Type::String;
 			}
 			else
 			{
@@ -216,8 +207,8 @@ namespace dbr
 		Value::operator nil() const
 		{
 #ifdef DEBUG
-			if(type != Type::None)
-				throw errorBuilder(Type::None, type);
+			if(typeVal != Type::Nil)
+				throw errorBuilder(Type::Nil, typeVal);
 #endif
 			return nullptr;
 		}
@@ -225,8 +216,8 @@ namespace dbr
 		Value::operator bool() const
 		{
 #ifdef DEBUG
-			if(type != Type::Bool)
-				throw errorBuilder(Type::Bool, type);
+			if(typeVal != Type::Bool)
+				throw errorBuilder(Type::Bool, typeVal);
 #endif
 			if(value)
 				return *static_cast<bool*>(value);
@@ -237,8 +228,8 @@ namespace dbr
 		Value::operator number() const
 		{
 #ifdef DEBUG
-			if(type != Type::Number)
-				throw errorBuilder(Type::Number, type);
+			if(typeVal != Type::Number)
+				throw errorBuilder(Type::Number, typeVal);
 #endif
 			if(value)
 				return *static_cast<number*>(value);
@@ -249,8 +240,8 @@ namespace dbr
 		Value::operator string() const
 		{
 #ifdef DEBUG
-			if(type != Type::String)
-				throw errorBuilder(Type::String, type);
+			if(typeVal != Type::String)
+				throw errorBuilder(Type::String, typeVal);
 #endif
 			if(value)
 				return *static_cast<string*>(value);
@@ -258,9 +249,27 @@ namespace dbr
 				return "";
 		}
 
-		Value::Type Value::getType() const
+		Value::operator Bytes() const
 		{
-			return type;
+			Bytes ret(sizeOf());
+
+			if(value)
+			{
+				auto byteBeg = static_cast<byte*>(value);
+
+				std::copy(byteBeg, byteBeg + ret.size(), ret.begin());
+			}
+			else
+			{
+				std::fill(ret.begin(), ret.end(), 0);
+			}
+
+			return ret;
+		}
+
+		Value::Type Value::type() const
+		{
+			return typeVal;
 		}
 
 		void Value::clean()

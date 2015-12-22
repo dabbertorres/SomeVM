@@ -1,10 +1,8 @@
-#ifndef VM_HPP
-#define VM_HPP
+#ifndef DBR_SVM_VM_HPP
+#define DBR_SVM_VM_HPP
 
 #include <stack>
-#include <vector>
-#include <istream>
-#include <ostream>
+#include <iostream>
 
 #include "StackFrame.hpp"
 
@@ -12,25 +10,24 @@ namespace dbr
 {
 	namespace svm
 	{
+		struct Program;
+
 		class VM
 		{
 			public:
 				VM() = default;
 				~VM() = default;
 
-				void run(const Bytecode& bytecode);
+				void run(Program program, std::istream& in, std::ostream& out);
 
 				void interpreter(std::istream& in, std::ostream& out);
 
-				std::size_t stackSize() const;
+				std::size_t callStackSize() const;
 
 			private:
-				std::stack<StackFrame> stack;
-
-				Constants constants;
-				Functions functions;
+				std::stack<StackFrame> callStack;
 		};
 	}
 }
 
-#endif // VM_HPP
+#endif

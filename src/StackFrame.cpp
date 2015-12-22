@@ -14,20 +14,56 @@ namespace dbr
 		StackFrame::StackFrame(const Bytecode& bc)
 		:	code(bc),
 			currInst(code.begin()),
+			registry(),
 			nextEmpty(registry.begin())
 		{}
 
 		StackFrame::StackFrame(Registry::const_iterator begin, Registry::const_iterator end)
 		:	currInst(code.begin())
 		{
-			initRegistry(begin, end);
+			nextEmpty = std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const Bytecode& bc, Registry::const_iterator begin, Registry::const_iterator end)
 		:	code(bc),
 			currInst(code.begin())
 		{
-			initRegistry(begin, end);
+			nextEmpty = std::copy(begin, end, registry.begin());
+		}
+
+		StackFrame::StackFrame(const StackFrame& other)
+		{
+			*this = other;
+		}
+
+		StackFrame::StackFrame(StackFrame&& other)
+		{
+			*this = other;
+		}
+
+		StackFrame& StackFrame::operator=(const StackFrame& other)
+		{
+			code.resize(other.code.size());
+			std::copy(other.code.begin(), other.code.end(), code.begin());
+
+			currInst = code.begin() + (other.currInst - other.code.begin());
+
+			nextEmpty = std::copy(other.registry.begin(), other.registry.end(), registry.begin());
+
+			return *this;
+		}
+
+		StackFrame& StackFrame::operator=(StackFrame&& other)
+		{
+			code = std::move(other.code);
+			currInst = std::move(other.currInst);
+			registry = std::move(other.registry);
+			nextEmpty = std::move(other.nextEmpty);
+
+			other.currInst = other.code.end();
+			other.nextEmpty = other.registry.end();
+
+			return *this;
 		}
 
 		void StackFrame::push(const Instruction& inst)
@@ -42,7 +78,7 @@ namespace dbr
 			currInst = code.begin() + diff;
 		}
 
-		bool StackFrame::run(const Constants& constants, const Functions& functions)
+		bool StackFrame::run(Constants& constants, const Functions& functions, std::istream& in, std::ostream& out)
 		{
 			auto arg1 = currInst->arg1();
 			auto arg1x = currInst->arg1x();
@@ -69,7 +105,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Subtract:
+				case Instruction::Type::Sub:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -78,7 +114,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Multiply:
+				case Instruction::Type::Mult:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -87,7 +123,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Divide:
+				case Instruction::Type::Div:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -96,7 +132,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Modulus:
+				case Instruction::Type::Mod:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -105,7 +141,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Negative:
+				case Instruction::Type::Neg:
 				{
 					number one = registry[currInst->arg2()];
 
@@ -122,7 +158,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Lesser:
+				case Instruction::Type::Less:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -131,7 +167,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::LesserOrEqual:
+				case Instruction::Type::LessEq:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -140,7 +176,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Greater:
+				case Instruction::Type::Gret:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -149,7 +185,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::GreaterOrEqual:
+				case Instruction::Type::GretEq:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -158,7 +194,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::IsEqual:
+				case Instruction::Type::Eq:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -167,7 +203,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::NotEqual:
+				case Instruction::Type::Neq:
 				{
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
@@ -198,7 +234,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Return:
+				case Instruction::Type::Ret:
 				{
 					auto twoX = currInst->arg2x();
 
@@ -230,6 +266,34 @@ namespace dbr
 				{
 					break;
 				}
+
+				case Instruction::Type::Print:
+				{
+					auto reg = currInst->arg1();
+
+					const Value& val = registry.at(reg);
+
+					switch(val.type())
+					{
+						case Value::Type::Nil:
+							out << "nil";
+							break;
+
+						case Value::Type::Bool:
+							out << std::boolalpha << static_cast<bool>(val);
+							break;
+
+						case Value::Type::Number:
+							out << static_cast<number>(val);
+							break;
+
+						case Value::Type::String:
+							out << '"' << static_cast<string>(val) << '"';
+							break;
+					}
+
+					break;
+				}
 			}
 
 			++currInst;
@@ -258,11 +322,6 @@ namespace dbr
 		Value StackFrame::read(std::size_t idx) const
 		{
 			return registry.at(idx);
-		}
-
-		void StackFrame::initRegistry(Registry::const_iterator begin, Registry::const_iterator end)
-		{
-			nextEmpty = std::copy(begin, end, registry.begin());
 		}
 	}
 }

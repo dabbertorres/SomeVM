@@ -1,36 +1,71 @@
-#ifndef DBR_SVM_PRS_PARSER_HPP
-#define DBR_SVM_PRS_PARSER_HPP
+#ifndef DBR_SVM_IL_PARSER_HPP
+#define DBR_SVM_IL_PARSER_HPP
 
-#include <vector>
+#include <istream>
+#include <tuple>
 #include <unordered_map>
-#include <string>
-#include <functional>
 
-#include "Value.hpp"
 #include "Instruction.hpp"
-
-#include "Lexer.hpp"
+#include "Value.hpp"
 
 namespace dbr
 {
 	namespace svm
 	{
-		namespace prs
+		struct Program
+		{
+			Constants constants;
+			Functions functions;
+			Bytecode bytecode;
+		};
+
+		namespace il
 		{
 			class Parser
 			{
 				public:
-					using VarMap = std::unordered_map<std::string, unsigned int>;
+					Parser() = delete;
+					~Parser() = delete;
 
-					Parser() = default;
-					~Parser() = default;
-
-					// maybe return something else. AST?
-					// really should at least organize the raw TokenCode
-					lex::Lexer::TokenCode run(const lex::Lexer::TokenCode&);
+					static Program run(std::istream& in, std::ostream& out);
+					static void run(std::istream& in, std::ostream& out, Program& program);
+					static std::size_t toRegister(const std::string& regStr);
 
 				private:
-					VarMap variables;
+					// memory ops
+					static Instruction load(std::istream& in);
+					static void constant(std::istream& in, Constants& constants);
+
+					// math ops
+					static Instruction add(std::istream& in);
+					static Instruction sub(std::istream& in);
+					static Instruction mult(std::istream& in);
+					static Instruction div(std::istream& in);
+					static Instruction mod(std::istream& in);
+					static Instruction neg(std::istream& in);
+
+					// comparison
+					static Instruction not(std::istream& in);
+					static Instruction less(std::istream& in);
+					static Instruction lesseq(std::istream& in);
+					static Instruction gret(std::istream& in);
+					static Instruction greteq(std::istream& in);
+					static Instruction eq(std::istream& in);
+					static Instruction neq(std::istream& in);
+
+					// conditions
+					static Instruction ifTest(std::istream& in);
+
+					// branching
+					static Instruction call(std::istream& in);
+					static Instruction ret(std::istream& in);
+					static Instruction jump(std::istream& in);
+
+					// misc
+					static Instruction noop(std::istream& in);
+					static Instruction print(std::istream& in);
+
+					static const std::unordered_map<std::string, dbr::svm::Instruction(*)(std::istream&)> commands;
 			};
 		}
 	}
