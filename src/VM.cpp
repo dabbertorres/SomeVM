@@ -24,11 +24,22 @@ namespace dbr
 
 			StackFrame* currFrame = &callStack.top();
 
-			bool run = false;
+			bool done = false;
 
-			while(!run)
+			while(!done)
 			{
-				run = currFrame->run(program.constants, program.functions, in, out);
+				done = currFrame->run(program.constants, program.functions, in, out);
+
+				if(done)
+				{
+					callStack.pop();
+
+					if(!callStack.empty())
+					{
+						currFrame = &callStack.top();
+						done = false;
+					}
+				}
 			}
 		}
 
