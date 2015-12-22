@@ -1,18 +1,29 @@
 # SomeVM
 A register-based bytecode interpreter VM.
 
-Currently will run only in REPL mode (though the Print part is manual!).
+Has two modes:
+  * REPL mode (though the Print part is manual!).
+  * Run mode(?) (like reading from a file and just running it, etc)
 
 REPL mode is functional, with a currently assembly-like sort of intermediate language (IL).
 example hello world:
 ```asm
-  > load $0 "hello, world"
-  
+  > const "hello, world"
+  > load $0 $0
   > print $0
-  string: "hello, world"
+  "hello, world"
+  > 
+```
+
+Run mode is functional, using the same IL (hesitantly named "SVML"):
+```asm
+const "hello, world"
+load $0 $0
+print $0
 ```
 
 Basic arithmetic (+, -, *, /, %) is supported, as well as logical operators (!, <, <=, >, >=, ==, !=).
+Also, a "print" instruction.
 
 Basic syntax:
 * Any integer prepended with a '$' is a register index.
@@ -20,14 +31,12 @@ Basic syntax:
 * "true" and "false" (no quotes) are bools.
 * Instructions and their arguments are simply separated by spaces
 
-Current instructions:
+Current VM instructions:
 * \<instruction\> - \<description\>
   * \<argument list\>
-* print - prints out the type and the value of the value at the specified register
-  * register to print from
 * load - loads the provided literal or constant index to a register
   * register to load to
-  * literal to load to the constants list OR an index into the constants list to load
+  * index into the constants list to load
 * add - adds the values at the two registers and stores the result
   * register to write to
   * first register to add
@@ -75,3 +84,16 @@ Current instructions:
   * register to write to
   * first register to compare with
   * second register to compare with
+* if - next instruction is a jump, executed if argument is false (the "else"). if argument is true, jump is skipped (the "then"). If an "else" exists, the end of the "then" will have a jump
+  * registry index to test
+* call - creates a new stack frame and moves execution to it
+  * function index (will prolly change)
+* ret - returns from the current stack frame to the previous (if no previous, exits)
+  * starting register to return values from
+  * ending register to return values from (inclusive). If larger than 255, nothing is returned
+* jump - moves execution to the specified instruction (only within the current stack frame)
+  * instruction index (if out of bounds, instantly returns from the current stack frame)
+* noop - "No operation" - self explanatory
+  * any arguments are ignored
+* print - prints out the type and the value of the value at the specified register
+  * register to print from
