@@ -10,7 +10,12 @@ namespace dbr
 {
 	namespace svm
 	{
-		struct Program;
+		struct Program
+		{
+			Constants constants;
+			Functions functions;
+			Bytecode bytecode;
+		};
 
 		class VM
 		{

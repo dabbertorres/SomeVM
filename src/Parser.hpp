@@ -12,12 +12,7 @@ namespace dbr
 {
 	namespace svm
 	{
-		struct Program
-		{
-			Constants constants;
-			Functions functions;
-			Bytecode bytecode;
-		};
+		struct Program;
 
 		namespace il
 		{
@@ -29,7 +24,11 @@ namespace dbr
 
 					static Program run(std::istream& in, std::ostream& out);
 					static void run(std::istream& in, std::ostream& out, Program& program);
+
+					static bool isRegister(const std::string& str);
+					static bool isConst(const std::string& str);
 					static std::size_t toRegister(const std::string& regStr);
+					static std::size_t toConst(const std::string& regStr);
 
 				private:
 					// memory ops

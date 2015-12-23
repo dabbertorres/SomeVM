@@ -6,6 +6,8 @@
 #include <string>
 #include <sstream>
 
+#include "VM.hpp"
+
 namespace
 {
 	static void toLower(std::string& str)
@@ -115,24 +117,40 @@ namespace dbr
 				}
 			}
 
+			bool Parser::isRegister(const std::string& str)
+			{
+				return str[0] == '$';
+			}
+
+			bool Parser::isConst(const std::string& str)
+			{
+				return str[0] == '%';
+			}
+
 			std::size_t Parser::toRegister(const std::string& regStr)
 			{
-				if(regStr[0] == '$')
-					return std::stoi(regStr.substr(1));
-				else
-					throw std::exception("Registry/Constant indices must start with '$'");
+				return std::stoi(regStr.substr(1));
+			}
+
+			std::size_t Parser::toConst(const std::string& regStr)
+			{
+				return std::stoi(regStr.substr(1));
 			}
 
 			Instruction Parser::load(std::istream& in)
 			{
-				std::string regStr;
-				std::string constIdxStr;
-				in >> regStr >> constIdxStr;
+				std::string indexOneStr;
+				std::string indexTwoStr;
+				in >> indexOneStr >> indexTwoStr;
 
-				std::uint8_t reg = toRegister(regStr);
-				std::uint16_t constIdx = toRegister(constIdxStr);
-
-				return{Instruction::Type::Load, reg, constIdx};
+				std::uint8_t indexOne = toRegister(indexOneStr);
+				
+				if(isRegister(indexTwoStr))
+					return{Instruction::Type::Load, indexOne, static_cast<std::uint16_t>(toRegister(indexTwoStr))};
+				else if(isConst(indexTwoStr))
+					return{Instruction::Type::LoadConst, indexOne, static_cast<std::uint16_t>(toConst(indexTwoStr))};
+				else
+					throw std::runtime_error(std::string("Expected index prefix ('$' or '%'), got ") + indexTwoStr[0]);
 			}
 
 			void Parser::constant(std::istream& in, Constants& constants)
@@ -143,6 +161,7 @@ namespace dbr
 
 				Value val;
 
+				// string value
 				if(value[0] == '"' && value.back() == '"')
 				{
 					val.set(value.substr(1, value.length() - 2));
@@ -153,10 +172,12 @@ namespace dbr
 				{
 					toLower(value);
 
+					// bool value
 					if(value == "true")
 						val.set(true);
 					else if(value == "false")
 						val.set(false);
+					// number value
 					else
 						val.set(std::stof(value));
 

@@ -7,28 +7,26 @@ namespace dbr
 	namespace svm
 	{
 		StackFrame::StackFrame()
-		:	registry(),
-			nextEmpty(registry.begin())
+		:	registry()
 		{}
 
 		StackFrame::StackFrame(const Bytecode& bc)
 		:	code(bc),
 			currInst(code.begin()),
-			registry(),
-			nextEmpty(registry.begin())
+			registry()
 		{}
 
 		StackFrame::StackFrame(Registry::const_iterator begin, Registry::const_iterator end)
 		:	currInst(code.begin())
 		{
-			nextEmpty = std::copy(begin, end, registry.begin());
+			std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const Bytecode& bc, Registry::const_iterator begin, Registry::const_iterator end)
 		:	code(bc),
 			currInst(code.begin())
 		{
-			nextEmpty = std::copy(begin, end, registry.begin());
+			std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const StackFrame& other)
@@ -48,7 +46,7 @@ namespace dbr
 
 			currInst = code.begin() + (other.currInst - other.code.begin());
 
-			nextEmpty = std::copy(other.registry.begin(), other.registry.end(), registry.begin());
+			std::copy(other.registry.begin(), other.registry.end(), registry.begin());
 
 			return *this;
 		}
@@ -58,10 +56,8 @@ namespace dbr
 			code = std::move(other.code);
 			currInst = std::move(other.currInst);
 			registry = std::move(other.registry);
-			nextEmpty = std::move(other.nextEmpty);
 
 			other.currInst = other.code.end();
-			other.nextEmpty = other.registry.end();
 
 			return *this;
 		}
@@ -91,7 +87,13 @@ namespace dbr
 				// memory ops
 				case Instruction::Type::Load:
 				{
-					write(constants[currInst->arg2x()], currInst->arg1());
+					write(currInst->arg1(), registry[currInst->arg2x()]);
+					break;
+				}
+				
+				case Instruction::Type::LoadConst:
+				{
+					write(currInst->arg1(), constants[currInst->arg2x()]);
 					break;
 				}
 
@@ -101,7 +103,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 					
-					write({one + two}, currInst->arg1());
+					write(currInst->arg1(), {one + two});
 					break;
 				}
 
@@ -110,7 +112,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one - two}, currInst->arg1());
+					write(currInst->arg1(), {one - two});
 					break;
 				}
 
@@ -119,7 +121,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one * two}, currInst->arg1());
+					write(currInst->arg1(), {one * two});
 					break;
 				}
 
@@ -128,7 +130,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one / two}, currInst->arg1());
+					write(currInst->arg1(), {one / two});
 					break;
 				}
 
@@ -137,7 +139,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({std::fmod(one, two)}, currInst->arg1());
+					write(currInst->arg1(), {std::fmod(one, two)});
 					break;
 				}
 
@@ -145,7 +147,7 @@ namespace dbr
 				{
 					number one = registry[currInst->arg2()];
 
-					write({-one}, currInst->arg1());
+					write(currInst->arg1(), {-one});
 					break;
 				}
 
@@ -154,7 +156,7 @@ namespace dbr
 				{
 					bool one = registry[currInst->arg2()];
 
-					write({!one}, currInst->arg1());
+					write(currInst->arg1(), {!one});
 					break;
 				}
 
@@ -163,7 +165,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one < two}, currInst->arg1());
+					write(currInst->arg1(), {one < two});
 					break;
 				}
 
@@ -172,7 +174,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one <= two}, currInst->arg1());
+					write(currInst->arg1(), {one <= two});
 					break;
 				}
 
@@ -181,7 +183,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one > two}, currInst->arg1());
+					write(currInst->arg1(), {one > two});
 					break;
 				}
 
@@ -190,7 +192,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one >= two}, currInst->arg1());
+					write(currInst->arg1(), {one >= two});
 					break;
 				}
 
@@ -199,7 +201,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one == two}, currInst->arg1());
+					write(currInst->arg1(), {one == two});
 					break;
 				}
 
@@ -208,7 +210,7 @@ namespace dbr
 					number one = registry[currInst->arg2()];
 					number two = registry[currInst->arg3()];
 
-					write({one != two}, currInst->arg1());
+					write(currInst->arg1(), {one != two});
 					break;
 				}
 
@@ -306,15 +308,7 @@ namespace dbr
 			return returnPair;
 		}
 
-		void StackFrame::write(const Value& val)
-		{
-			if(nextEmpty == registry.end())
-				nextEmpty = registry.begin();
-
-			*nextEmpty++ = val;
-		}
-
-		void StackFrame::write(const Value& val, std::size_t idx)
+		void StackFrame::write(std::size_t idx, const Value& val)
 		{
 			registry[idx] = val;
 		}

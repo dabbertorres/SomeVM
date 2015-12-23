@@ -27,7 +27,8 @@ namespace dbr
 				enum class Type : std::uint8_t
 				{
 					// memory ops
-					Load,		// 1: write-to, 2x: constant index
+					Load,		// 1: write-to, 2: index
+					LoadConst,	// 1: write-to, 2x: constant index
 
 					// math ops
 					Add,		// "addition" 1: write-to, 2: registry index, 3: registry index

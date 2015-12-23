@@ -40,8 +40,7 @@ namespace dbr
 
 				void push(const Instruction& inst);
 
-				void write(const Value& val);
-				void write(const Value& val, std::size_t idx);
+				void write(std::size_t idx, const Value& val);
 				Value read(std::size_t idx) const;
 
 			private:
@@ -50,7 +49,6 @@ namespace dbr
 				Return returnPair;
 				
 				Registry registry;
-				Registry::iterator nextEmpty;
 		};
 	}
 }
