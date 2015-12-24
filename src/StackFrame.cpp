@@ -290,7 +290,7 @@ namespace dbr
 							break;
 
 						case Value::Type::String:
-							out << '"' << static_cast<string>(val) << '"';
+							out << static_cast<string>(val);
 							break;
 					}
 
