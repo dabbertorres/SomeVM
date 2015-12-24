@@ -9,7 +9,7 @@ REPL mode is functional, with a currently assembly-like sort of intermediate lan
 example hello world:
 ```asm
   > const "hello, world"
-  > load $0 $0
+  > load $0 %0
   > print $0
   "hello, world"
   > 
@@ -18,7 +18,7 @@ example hello world:
 Run mode is functional, using the same IL (hesitantly named "SVML"):
 ```asm
 const "hello, world"
-load $0 $0
+load $0 %0
 print $0
 ```
 
@@ -34,9 +34,9 @@ Basic syntax:
 Current VM instructions:
 * \<instruction\> - \<description\>
   * \<argument list\>
-* load - loads the provided literal or constant index to a register
+* load - loads a constant or another the value of another register to the given register
   * register to load to
-  * index into the constants list to load
+  * index into the constants list OR another register to load
 * add - adds the values at the two registers and stores the result
   * register to write to
   * first register to add
