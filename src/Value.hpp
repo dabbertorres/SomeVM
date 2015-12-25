@@ -13,7 +13,6 @@ namespace dbr
 		using Bytes = std::vector<byte>;
 
 		using nil = std::nullptr_t;
-		using number = float;
 		using string = std::string;
 
 		class Value
@@ -23,13 +22,15 @@ namespace dbr
 				{
 					Nil,
 					Bool,
-					Number,
+					Int,
+					Float,
 					String,
 				};
 
 				Value();
 				Value(bool b);
-				Value(number f);
+				Value(int i);
+				Value(float f);
 				Value(const string& str);
 
 				Value(const Value& other);
@@ -44,12 +45,14 @@ namespace dbr
 
 				void set(nil);
 				void set(bool b);
-				void set(number f);
+				void set(int i);
+				void set(float f);
 				void set(const string& str);
 
 				operator nil() const;
 				operator bool() const;
-				operator number() const;
+				operator int() const;
+				operator float() const;
 				operator string() const;
 				operator Bytes() const;
 

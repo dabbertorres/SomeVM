@@ -2,6 +2,29 @@
 
 #include <cmath>
 
+namespace
+{
+	struct Float
+	{
+		Float()
+		:	valid(false)
+		{}
+
+		float value;
+		bool valid;
+	};
+
+	struct Int
+	{
+		Int()
+		: valid(false)
+		{}
+
+		int value;
+		bool valid;
+	};
+}
+
 namespace dbr
 {
 	namespace svm
@@ -76,41 +99,36 @@ namespace dbr
 
 		bool StackFrame::run(Constants& constants, const Functions& functions, std::istream& in, std::ostream& out)
 		{
-			auto arg1 = currInst->arg1();
-			auto arg1x = currInst->arg1x();
-			auto arg2 = currInst->arg2();
-			auto arg2x = currInst->arg2x();
-			auto arg3 = currInst->arg3();
-
 			switch(currInst->type())
 			{
-				// memory ops
+				/* memory ops */
 				case Instruction::Type::Load:
 				{
-					write(currInst->arg1(), registry[currInst->arg2x()]);
+					write(currInst->arg1(), registry[currInst->arg2()]);
 					break;
 				}
 				
-				case Instruction::Type::LoadConst:
+				case Instruction::Type::LoadC:
 				{
 					write(currInst->arg1(), constants[currInst->arg2x()]);
 					break;
 				}
 
-				// math ops
+				/* math ops */
+				// integer
 				case Instruction::Type::Add:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
-					
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
 					write(currInst->arg1(), {one + two});
 					break;
 				}
 
 				case Instruction::Type::Sub:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
 
 					write(currInst->arg1(), {one - two});
 					break;
@@ -118,8 +136,8 @@ namespace dbr
 
 				case Instruction::Type::Mult:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
 
 					write(currInst->arg1(), {one * two});
 					break;
@@ -127,8 +145,8 @@ namespace dbr
 
 				case Instruction::Type::Div:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
 
 					write(currInst->arg1(), {one / two});
 					break;
@@ -136,22 +154,195 @@ namespace dbr
 
 				case Instruction::Type::Mod:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
 
-					write(currInst->arg1(), {std::fmod(one, two)});
+					write(currInst->arg1(), {one % two});
 					break;
 				}
 
 				case Instruction::Type::Neg:
 				{
-					number one = registry[currInst->arg2()];
+					int one = registry[currInst->arg2()];
 
 					write(currInst->arg1(), {-one});
 					break;
 				}
 
-				// comparison
+				// float
+				case Instruction::Type::FAdd:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one + two});
+					break;
+				}
+
+				case Instruction::Type::FSub:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one - two});
+					break;
+				}
+
+				case Instruction::Type::FMult:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one * two});
+					break;
+				}
+
+				case Instruction::Type::FDiv:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one / two});
+					break;
+				}
+
+				case Instruction::Type::FNeg:
+				{
+					float one = registry[currInst->arg2()];
+
+					write(currInst->arg1(), {-one});
+					break;
+				}
+
+				// misc
+				case Instruction::Type::CastI:
+				{
+					float one = registry[currInst->arg2()];
+
+					write(currInst->arg1(), {static_cast<int>(one)});
+					break;
+				}
+
+				case Instruction::Type::CastF:
+				{
+					int one = registry[currInst->arg2()];
+
+					write(currInst->arg1(), {static_cast<float>(one)});
+					break;
+				}
+
+				/* comparison ops */
+				// integer
+				case Instruction::Type::Lt:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one < two});
+					break;
+				}
+
+				case Instruction::Type::LtEq:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one <= two});
+					break;
+				}
+
+				case Instruction::Type::Gt:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one > two});
+					break;
+				}
+
+				case Instruction::Type::GtEq:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one >= two});
+					break;
+				}
+
+				case Instruction::Type::Eq:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one == two});
+					break;
+				}
+
+				case Instruction::Type::Neq:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one != two});
+					break;
+				}
+
+				// float
+				case Instruction::Type::FLt:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one < two});
+					break;
+				}
+
+				case Instruction::Type::FLtEq:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one <= two});
+					break;
+				}
+
+				case Instruction::Type::FGt:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one > two});
+					break;
+				}
+
+				case Instruction::Type::FGtEq:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one >= two});
+					break;
+				}
+
+				case Instruction::Type::FEq:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one == two});
+					break;
+				}
+
+				case Instruction::Type::FNeq:
+				{
+					float one = registry[currInst->arg2()];
+					float two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one != two});
+					break;
+				}
+
+				/* logical ops */
 				case Instruction::Type::Not:
 				{
 					bool one = registry[currInst->arg2()];
@@ -160,61 +351,80 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Less:
+				case Instruction::Type::And:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					bool one = registry[currInst->arg2()];
+					bool two = registry[currInst->arg3()];
 
-					write(currInst->arg1(), {one < two});
+					write(currInst->arg1(), {one && two});
 					break;
 				}
 
-				case Instruction::Type::LessEq:
+				case Instruction::Type::Or:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					bool one = registry[currInst->arg2()];
+					bool two = registry[currInst->arg3()];
 
-					write(currInst->arg1(), {one <= two});
+					write(currInst->arg1(), {one || two});
 					break;
 				}
 
-				case Instruction::Type::Gret:
+				case Instruction::Type::Xor:
 				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one > two});
-					break;
-				}
-
-				case Instruction::Type::GretEq:
-				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one >= two});
-					break;
-				}
-
-				case Instruction::Type::Eq:
-				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one == two});
-					break;
-				}
-
-				case Instruction::Type::Neq:
-				{
-					number one = registry[currInst->arg2()];
-					number two = registry[currInst->arg3()];
+					bool one = registry[currInst->arg2()];
+					bool two = registry[currInst->arg3()];
 
 					write(currInst->arg1(), {one != two});
 					break;
 				}
 
-				// conditions
+				/* bitwise ops */
+				case Instruction::Type::BAnd:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one & two});
+					break;
+				}
+
+				case Instruction::Type::BOr:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one | two});
+					break;
+				}
+
+				case Instruction::Type::BXor:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one ^ two});
+					break;
+				}
+
+				case Instruction::Type::Bsl:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one << two});
+					break;
+				}
+
+				case Instruction::Type::Bsr:
+				{
+					int one = registry[currInst->arg2()];
+					int two = registry[currInst->arg3()];
+
+					write(currInst->arg1(), {one >> two});
+					break;
+				}
+
+				/* conditions */
 				case Instruction::Type::If:
 				{
 					bool one = registry[currInst->arg1()];
@@ -226,7 +436,7 @@ namespace dbr
 					break;
 				}
 
-				// branching
+				/* branching */
 				case Instruction::Type::Call:
 				{
 					throw std::exception("Call is not implemented");
@@ -285,8 +495,12 @@ namespace dbr
 							out << std::boolalpha << static_cast<bool>(val);
 							break;
 
-						case Value::Type::Number:
-							out << static_cast<number>(val);
+						case Value::Type::Int:
+							out << static_cast<int>(val);
+							break;
+
+						case Value::Type::Float:
+							out << static_cast<float>(val);
 							break;
 
 						case Value::Type::String:

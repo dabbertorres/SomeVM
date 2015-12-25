@@ -4,18 +4,20 @@ namespace
 {
 	using Type = dbr::svm::Value::Type;
 
-	static constexpr const char* typeMap[] =
+	static const char* typeMap[] =
 	{
 		"Nil",
 		"Bool",
-		"Number",
+		"Int",
+		"Float",
 		"String",
 	};
 
-	static constexpr const char* asString(Type type)
+	static const char* asString(Type type)
 	{
 		return typeMap[static_cast<dbr::svm::byte>(type)];
 	}
+
 
 	static std::runtime_error errorBuilder(Type asked, Type is)
 	{
@@ -44,7 +46,13 @@ namespace dbr
 			set(b);
 		}
 
-		Value::Value(number f)
+		Value::Value(int i)
+		:	Value()
+		{
+			set(i);
+		}
+
+		Value::Value(float f)
 		:	Value()
 		{
 			set(f);
@@ -81,8 +89,11 @@ namespace dbr
 					value = new bool(*static_cast<bool*>(other.value));
 					break;
 
-				case Type::Number:
-					value = new number(*static_cast<number*>(other.value));
+				case Type::Int:
+					value = new int(*static_cast<int*>(other.value));
+
+				case Type::Float:
+					value = new float(*static_cast<float*>(other.value));
 					break;
 
 				case Type::String:
@@ -99,27 +110,9 @@ namespace dbr
 		{
 			clean();
 
-			switch(other.typeVal)
-			{
-				case Type::Nil:
-					break;
-
-				case Type::Bool:
-					value = new bool(*static_cast<bool*>(other.value));
-					break;
-
-				case Type::Number:
-					value = new number(*static_cast<number*>(other.value));
-					break;
-
-				case Type::String:
-					value = new string(*static_cast<string*>(other.value));
-					break;
-			}
+			value = other.value;
 
 			typeVal = other.typeVal;
-
-			other.clean();
 
 			return *this;
 		}
@@ -139,8 +132,11 @@ namespace dbr
 				case Type::Bool:
 					return sizeof(bool);
 
-				case Type::Number:
-					return sizeof(number);
+				case Type::Int:
+					return sizeof(int);
+
+				case Type::Float:
+					return sizeof(float);
 
 				case Type::String:
 					return value ? static_cast<string*>(value)->size() : 0;
@@ -172,19 +168,35 @@ namespace dbr
 			}
 		}
 
-		void Value::set(number f)
+		void Value::set(int i)
 		{
-			if(typeVal != Type::Number)
+			if(typeVal != Type::Int)
 			{
 				clean();
 
-				value = new number(f);
+				value = new int(i);
 
-				typeVal = Type::Number;
+				typeVal = Type::Int;
 			}
 			else
 			{
-				*static_cast<number*>(value) = f;
+				*static_cast<int*>(value) = i;
+			}
+		}
+
+		void Value::set(float f)
+		{
+			if(typeVal != Type::Float)
+			{
+				clean();
+
+				value = new int(f);
+
+				typeVal = Type::Float;
+			}
+			else
+			{
+				*static_cast<int*>(value) = f;
 			}
 		}
 
@@ -225,14 +237,26 @@ namespace dbr
 				return false;
 		}
 
-		Value::operator number() const
+		Value::operator int() const
 		{
 #ifdef DEBUG
-			if(typeVal != Type::Number)
-				throw errorBuilder(Type::Number, typeVal);
+			if(typeVal != Type::Int)
+				throw errorBuilder(Type::Int, typeVal);
 #endif
 			if(value)
-				return *static_cast<number*>(value);
+				return *static_cast<int*>(value);
+			else
+				return 0;
+		}
+
+		Value::operator float() const
+		{
+#ifdef DEBUG
+			if(typeVal != Type::Float)
+				throw errorBuilder(Type::Float, typeVal);
+#endif
+			if(value)
+				return *static_cast<float*>(value);
 			else
 				return 0;
 		}
