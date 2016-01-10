@@ -20,12 +20,15 @@ namespace dbr
 			public:
 				enum class Type : byte
 				{
-					Nil,
-					Bool,
-					Int,
-					Float,
-					String,
+					Nil = 1 << 0,
+					Bool = 1 << 1,
+					Int = 1 << 2,
+					Float = 1 << 3,
+					String = 1 << 4,
+					Array = 1 << 5,
 				};
+
+				static bool isArray(Type type);
 
 				Value();
 				Value(bool b);
@@ -54,9 +57,11 @@ namespace dbr
 				operator int() const;
 				operator float() const;
 				operator string() const;
+
 				operator Bytes() const;
 
 				Type type() const;
+				bool isArray() const;
 
 			private:
 				void clean();

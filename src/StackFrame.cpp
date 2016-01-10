@@ -30,24 +30,30 @@ namespace dbr
 	namespace svm
 	{
 		StackFrame::StackFrame()
-		:	registry()
+		:	registry(),
+			returnPair(registry.end(), registry.end())
 		{}
 
 		StackFrame::StackFrame(const Bytecode& bc)
 		:	code(bc),
 			currInst(code.begin()),
-			registry()
+			registry(),
+			returnPair(registry.end(), registry.end())
 		{}
 
 		StackFrame::StackFrame(Registry::const_iterator begin, Registry::const_iterator end)
-		:	currInst(code.begin())
+		:	currInst(code.begin()),
+			registry(),
+			returnPair(registry.end(), registry.end())
 		{
 			std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const Bytecode& bc, Registry::const_iterator begin, Registry::const_iterator end)
 		:	code(bc),
-			currInst(code.begin())
+			currInst(code.begin()),
+			registry(),
+			returnPair(registry.end(), registry.end())
 		{
 			std::copy(begin, end, registry.begin());
 		}
@@ -71,6 +77,8 @@ namespace dbr
 
 			std::copy(other.registry.begin(), other.registry.end(), registry.begin());
 
+			returnPair = other.returnPair;
+
 			return *this;
 		}
 
@@ -81,6 +89,8 @@ namespace dbr
 			registry = std::move(other.registry);
 
 			other.currInst = other.code.end();
+
+			returnPair = std::move(other.returnPair);
 
 			return *this;
 		}
@@ -454,15 +464,17 @@ namespace dbr
 					{
 						auto one = currInst->arg1();
 						
-						returnPair.first = registry.begin() + one;
-						returnPair.second = registry.begin() + twoX;
+						returnPair.first = returnPair.second = registry.begin();
+
+						std::advance(returnPair.first, one);
+						std::advance(returnPair.second, one);
 					}
 					else
 					{
-						returnPair.first = registry.end();
-						returnPair.second = registry.end();
+						returnPair.first = returnPair.second = registry.end();
 					}
 
+					// if we're returning before the end of this stackframe, make it so
 					currInst = code.end();
 
 					break;
@@ -470,7 +482,9 @@ namespace dbr
 
 				case Instruction::Type::Jump:
 				{
-					currInst = code.begin() + currInst->arg1x();
+					int dist = registry.at(currInst->arg1());
+					currInst = code.begin();
+					std::advance(currInst, dist - 1);	// subtract 1 for the increment below
 					break;
 				}
 
@@ -508,11 +522,14 @@ namespace dbr
 							break;
 					}
 
+					out << std::endl;
+
 					break;
 				}
 			}
 
-			++currInst;
+			if(currInst != code.end())
+				++currInst;
 
 			return currInst == code.end();
 		}

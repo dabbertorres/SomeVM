@@ -35,6 +35,11 @@ namespace dbr
 {
 	namespace svm
 	{
+		bool Value::isArray(Type type)
+		{
+			return static_cast<byte>(type) & static_cast<byte>(Type::Array);
+		}
+
 		Value::Value()
 		:	value(nullptr),
 			typeVal(Type::Nil)
@@ -294,6 +299,11 @@ namespace dbr
 		Value::Type Value::type() const
 		{
 			return typeVal;
+		}
+
+		bool Value::isArray() const
+		{
+			return isArray(typeVal);
 		}
 
 		void Value::clean()

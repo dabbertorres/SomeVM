@@ -142,6 +142,9 @@ namespace dbr
 
 					toLower(command);
 
+					if(command.empty())
+						continue;
+
 					try
 					{
 						auto it = commands.end();
@@ -238,11 +241,18 @@ namespace dbr
 					return false;
 
 				auto it = str.begin();
+
 				bool neg = *it == '-';
-				auto place = str.length() - 1 - (neg || *it == '+');	// "- 1" for base 0, and subtract another if a positive/negative character exists
+				bool pos = *it == '+';
+				bool sign = neg || pos;
+
+				auto place = str.length() - 1 - sign;	// "- 1" for base 0, and subtract another if a positive/negative character exists
 				i = 0;
 
-				for(++it; it != str.end(); ++it, --place)
+				if(sign)
+					++it;
+
+				for(; it != str.end(); ++it, --place)
 				{
 					i += (*it - '0') * static_cast<std::size_t>(std::pow(10, place));
 				}
@@ -259,17 +269,24 @@ namespace dbr
 					return false;
 
 				auto it = str.begin();
+
 				bool neg = *it == '-';
+				bool pos = *it == '+';
+				bool sign = neg || pos;
+
 				auto decimalPos = str.find('.');
-				auto place = str.length() - decimalPos - 1 - (neg || *it == '+');	// "- 1" for base 0, and subtract another if a positive/negative character exists
+				auto place = str.length() - decimalPos - 1 - sign;	// "- 1" for base 0, and subtract another if a positive/negative character exists
 				f = 0;
 
-				for(++it; it != str.end(); ++it, --place)
+				if(sign)
+					++it;
+
+				for(; it != str.end(); ++it, --place)
 				{
 					if(*it == '.')
 						continue;
 
-					f += (*it - '0') * static_cast<std::size_t>(std::pow(10, place));
+					f += (*it - '0') * static_cast<float>(std::pow(10, place));
 				}
 
 				if(neg)

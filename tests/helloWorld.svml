@@ -1,4 +1,25 @@
 # this is a comment
 const "hello, world"
+const "goodbye, world"
+const false
+const 10
+const 12
+
 loadc $0 $0
+loadc $1 $1
+loadc $2 $2
+loadc $3 $3
+loadc $4 $4
+
+print $2
+
+# if 
+if $2		# 6
+jump $3
+
+# then
 print $0
+jump $4
+
+#else
+print $1

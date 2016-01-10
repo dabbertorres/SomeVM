@@ -33,12 +33,7 @@ int main(int argc, char** argv)
 		{
 			std::cout << "Exception: " << e.what() << std::endl;
 		}
-
-		svm::Program program = svm::VM::loadBinary("tests/helloWorld.svm");
-
-		vm.run(program, std::cin, std::cout);
 	}
 
-	std::cin.get();
 	return 0;
 }
