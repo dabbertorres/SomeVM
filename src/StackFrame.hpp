@@ -16,12 +16,9 @@ namespace dbr
 			public:
 				using Registry = std::array<Value, 256>;
 
-				using Return = std::pair<Registry::const_iterator, Registry::const_iterator>;
-
-				StackFrame();
-				StackFrame(const Bytecode& code);
-				StackFrame(Registry::const_iterator begin, Registry::const_iterator end);
-				StackFrame(const Bytecode& code, Registry::const_iterator begin, Registry::const_iterator end);
+				StackFrame() = default;
+				StackFrame(Bytecode code);
+				StackFrame(Bytecode code, Registry::const_iterator begin, Registry::const_iterator end);
 
 				StackFrame(const StackFrame& other);
 				StackFrame(StackFrame&& other);
@@ -31,24 +28,39 @@ namespace dbr
 
 				~StackFrame() = default;
 
-				// returns true when frame is finished (calling getReturn() becomes valid)
-				// otherwise, returns false
-				bool run(Constants& constants, const Functions& functions, std::istream& in, std::ostream& out);
-
-				// returns valid Registry iterators once run() returns true
-				Return getReturn() const;
+				Bytecode::const_iterator next();
 
 				void push(const Instruction& inst);
 
-				void write(std::size_t idx, const Value& val);
+				// implicit write - writes 'val' to the first unused register
+				void write(Value val);
+
+				// explicit write - writes 'val' to the provided register number 'idx'
+				void write(std::size_t idx, Value val);
+
+				// implicit write - writes all Values from 'begin'..'end' starting at the first unused register
+				void writeAll(Registry::const_iterator begin, Registry::const_iterator end);
+
+				// explicit write - writes all Values from 'begin'..'end' starting at the provided register number 'idx'
+				void writeAll(std::size_t idx, Registry::const_iterator begin, Registry::const_iterator end);
+
 				Value read(std::size_t idx) const;
+
+				const Registry& getRegistry() const;
+				const Bytecode& getBytecode() const;
+
+				Bytecode::const_iterator codeBegin() const;
+				Bytecode::const_iterator codeEnd() const;
+
+				Registry::const_iterator regBegin() const;
+				Registry::const_iterator regEnd() const;
 
 			private:
 				Bytecode code;
-				Bytecode::const_iterator currInst;
-				Return returnPair;
+				Bytecode::const_iterator currInstr;
 				
 				Registry registry;
+				Registry::iterator nextFree;
 		};
 	}
 }

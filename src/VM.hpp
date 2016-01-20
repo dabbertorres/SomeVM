@@ -18,32 +18,41 @@ namespace dbr
 			}
 		}
 
+		// number of arguments, StackFrame
+		using Function = std::pair<std::uint8_t, StackFrame>;
+
 		struct Program
 		{
 			Constants constants;
-			Functions functions;
-			Bytecode bytecode;
+			std::vector<Function> functions;
 		};
 
 		class VM
 		{
 			public:
-				VM() = default;
+				VM(std::istream& in, std::ostream& out);
 				~VM() = default;
 
 				static Program loadBinary(const std::string& file);
 				static void writeBinary(const Program& program, const std::string& file);
 
-				void run(Program program, std::istream& in, std::ostream& out);
+				void run(const Program& program);
 
-				void repl(std::istream& in, std::ostream& out);
+				void repl();
 
 				std::size_t callStackSize() const;
 
 				static constexpr const char* BINARY_ID = ".svm";
 
 			private:
+				void interpret(const Program& program, StackFrame& currFrame, Bytecode::const_iterator& currInstr);
+				
 				std::stack<StackFrame> callStack;
+
+				std::vector<Value> returns;
+
+				std::istream& in;
+				std::ostream& out;
 		};
 	}
 }

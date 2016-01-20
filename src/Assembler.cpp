@@ -37,6 +37,17 @@ namespace
 		return{type, one, 0, 0};
 	}
 
+	static Instruction oneArgX(std::istream& in, Instruction::Type type)
+	{
+		std::string oneStr;
+
+		in >> oneStr;
+
+		auto one = static_cast<std::uint32_t>(Assembler::toRegister(oneStr));
+
+		return{type, one};
+	}
+
 	static Instruction twoArg(std::istream& in, Instruction::Type type)
 	{
 		std::string writeToStr;
@@ -129,9 +140,12 @@ namespace dbr
 				return program;
 			}
 
+			// assembler only supports single functions at the moment...
 			void Assembler::run(std::istream& in, std::ostream& out, Program& program)
 			{
 				std::string line;
+
+				Bytecode code;
 
 				while(std::getline(in, line))
 				{
@@ -161,7 +175,7 @@ namespace dbr
 						else if((it = commands.find(command)) != commands.end())
 						{
 							auto inst = it->second(iss);
-							program.bytecode.push_back(inst);
+							code.push_back(inst);
 						}
 						else
 						{
@@ -173,6 +187,8 @@ namespace dbr
 						out << "\nError: " << e.what() << std::endl;
 					}
 				}
+
+				program.functions.emplace_back(0, StackFrame(std::move(code)));
 			}
 
 			bool Assembler::isRegister(const std::string& str)
@@ -363,12 +379,12 @@ namespace dbr
 				{"bsr", [](std::istream& in) { return threeArg(in, Instruction::Type::Bsr); }},
 
 				/* conditions */
-				{"if", [](std::istream& in) { return oneArg(in, Instruction::Type::If); }},
+				{"if", [](std::istream& in) { return oneArgX(in, Instruction::Type::If); }},
 
 				/* branching */
-				{"call", [](std::istream& in) { return oneArg(in, Instruction::Type::Call); }},
+				{"call", [](std::istream& in) { return twoArg(in, Instruction::Type::Call); }},
 				{"ret", [](std::istream& in) { return twoArg(in, Instruction::Type::Ret); }},
-				{"jump", [](std::istream& in) { return oneArg(in, Instruction::Type::Jump); }},
+				{"jump", [](std::istream& in) { return oneArgX(in, Instruction::Type::Jump); }},
 
 				/* misc */
 				{"noop", [](std::istream& in) { return Instruction(Instruction::Type::Noop, 0); }},

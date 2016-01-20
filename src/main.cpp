@@ -8,11 +8,11 @@ using namespace dbr;
 
 int main(int argc, char** argv)
 {
-	svm::VM vm;
+	svm::VM vm(std::cin, std::cout);
 
 	if(argc == 1)
 	{
-		vm.repl(std::cin, std::cout);
+		vm.repl();
 	}
 	else
 	{
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 
 			svm::VM::writeBinary(program, "tests/helloWorld.svm");
 
-			vm.run(program, std::cin, std::cout);
+			vm.run(program);
 		}
 		catch(const std::exception& e)
 		{

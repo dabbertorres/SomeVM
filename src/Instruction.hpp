@@ -87,7 +87,7 @@ namespace dbr
 					// if argument is true, jump is skipped (the "then"). If an "else" exists, the end of the "then" will have a jump
 
 					/* branching */
-					Call,		// 1x: function index
+					Call,		// 1: number of arguments to call with (from $0), 2x: function index
 					Ret,		// "return" 1: starting registry index to return values from, 2x: ending registry index to return values from. If 2x is greater than 255, nothing is returned
 					Jump,		// 1x: instruction index (can only jump within current stack frame)
 
@@ -114,10 +114,6 @@ namespace dbr
 		};
 
 		using Bytecode = std::vector<Instruction>;
-
-		// a function has a start index and a last index into the bytecode
-		using Function = std::pair<std::size_t, std::size_t>;
-		using Functions = std::vector<Function>;
 	}
 }
 

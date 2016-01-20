@@ -1,61 +1,21 @@
 #include "StackFrame.hpp"
 
-#include <cmath>
-
-namespace
-{
-	struct Float
-	{
-		Float()
-		:	valid(false)
-		{}
-
-		float value;
-		bool valid;
-	};
-
-	struct Int
-	{
-		Int()
-		: valid(false)
-		{}
-
-		int value;
-		bool valid;
-	};
-}
-
 namespace dbr
 {
 	namespace svm
 	{
-		StackFrame::StackFrame()
-		:	registry(),
-			returnPair(registry.end(), registry.end())
+		StackFrame::StackFrame(Bytecode bc)
+		:	code(bc),
+			currInstr(code.begin()),
+			registry(),
+			nextFree(registry.begin())
 		{}
 
-		StackFrame::StackFrame(const Bytecode& bc)
+		StackFrame::StackFrame(Bytecode bc, Registry::const_iterator begin, Registry::const_iterator end)
 		:	code(bc),
-			currInst(code.begin()),
-			registry(),
-			returnPair(registry.end(), registry.end())
-		{}
-
-		StackFrame::StackFrame(Registry::const_iterator begin, Registry::const_iterator end)
-		:	currInst(code.begin()),
-			registry(),
-			returnPair(registry.end(), registry.end())
+			currInstr(code.begin())
 		{
-			std::copy(begin, end, registry.begin());
-		}
-
-		StackFrame::StackFrame(const Bytecode& bc, Registry::const_iterator begin, Registry::const_iterator end)
-		:	code(bc),
-			currInst(code.begin()),
-			registry(),
-			returnPair(registry.end(), registry.end())
-		{
-			std::copy(begin, end, registry.begin());
+			nextFree = std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const StackFrame& other)
@@ -65,7 +25,7 @@ namespace dbr
 
 		StackFrame::StackFrame(StackFrame&& other)
 		{
-			*this = other;
+			*this = std::move(other);
 		}
 
 		StackFrame& StackFrame::operator=(const StackFrame& other)
@@ -73,11 +33,11 @@ namespace dbr
 			code.resize(other.code.size());
 			std::copy(other.code.begin(), other.code.end(), code.begin());
 
-			currInst = code.begin() + (other.currInst - other.code.begin());
+			currInstr = code.begin() + (other.currInstr - other.code.begin());
 
 			std::copy(other.registry.begin(), other.registry.end(), registry.begin());
 
-			returnPair = other.returnPair;
+			nextFree = registry.begin() + (other.nextFree - other.registry.begin());
 
 			return *this;
 		}
@@ -85,468 +45,94 @@ namespace dbr
 		StackFrame& StackFrame::operator=(StackFrame&& other)
 		{
 			code = std::move(other.code);
-			currInst = std::move(other.currInst);
+			currInstr = std::move(other.currInstr);
+
 			registry = std::move(other.registry);
+			nextFree = std::move(other.nextFree);
 
-			other.currInst = other.code.end();
-
-			returnPair = std::move(other.returnPair);
+			other.nextFree = other.registry.begin();
 
 			return *this;
 		}
 
+		Bytecode::const_iterator StackFrame::next()
+		{
+			// if we haven't reached the end, increment before returning.
+			// otherwise, just return
+			if(currInstr != code.end())
+				return currInstr++;
+			else
+				return currInstr;
+		}
+
 		void StackFrame::push(const Instruction& inst)
 		{
-			auto diff = 0;
-
-			if(code.size() != 0)
-				diff = currInst - code.begin();
-
+			// just in case code.push_back causes a reallocation, store and restore the offset of currInstr
+			auto dist = currInstr - code.begin();
 			code.push_back(inst);
-
-			currInst = code.begin() + diff;
+			currInstr = code.begin() + dist;
 		}
 
-		bool StackFrame::run(Constants& constants, const Functions& functions, std::istream& in, std::ostream& out)
+		void StackFrame::write(Value val)
 		{
-			switch(currInst->type())
-			{
-				/* memory ops */
-				case Instruction::Type::Load:
-				{
-					write(currInst->arg1(), registry[currInst->arg2()]);
-					break;
-				}
-				
-				case Instruction::Type::LoadC:
-				{
-					write(currInst->arg1(), constants[currInst->arg2x()]);
-					break;
-				}
-
-				/* math ops */
-				// integer
-				case Instruction::Type::Add:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one + two});
-					break;
-				}
-
-				case Instruction::Type::Sub:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one - two});
-					break;
-				}
-
-				case Instruction::Type::Mult:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one * two});
-					break;
-				}
-
-				case Instruction::Type::Div:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one / two});
-					break;
-				}
-
-				case Instruction::Type::Mod:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one % two});
-					break;
-				}
-
-				case Instruction::Type::Neg:
-				{
-					int one = registry[currInst->arg2()];
-
-					write(currInst->arg1(), {-one});
-					break;
-				}
-
-				// float
-				case Instruction::Type::FAdd:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one + two});
-					break;
-				}
-
-				case Instruction::Type::FSub:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one - two});
-					break;
-				}
-
-				case Instruction::Type::FMult:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one * two});
-					break;
-				}
-
-				case Instruction::Type::FDiv:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one / two});
-					break;
-				}
-
-				case Instruction::Type::FNeg:
-				{
-					float one = registry[currInst->arg2()];
-
-					write(currInst->arg1(), {-one});
-					break;
-				}
-
-				// misc
-				case Instruction::Type::CastI:
-				{
-					float one = registry[currInst->arg2()];
-
-					write(currInst->arg1(), {static_cast<int>(one)});
-					break;
-				}
-
-				case Instruction::Type::CastF:
-				{
-					int one = registry[currInst->arg2()];
-
-					write(currInst->arg1(), {static_cast<float>(one)});
-					break;
-				}
-
-				/* comparison ops */
-				// integer
-				case Instruction::Type::Lt:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one < two});
-					break;
-				}
-
-				case Instruction::Type::LtEq:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one <= two});
-					break;
-				}
-
-				case Instruction::Type::Gt:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one > two});
-					break;
-				}
-
-				case Instruction::Type::GtEq:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one >= two});
-					break;
-				}
-
-				case Instruction::Type::Eq:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one == two});
-					break;
-				}
-
-				case Instruction::Type::Neq:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one != two});
-					break;
-				}
-
-				// float
-				case Instruction::Type::FLt:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one < two});
-					break;
-				}
-
-				case Instruction::Type::FLtEq:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one <= two});
-					break;
-				}
-
-				case Instruction::Type::FGt:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one > two});
-					break;
-				}
-
-				case Instruction::Type::FGtEq:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one >= two});
-					break;
-				}
-
-				case Instruction::Type::FEq:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one == two});
-					break;
-				}
-
-				case Instruction::Type::FNeq:
-				{
-					float one = registry[currInst->arg2()];
-					float two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one != two});
-					break;
-				}
-
-				/* logical ops */
-				case Instruction::Type::Not:
-				{
-					bool one = registry[currInst->arg2()];
-
-					write(currInst->arg1(), {!one});
-					break;
-				}
-
-				case Instruction::Type::And:
-				{
-					bool one = registry[currInst->arg2()];
-					bool two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one && two});
-					break;
-				}
-
-				case Instruction::Type::Or:
-				{
-					bool one = registry[currInst->arg2()];
-					bool two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one || two});
-					break;
-				}
-
-				case Instruction::Type::Xor:
-				{
-					bool one = registry[currInst->arg2()];
-					bool two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one != two});
-					break;
-				}
-
-				/* bitwise ops */
-				case Instruction::Type::BAnd:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one & two});
-					break;
-				}
-
-				case Instruction::Type::BOr:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one | two});
-					break;
-				}
-
-				case Instruction::Type::BXor:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one ^ two});
-					break;
-				}
-
-				case Instruction::Type::Bsl:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one << two});
-					break;
-				}
-
-				case Instruction::Type::Bsr:
-				{
-					int one = registry[currInst->arg2()];
-					int two = registry[currInst->arg3()];
-
-					write(currInst->arg1(), {one >> two});
-					break;
-				}
-
-				/* conditions */
-				case Instruction::Type::If:
-				{
-					bool one = registry[currInst->arg1()];
-
-					// if true, skip the next instruction (the jump to the "else")
-					if(one)
-						++currInst;
-
-					break;
-				}
-
-				/* branching */
-				case Instruction::Type::Call:
-				{
-					throw std::exception("Call is not implemented");
-
-					auto callee = functions[currInst->arg1x()];
-
-					break;
-				}
-
-				case Instruction::Type::Ret:
-				{
-					auto twoX = currInst->arg2x();
-
-					if(twoX <= 0xFF)
-					{
-						auto one = currInst->arg1();
-						
-						returnPair.first = returnPair.second = registry.begin();
-
-						std::advance(returnPair.first, one);
-						std::advance(returnPair.second, one);
-					}
-					else
-					{
-						returnPair.first = returnPair.second = registry.end();
-					}
-
-					// if we're returning before the end of this stackframe, make it so
-					currInst = code.end();
-
-					break;
-				}
-
-				case Instruction::Type::Jump:
-				{
-					int dist = registry.at(currInst->arg1());
-					currInst = code.begin();
-					std::advance(currInst, dist - 1);	// subtract 1 for the increment below
-					break;
-				}
-
-				case Instruction::Type::Noop:
-				{
-					break;
-				}
-
-				case Instruction::Type::Print:
-				{
-					auto reg = currInst->arg1();
-
-					const Value& val = registry.at(reg);
-
-					switch(val.type())
-					{
-						case Value::Type::Nil:
-							out << "nil";
-							break;
-
-						case Value::Type::Bool:
-							out << std::boolalpha << static_cast<bool>(val);
-							break;
-
-						case Value::Type::Int:
-							out << static_cast<int>(val);
-							break;
-
-						case Value::Type::Float:
-							out << static_cast<float>(val);
-							break;
-
-						case Value::Type::String:
-							out << static_cast<string>(val);
-							break;
-					}
-
-					out << std::endl;
-
-					break;
-				}
-			}
-
-			if(currInst != code.end())
-				++currInst;
-
-			return currInst == code.end();
+			if(nextFree != registry.end())
+				*nextFree++ = val;
+			else
+				throw std::runtime_error("Error: Registry full");
 		}
 
-		StackFrame::Return StackFrame::getReturn() const
+		void StackFrame::write(std::size_t idx, Value val)
 		{
-			return returnPair;
+			registry.at(idx) = val;
 		}
 
-		void StackFrame::write(std::size_t idx, const Value& val)
+		void StackFrame::writeAll(Registry::const_iterator begin, Registry::const_iterator end)
 		{
-			registry[idx] = val;
+			nextFree = std::copy(begin, end, nextFree);
+		}
+
+		void StackFrame::writeAll(std::size_t idx, Registry::const_iterator begin, Registry::const_iterator end)
+		{
+			auto endCopy = std::copy(begin, end, registry.begin() + idx);
+			
+			// move nextFree only if the copy went past it
+			if(endCopy > nextFree)
+				nextFree = endCopy;
 		}
 
 		Value StackFrame::read(std::size_t idx) const
 		{
 			return registry.at(idx);
+		}
+
+		const StackFrame::Registry& StackFrame::getRegistry() const
+		{
+			return registry;
+		}
+
+		const Bytecode& StackFrame::getBytecode() const
+		{
+			return code;
+		}
+
+		Bytecode::const_iterator StackFrame::codeBegin() const
+		{
+			return code.begin();
+		}
+
+		Bytecode::const_iterator StackFrame::codeEnd() const
+		{
+			return code.end();
+		}
+
+		StackFrame::Registry::const_iterator StackFrame::regBegin() const
+		{
+			return registry.begin();
+		}
+
+		StackFrame::Registry::const_iterator StackFrame::regEnd() const
+		{
+			return registry.end();
 		}
 	}
 }
