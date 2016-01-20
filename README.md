@@ -31,7 +31,7 @@ Basic syntax:
 * "true" and "false" (no quotes) are bools.
 * Instructions and their arguments are simply separated by spaces
 
-Current VM instructions:
+Current VM instructions: (Out of date as of Jan 19, 2016)
 * \<instruction\> - \<description\>
   * \<argument list\>
 * load - loads a constant or another the value of another register to the given register
