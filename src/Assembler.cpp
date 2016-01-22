@@ -142,13 +142,16 @@ namespace dbr
 				return program;
 			}
 
-			// assembler only supports single functions at the moment...
 			void Assembler::run(std::istream& in, std::ostream& out, Program& program)
 			{
 				std::size_t lineNum = 1;
 				std::string line;
 
-				Bytecode code;
+				// stack of number of arguments and Bytecode for each StackFrame
+				std::stack<std::pair<std::uint8_t, Bytecode>> codeStack;
+
+				// top level function has 1 argument (an array of command-line parameters) (or, will at least)
+				codeStack.emplace(1, Bytecode{});
 
 				for(; std::getline(in, line); ++lineNum)
 				{
@@ -169,19 +172,42 @@ namespace dbr
 					{
 						auto it = commands.end();
 
+						if(codeStack.empty())
+							throw std::runtime_error("Unexpected end of function");
+
+						auto* top = &codeStack.top();
+
 						// comment
 						if(command[0] == '#')
 						{
 							continue;
 						}
+						// const declaration
 						else if(command == "const")
 						{
 							constant(iss, program.constants);
 						}
+						// command
 						else if((it = commands.find(command)) != commands.end())
 						{
 							auto inst = it->second(iss);
-							code.push_back(inst);
+							top->second.push_back(inst);
+						}
+						// start function
+						else if(command.back() == ':')
+						{
+							// number of arguments the function takes is a number following the colon (with a space between them! (strict for now...))
+							std::uint8_t numArgs = 0;
+							iss >> numArgs;
+
+							codeStack.emplace(numArgs, Bytecode{});
+						}
+						// end function
+						else if(command == "end")
+						{
+							// push to the front of the function list so the top level function will be first in the list
+							program.functions.emplace(program.functions.begin(), top->first, StackFrame(std::move(top->second)));
+							codeStack.pop();
 						}
 						else
 						{
@@ -195,7 +221,13 @@ namespace dbr
 					}					
 				}
 
-				program.functions.emplace_back(0, StackFrame(std::move(code)));
+				// if the top-level function was not popped
+				if(!codeStack.empty())
+				{
+					auto& top = codeStack.top();
+					program.functions.emplace(program.functions.begin(), top.first, StackFrame(std::move(top.second)));
+					codeStack.pop();
+				}
 			}
 
 			bool Assembler::isRegister(const std::string& str)
@@ -385,10 +417,10 @@ namespace dbr
 				{"bsl", [](std::istream& in) { return threeArg(in, Instruction::Type::Bsl); }},
 				{"bsr", [](std::istream& in) { return threeArg(in, Instruction::Type::Bsr); }},
 
-				/* conditions */
+				/* branching */
 				{"if", [](std::istream& in) { return oneArgX(in, Instruction::Type::If); }},
 
-				/* branching */
+				/* jumps */
 				{"call", [](std::istream& in) { return twoArg(in, Instruction::Type::Call); }},
 				{"ret", [](std::istream& in) { return twoArg(in, Instruction::Type::Ret); }},
 				{"jump", [](std::istream& in) { return oneArgX(in, Instruction::Type::Jump); }},
