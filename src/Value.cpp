@@ -49,25 +49,25 @@ namespace dbr
 			typeVal(Type::Nil)
 		{}
 
-		Value::Value(bool b)
+		Value::Value(Bool b)
 		:	Value()
 		{
 			set(b);
 		}
 
-		Value::Value(int i)
+		Value::Value(Int i)
 		:	Value()
 		{
 			set(i);
 		}
 
-		Value::Value(float f)
+		Value::Value(Float f)
 		:	Value()
 		{
 			set(f);
 		}
 
-		Value::Value(const string& str)
+		Value::Value(const String& str)
 		:	Value()
 		{
 			set(str);
@@ -95,18 +95,18 @@ namespace dbr
 					break;
 
 				case Type::Bool:
-					value = new bool(*static_cast<bool*>(other.value));
+					value = new Bool(*static_cast<Bool*>(other.value));
 					break;
 
 				case Type::Int:
-					value = new int(*static_cast<int*>(other.value));
+					value = new Int(*static_cast<Int*>(other.value));
 
 				case Type::Float:
-					value = new float(*static_cast<float*>(other.value));
+					value = new Float(*static_cast<Float*>(other.value));
 					break;
 
 				case Type::String:
-					value = new string(*static_cast<string*>(other.value));
+					value = new String(*static_cast<String*>(other.value));
 					break;
 			}
 
@@ -139,93 +139,93 @@ namespace dbr
 					return 1;
 
 				case Type::Bool:
-					return sizeof(bool);
+					return sizeof(Bool);
 
 				case Type::Int:
-					return sizeof(int);
+					return sizeof(Int);
 
 				case Type::Float:
-					return sizeof(float);
+					return sizeof(Float);
 
 				case Type::String:
-					return value ? static_cast<string*>(value)->size() : 0;
+					return value ? static_cast<String*>(value)->size() : 0;
 			}
 
 			return 0;
 		}
 
-		void Value::set(nil)
+		void Value::set(Nil)
 		{
 			clean();
 
 			typeVal = Type::Nil;
 		}
 
-		void Value::set(bool b)
+		void Value::set(Bool b)
 		{
 			if(typeVal != Type::Bool)
 			{
 				clean();
 
-				value = new bool(b);
+				value = new Bool(b);
 
 				typeVal = Type::Bool;
 			}
 			else
 			{
-				*static_cast<bool*>(value) = b;
+				*static_cast<Bool*>(value) = b;
 			}
 		}
 
-		void Value::set(int i)
+		void Value::set(Int i)
 		{
 			if(typeVal != Type::Int)
 			{
 				clean();
 
-				value = new int(i);
+				value = new Int(i);
 
 				typeVal = Type::Int;
 			}
 			else
 			{
-				*static_cast<int*>(value) = i;
+				*static_cast<Int*>(value) = i;
 			}
 		}
 
-		void Value::set(float f)
+		void Value::set(Float f)
 		{
 			if(typeVal != Type::Float)
 			{
 				clean();
 
-				value = new int(f);
+				value = new Float(f);
 
 				typeVal = Type::Float;
 			}
 			else
 			{
-				*static_cast<int*>(value) = f;
+				*static_cast<Float*>(value) = f;
 			}
 		}
 
-		void Value::set(const string& str)
+		void Value::set(const String& str)
 		{
 			if(typeVal != Type::String)
 			{
 				clean();
 
-				value = new string(str);
+				value = new String(str);
 
 				typeVal = Type::String;
 			}
 			else
 			{
-				*static_cast<string*>(value) = str;
+				*static_cast<String*>(value) = str;
 			}
 		}
 
-		Value::operator nil() const
+		Value::operator Nil() const
 		{
 #ifdef DEBUG
 			if(typeVal != Type::Nil)
@@ -234,50 +234,50 @@ namespace dbr
 			return nullptr;
 		}
 
-		Value::operator bool() const
+		Value::operator Bool() const
 		{
 #ifdef DEBUG
 			if(typeVal != Type::Bool)
 				throw errorBuilder(Type::Bool, typeVal);
 #endif
 			if(value)
-				return *static_cast<bool*>(value);
+				return *static_cast<Bool*>(value);
 			else
 				return false;
 		}
 
-		Value::operator int() const
+		Value::operator Int() const
 		{
 #ifdef DEBUG
 			if(typeVal != Type::Int)
 				throw errorBuilder(Type::Int, typeVal);
 #endif
 			if(value)
-				return *static_cast<int*>(value);
+				return *static_cast<Int*>(value);
 			else
 				return 0;
 		}
 
-		Value::operator float() const
+		Value::operator Float() const
 		{
 #ifdef DEBUG
 			if(typeVal != Type::Float)
 				throw errorBuilder(Type::Float, typeVal);
 #endif
 			if(value)
-				return *static_cast<float*>(value);
+				return *static_cast<Float*>(value);
 			else
 				return 0;
 		}
 
-		Value::operator string() const
+		Value::operator String() const
 		{
 #ifdef DEBUG
 			if(typeVal != Type::String)
 				throw errorBuilder(Type::String, typeVal);
 #endif
 			if(value)
-				return *static_cast<string*>(value);
+				return *static_cast<String*>(value);
 			else
 				return "";
 		}

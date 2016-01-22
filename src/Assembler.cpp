@@ -10,6 +10,8 @@
 
 namespace
 {
+	using namespace dbr;
+
 	static void toLower(std::string& str)
 	{
 		std::transform(str.begin(), str.end(), str.begin(), std::tolower);
@@ -95,9 +97,9 @@ namespace
 		{
 			toLower(value);
 
-			bool b;
-			int i;
-			float f;
+			svm::Bool b;
+			svm::Int i;
+			svm::Float f;
 
 			if(Assembler::strToBool(value, b))
 			{
@@ -143,12 +145,16 @@ namespace dbr
 			// assembler only supports single functions at the moment...
 			void Assembler::run(std::istream& in, std::ostream& out, Program& program)
 			{
+				std::size_t lineNum = 1;
 				std::string line;
 
 				Bytecode code;
 
-				while(std::getline(in, line))
+				for(; std::getline(in, line); ++lineNum)
 				{
+					if(line.empty())
+						continue;
+
 					std::string command;
 
 					std::istringstream iss(line);
@@ -184,8 +190,9 @@ namespace dbr
 					}
 					catch(const std::exception& e)
 					{
-						out << "\nError: " << e.what() << std::endl;
-					}
+						out << "\nError (line: " << lineNum << "): " << e.what() << std::endl;
+						throw e;
+					}					
 				}
 
 				program.functions.emplace_back(0, StackFrame(std::move(code)));
@@ -251,7 +258,7 @@ namespace dbr
 				return str == "true" || str == "false";
 			}
 
-			bool Assembler::strToInt(const std::string& str, int& i)
+			bool Assembler::strToInt(const std::string& str, Int& i)
 			{
 				if(!isInt(str))
 					return false;
@@ -279,7 +286,7 @@ namespace dbr
 				return true;
 			}
 
-			bool Assembler::strToFloat(const std::string& str, float& f)
+			bool Assembler::strToFloat(const std::string& str, Float& f)
 			{
 				if(!isFloat(str))
 					return false;
@@ -311,7 +318,7 @@ namespace dbr
 				return true;
 			}
 
-			bool Assembler::strToBool(const std::string& str, bool& b)
+			bool Assembler::strToBool(const std::string& str, Bool& b)
 			{
 				if(!isBool(str))
 					return false;

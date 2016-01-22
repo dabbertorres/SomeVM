@@ -12,8 +12,11 @@ namespace dbr
 		using byte = std::uint8_t;
 		using Bytes = std::vector<byte>;
 
-		using nil = std::nullptr_t;
-		using string = std::string;
+		using Nil = std::nullptr_t;
+		using Bool = bool;
+		using Int = long long int;
+		using Float = double;
+		using String = std::string;
 
 		class Value
 		{
@@ -30,10 +33,10 @@ namespace dbr
 				static bool isArray(Type type);
 
 				Value();
-				Value(bool b);
-				Value(int i);
-				Value(float f);
-				Value(const string& str);
+				Value(Bool b);
+				Value(Int i);
+				Value(Float f);
+				Value(const String& str);
 
 				Value(const Value& other);
 				Value(Value&& other);
@@ -45,17 +48,17 @@ namespace dbr
 
 				std::size_t sizeOf() const;
 
-				void set(nil);
-				void set(bool b);
-				void set(int i);
-				void set(float f);
-				void set(const string& str);
+				void set(Nil);
+				void set(Bool b);
+				void set(Int i);
+				void set(Float f);
+				void set(const String& str);
 
-				operator nil() const;
-				operator bool() const;
-				operator int() const;
-				operator float() const;
-				operator string() const;
+				operator Nil() const;
+				operator Bool() const;
+				operator Int() const;
+				operator Float() const;
+				operator String() const;
 
 				operator Bytes() const;
 

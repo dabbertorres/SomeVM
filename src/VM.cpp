@@ -65,7 +65,7 @@ namespace dbr
 
 					case Value::Type::Bool:
 					{
-						bool val;
+						Bool val;
 						fin.read(reinterpret_cast<char*>(&val), sizeof(val));
 						out.constants.emplace_back(val);
 						break;
@@ -73,7 +73,7 @@ namespace dbr
 
 					case Value::Type::Int:
 					{
-						int val;
+						Int val;
 						fin.read(reinterpret_cast<char*>(&val), sizeof(val));
 						out.constants.emplace_back(val);
 						break;
@@ -81,7 +81,7 @@ namespace dbr
 
 					case Value::Type::Float:
 					{
-						float val;
+						Float val;
 						fin.read(reinterpret_cast<char*>(&val), sizeof(val));
 						out.constants.emplace_back(val);
 						break;
@@ -92,7 +92,7 @@ namespace dbr
 						std::size_t len = 0;
 						fin.read(reinterpret_cast<char*>(&len), sizeof(len));
 
-						string val(len, 0);
+						String val(len, 0);
 						fin.read(reinterpret_cast<char*>(&val[0]), len);
 
 						out.constants.emplace_back(val);
@@ -164,7 +164,7 @@ namespace dbr
 				}
 				else
 				{
-					string str = c;
+					String str = c;
 					std::size_t len = str.length();
 
 					fout.write(reinterpret_cast<char*>(&len), sizeof(len));
@@ -269,8 +269,8 @@ namespace dbr
 				// integer
 				case Instruction::Type::Add:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one + two});
 					break;
@@ -278,8 +278,8 @@ namespace dbr
 
 				case Instruction::Type::Sub:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one - two});
 					break;
@@ -287,8 +287,8 @@ namespace dbr
 
 				case Instruction::Type::Mult:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one * two});
 					break;
@@ -296,8 +296,8 @@ namespace dbr
 
 				case Instruction::Type::Div:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one / two});
 					break;
@@ -305,8 +305,8 @@ namespace dbr
 
 				case Instruction::Type::Mod:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one % two});
 					break;
@@ -314,17 +314,17 @@ namespace dbr
 
 				case Instruction::Type::Neg:
 				{
-					int one = currFrame.read(currInstr->arg2());
+					Int one = currFrame.read(currInstr->arg2());
 
 					currFrame.write(currInstr->arg1(), {-one});
 					break;
 				}
 
-				// float
+				// Float
 				case Instruction::Type::FAdd:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one + two});
 					break;
@@ -332,8 +332,8 @@ namespace dbr
 
 				case Instruction::Type::FSub:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one - two});
 					break;
@@ -341,8 +341,8 @@ namespace dbr
 
 				case Instruction::Type::FMult:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one * two});
 					break;
@@ -350,8 +350,8 @@ namespace dbr
 
 				case Instruction::Type::FDiv:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one / two});
 					break;
@@ -359,7 +359,7 @@ namespace dbr
 
 				case Instruction::Type::FNeg:
 				{
-					float one = currFrame.read(currInstr->arg2());
+					Float one = currFrame.read(currInstr->arg2());
 
 					currFrame.write(currInstr->arg1(), {-one});
 					break;
@@ -368,17 +368,17 @@ namespace dbr
 				// misc
 				case Instruction::Type::CastI:
 				{
-					float one = currFrame.read(currInstr->arg2());
+					Float one = currFrame.read(currInstr->arg2());
 
-					currFrame.write(currInstr->arg1(), {static_cast<int>(one)});
+					currFrame.write(currInstr->arg1(), {static_cast<Int>(one)});
 					break;
 				}
 
 				case Instruction::Type::CastF:
 				{
-					int one = currFrame.read(currInstr->arg2());
+					Int one = currFrame.read(currInstr->arg2());
 
-					currFrame.write(currInstr->arg1(), {static_cast<float>(one)});
+					currFrame.write(currInstr->arg1(), {static_cast<Float>(one)});
 					break;
 				}
 
@@ -386,8 +386,8 @@ namespace dbr
 				// integer
 				case Instruction::Type::Lt:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one < two});
 					break;
@@ -395,8 +395,8 @@ namespace dbr
 
 				case Instruction::Type::LtEq:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one <= two});
 					break;
@@ -404,8 +404,8 @@ namespace dbr
 
 				case Instruction::Type::Gt:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one > two});
 					break;
@@ -413,8 +413,8 @@ namespace dbr
 
 				case Instruction::Type::GtEq:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one >= two});
 					break;
@@ -422,8 +422,8 @@ namespace dbr
 
 				case Instruction::Type::Eq:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one == two});
 					break;
@@ -431,18 +431,18 @@ namespace dbr
 
 				case Instruction::Type::Neq:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one != two});
 					break;
 				}
 
-				// float
+				// Float
 				case Instruction::Type::FLt:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one < two});
 					break;
@@ -450,8 +450,8 @@ namespace dbr
 
 				case Instruction::Type::FLtEq:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one <= two});
 					break;
@@ -459,8 +459,8 @@ namespace dbr
 
 				case Instruction::Type::FGt:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one > two});
 					break;
@@ -468,8 +468,8 @@ namespace dbr
 
 				case Instruction::Type::FGtEq:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one >= two});
 					break;
@@ -477,8 +477,8 @@ namespace dbr
 
 				case Instruction::Type::FEq:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one == two});
 					break;
@@ -486,8 +486,8 @@ namespace dbr
 
 				case Instruction::Type::FNeq:
 				{
-					float one = currFrame.read(currInstr->arg2());
-					float two = currFrame.read(currInstr->arg3());
+					Float one = currFrame.read(currInstr->arg2());
+					Float two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one != two});
 					break;
@@ -496,7 +496,7 @@ namespace dbr
 				/* logical ops */
 				case Instruction::Type::Not:
 				{
-					bool one = currFrame.read(currInstr->arg2());
+					Bool one = currFrame.read(currInstr->arg2());
 
 					currFrame.write(currInstr->arg1(), {!one});
 					break;
@@ -504,8 +504,8 @@ namespace dbr
 
 				case Instruction::Type::And:
 				{
-					bool one = currFrame.read(currInstr->arg2());
-					bool two = currFrame.read(currInstr->arg3());
+					Bool one = currFrame.read(currInstr->arg2());
+					Bool two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one && two});
 					break;
@@ -513,8 +513,8 @@ namespace dbr
 
 				case Instruction::Type::Or:
 				{
-					bool one = currFrame.read(currInstr->arg2());
-					bool two = currFrame.read(currInstr->arg3());
+					Bool one = currFrame.read(currInstr->arg2());
+					Bool two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one || two});
 					break;
@@ -522,8 +522,8 @@ namespace dbr
 
 				case Instruction::Type::Xor:
 				{
-					bool one = currFrame.read(currInstr->arg2());
-					bool two = currFrame.read(currInstr->arg3());
+					Bool one = currFrame.read(currInstr->arg2());
+					Bool two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one != two});
 					break;
@@ -532,8 +532,8 @@ namespace dbr
 				/* bitwise ops */
 				case Instruction::Type::BAnd:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one & two});
 					break;
@@ -541,8 +541,8 @@ namespace dbr
 
 				case Instruction::Type::BOr:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one | two});
 					break;
@@ -550,8 +550,8 @@ namespace dbr
 
 				case Instruction::Type::BXor:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one ^ two});
 					break;
@@ -559,8 +559,8 @@ namespace dbr
 
 				case Instruction::Type::Bsl:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one << two});
 					break;
@@ -568,8 +568,8 @@ namespace dbr
 
 				case Instruction::Type::Bsr:
 				{
-					int one = currFrame.read(currInstr->arg2());
-					int two = currFrame.read(currInstr->arg3());
+					Int one = currFrame.read(currInstr->arg2());
+					Int two = currFrame.read(currInstr->arg3());
 
 					currFrame.write(currInstr->arg1(), {one >> two});
 					break;
@@ -578,7 +578,7 @@ namespace dbr
 				/* conditions */
 				case Instruction::Type::If:
 				{
-					bool one = currFrame.read(currInstr->arg1x());
+					Bool one = currFrame.read(currInstr->arg1x());
 
 					// if true, skip the next instruction (the jump to the "else")
 					if(one)
@@ -632,7 +632,7 @@ namespace dbr
 
 				case Instruction::Type::Jump:
 				{
-					int instIdx = currFrame.read(currInstr->arg1x());
+					Int instIdx = currFrame.read(currInstr->arg1x());
 					currFrame.jump(instIdx);
 					break;
 				}
@@ -651,23 +651,23 @@ namespace dbr
 					switch(val.type())
 					{
 						case Value::Type::Nil:
-							out << "nil";
+							out << "Nil";
 							break;
 
 						case Value::Type::Bool:
-							out << std::boolalpha << static_cast<bool>(val);
+							out << std::boolalpha << static_cast<Bool>(val);
 							break;
 
 						case Value::Type::Int:
-							out << static_cast<int>(val);
+							out << static_cast<Int>(val);
 							break;
 
 						case Value::Type::Float:
-							out << static_cast<float>(val);
+							out << static_cast<Float>(val);
 							break;
 
 						case Value::Type::String:
-							out << static_cast<string>(val);
+							out << static_cast<String>(val);
 							break;
 					}
 

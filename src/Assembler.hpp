@@ -33,9 +33,9 @@ namespace dbr
 
 					static std::size_t toRegister(const std::string& regStr);
 
-					static bool strToInt(const std::string& str, int& i);
-					static bool strToFloat(const std::string& str, float& i);
-					static bool strToBool(const std::string& str, bool& i);
+					static bool strToInt(const std::string& str, Int& i);
+					static bool strToFloat(const std::string& str, Float& i);
+					static bool strToBool(const std::string& str, Bool& i);
 
 				private:
 					static const std::unordered_map<std::string, dbr::svm::Instruction(*)(std::istream&)> commands;
