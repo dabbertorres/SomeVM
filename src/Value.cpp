@@ -1,5 +1,7 @@
 #include "Value.hpp"
 
+#include <sstream>
+
 namespace
 {
 	using Type = dbr::svm::Value::Type;
@@ -21,13 +23,14 @@ namespace
 
 	static std::runtime_error errorBuilder(Type asked, Type is)
 	{
-		std::string msg = "Asked for type \"";
-		msg += asString(asked);
-		msg += "\", when type is \"";
-		msg += asString(is);
-		msg += '"';
+		std::ostringstream oss;
+		oss << "Asked for type \"";
+		oss << asString(asked);
+		oss << "\", when type is \"";
+		oss << asString(is);
+		oss << '"';
 
-		return std::runtime_error{msg};
+		return std::runtime_error(oss.str());
 	}
 }
 
@@ -37,7 +40,8 @@ namespace dbr
 	{
 		bool Value::isArray(Type type)
 		{
-			return static_cast<byte>(type) & static_cast<byte>(Type::Array);
+//			return static_cast<byte>(type) & static_cast<byte>(Type::Array);
+			return false;
 		}
 
 		Value::Value()

@@ -14,9 +14,9 @@ namespace dbr
 		class StackFrame
 		{
 			public:
-				using Registry = std::array<Value, 256>;
+				using Registry = std::vector<Value>;
 
-				StackFrame() = default;
+				StackFrame();
 				StackFrame(Bytecode code);
 				StackFrame(Bytecode code, Registry::const_iterator begin, Registry::const_iterator end);
 
@@ -29,6 +29,7 @@ namespace dbr
 				~StackFrame() = default;
 
 				Bytecode::const_iterator next();
+				void jump(std::size_t instIdx);
 
 				void push(const Instruction& inst);
 
@@ -56,6 +57,8 @@ namespace dbr
 				Registry::const_iterator regEnd() const;
 
 			private:
+				static constexpr std::size_t registrySize = 256;
+
 				Bytecode code;
 				Bytecode::const_iterator currInstr;
 				

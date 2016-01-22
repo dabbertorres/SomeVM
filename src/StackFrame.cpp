@@ -4,26 +4,34 @@ namespace dbr
 {
 	namespace svm
 	{
+		StackFrame::StackFrame()
+		:	code(),
+			currInstr(code.begin()),
+			registry(registrySize),
+			nextFree(registry.begin())
+		{}
+
 		StackFrame::StackFrame(Bytecode bc)
 		:	code(bc),
 			currInstr(code.begin()),
-			registry(),
+			registry(registrySize),
 			nextFree(registry.begin())
 		{}
 
 		StackFrame::StackFrame(Bytecode bc, Registry::const_iterator begin, Registry::const_iterator end)
-		:	code(bc),
-			currInstr(code.begin())
+		:	StackFrame(bc)
 		{
 			nextFree = std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const StackFrame& other)
+		:	StackFrame()
 		{
 			*this = other;
 		}
 
 		StackFrame::StackFrame(StackFrame&& other)
+		:	StackFrame()
 		{
 			*this = std::move(other);
 		}
@@ -50,8 +58,6 @@ namespace dbr
 			registry = std::move(other.registry);
 			nextFree = std::move(other.nextFree);
 
-			other.nextFree = other.registry.begin();
-
 			return *this;
 		}
 
@@ -63,6 +69,14 @@ namespace dbr
 				return currInstr++;
 			else
 				return currInstr;
+		}
+
+		void StackFrame::jump(std::size_t instIdx)
+		{
+			if(instIdx >= code.size())
+				currInstr = code.end();
+			else
+				currInstr = code.begin() + instIdx;
 		}
 
 		void StackFrame::push(const Instruction& inst)

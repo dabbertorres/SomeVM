@@ -20,12 +20,11 @@ namespace dbr
 			public:
 				enum class Type : byte
 				{
-					Nil = 1 << 0,
-					Bool = 1 << 1,
-					Int = 1 << 2,
-					Float = 1 << 3,
-					String = 1 << 4,
-					Array = 1 << 5,
+					Nil = 0,
+					Bool = 1,
+					Int = 2,
+					Float = 3,
+					String = 4,
 				};
 
 				static bool isArray(Type type);

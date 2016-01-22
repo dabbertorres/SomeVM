@@ -154,10 +154,10 @@ namespace dbr
 					std::istringstream iss(line);
 					iss >> command;
 
-					toLower(command);
-
 					if(command.empty())
 						continue;
+
+					toLower(command);
 
 					try
 					{

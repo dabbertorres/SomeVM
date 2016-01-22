@@ -578,11 +578,11 @@ namespace dbr
 				/* conditions */
 				case Instruction::Type::If:
 				{
-					bool one = currFrame.read(currInstr->arg1());
+					bool one = currFrame.read(currInstr->arg1x());
 
 					// if true, skip the next instruction (the jump to the "else")
 					if(one)
-						++currInstr;
+						currFrame.jump(currInstr - currFrame.codeBegin() + 2);	// add 2 to skip over the current, and next instructions
 
 					break;
 				}
@@ -632,9 +632,8 @@ namespace dbr
 
 				case Instruction::Type::Jump:
 				{
-					int dist = currFrame.read(currInstr->arg1());
-					currInstr = currFrame.codeBegin();
-					std::advance(currInstr, dist - 1);	// subtract 1 for the next program counter increment
+					int instIdx = currFrame.read(currInstr->arg1x());
+					currFrame.jump(instIdx);
 					break;
 				}
 
