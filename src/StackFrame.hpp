@@ -29,7 +29,7 @@ namespace dbr
 				~StackFrame() = default;
 
 				Bytecode::const_iterator next();
-				void jump(std::size_t instIdx);
+				void jump(Int instIdx);
 
 				void push(const Instruction& inst);
 

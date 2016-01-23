@@ -31,7 +31,7 @@ namespace dbr
 					static bool isFloat(const std::string& str);
 					static bool isBool(const std::string& str);
 
-					static std::size_t toRegister(const std::string& regStr);
+					static std::uint8_t toRegister(const std::string& regStr);
 
 					static bool strToInt(const std::string& str, Int& i);
 					static bool strToFloat(const std::string& str, Float& i);

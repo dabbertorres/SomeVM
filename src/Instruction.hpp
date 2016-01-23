@@ -105,6 +105,8 @@ namespace dbr
 				Type type() const;
 				std::uint8_t arg1() const;
 				std::uint32_t arg1x() const;
+				// signed
+				std::int32_t arg1xs() const;
 				std::uint8_t arg2() const;
 				std::uint16_t arg2x() const;
 				std::uint8_t arg3() const;

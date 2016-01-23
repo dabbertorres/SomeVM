@@ -71,12 +71,15 @@ namespace dbr
 				return currInstr;
 		}
 
-		void StackFrame::jump(std::size_t instIdx)
+		void StackFrame::jump(Int instOff)
 		{
-			if(instIdx >= code.size())
+			// bounds checking - wrap to ends if would go out of bounds
+			if(instOff > 0 && code.end() - currInstr < instOff)
 				currInstr = code.end();
+			else if(instOff < 0 && currInstr - code.begin() < std::abs(instOff))
+				currInstr = code.begin();
 			else
-				currInstr = code.begin() + instIdx;
+				currInstr += instOff;
 		}
 
 		void StackFrame::push(const Instruction& inst)

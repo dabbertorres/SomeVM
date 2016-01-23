@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 		{
 			svm::Program program = svm::il::Assembler::run(fin, std::cout);
 
-			svm::VM::writeBinary(program, "tests/helloWorld.svm");
+			svm::VM::writeBinary(program, argv[2]);
 
 			vm.run(program);
 		}

@@ -19,7 +19,7 @@ namespace dbr
 		}
 
 		// number of arguments, StackFrame
-		using Function = std::pair<std::uint8_t, StackFrame>;
+		using Function = std::pair<std::size_t, StackFrame>;
 
 		struct Program
 		{

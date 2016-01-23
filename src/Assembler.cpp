@@ -148,7 +148,7 @@ namespace dbr
 				std::string line;
 
 				// stack of number of arguments and Bytecode for each StackFrame
-				std::stack<std::pair<std::uint8_t, Bytecode>> codeStack;
+				std::stack<std::pair<std::size_t, Bytecode>> codeStack;
 
 				// top level function has 1 argument (an array of command-line parameters) (or, will at least)
 				codeStack.emplace(1, Bytecode{});
@@ -197,7 +197,7 @@ namespace dbr
 						else if(command.back() == ':')
 						{
 							// number of arguments the function takes is a number following the colon (with a space between them! (strict for now...))
-							std::uint8_t numArgs = 0;
+							std::size_t numArgs = 0;
 							iss >> numArgs;
 
 							codeStack.emplace(numArgs, Bytecode{});
@@ -205,8 +205,7 @@ namespace dbr
 						// end function
 						else if(command == "end")
 						{
-							// push to the front of the function list so the top level function will be first in the list
-							program.functions.emplace(program.functions.begin(), top->first, StackFrame(std::move(top->second)));
+							program.functions.emplace_back(top->first, StackFrame(std::move(top->second)));
 							codeStack.pop();
 						}
 						else
@@ -235,7 +234,7 @@ namespace dbr
 				return str[0] == '$';
 			}
 
-			std::size_t Assembler::toRegister(const std::string& regStr)
+			std::uint8_t Assembler::toRegister(const std::string& regStr)
 			{
 				if(!isRegister(regStr))
 				{
@@ -421,10 +420,46 @@ namespace dbr
 				{"if", [](std::istream& in) { return oneArgX(in, Instruction::Type::If); }},
 
 				/* jumps */
-				{"call", [](std::istream& in) { return twoArg(in, Instruction::Type::Call); }},
-				{"ret", [](std::istream& in) { return twoArg(in, Instruction::Type::Ret); }},
-				{"jump", [](std::istream& in) { return oneArgX(in, Instruction::Type::Jump); }},
+				{"call", [](std::istream& in)
+							{
+								std::string numArgsStr;
+								std::string funcRegStr;
 
+								in >> numArgsStr >> funcRegStr;
+
+								Int numArgs = 0;
+								if(!strToInt(numArgsStr, numArgs))
+									throw std::runtime_error("Invalid argument #0 to call (must be positive int)");
+
+								auto funcReg = toRegister(funcRegStr);
+								
+								return Instruction(Instruction::Type::Call, static_cast<std::uint8_t>(numArgs), funcReg, 0);
+							}
+				},
+				{"ret", [](std::istream& in) { return twoArg(in, Instruction::Type::Ret); }},
+				{"jump", [](std::istream& in)
+							{
+								// 24 bit maxes/mins
+								constexpr auto maxUnsigned = 0xffffff;
+								constexpr auto maxSigned = maxUnsigned / 2;
+								constexpr auto minSigned = maxSigned - maxUnsigned;
+								
+								std::string jumpOffStr;
+
+								in >> jumpOffStr;
+
+								Int jumpOff;
+								if(!strToInt(jumpOffStr, jumpOff))
+									throw std::runtime_error("Invalid argument to jump (must be an int)");
+
+								// check bounds
+								if(jumpOff < minSigned || jumpOff > maxSigned)
+									throw std::runtime_error("Invalid argument to jump (Out of bounds! Must fit in (signed) 24 bits)");
+
+								return Instruction(Instruction::Type::Jump, static_cast<std::uint32_t>(jumpOff));
+							}
+				},
+				
 				/* misc */
 				{"noop", [](std::istream& in) { return Instruction(Instruction::Type::Noop, 0); }},
 				{"print", [](std::istream& in) { return oneArg(in, Instruction::Type::Print); }},

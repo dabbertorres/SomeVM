@@ -261,7 +261,9 @@ namespace dbr
 
 				case Instruction::Type::LoadC:
 				{
-					currFrame.write(currInstr->arg1(), program.constants[currInstr->arg2x()]);
+					auto dest = currInstr->arg1();
+					auto constIdx = currInstr->arg2x();
+					currFrame.write(dest, program.constants[constIdx]);
 					break;
 				}
 
@@ -582,7 +584,7 @@ namespace dbr
 
 					// if true, skip the next instruction (the jump to the "else")
 					if(one)
-						currFrame.jump(currInstr - currFrame.codeBegin() + 2);	// add 2 to skip over the current, and next instructions
+						currFrame.jump(1);
 
 					break;
 				}
@@ -591,7 +593,8 @@ namespace dbr
 				case Instruction::Type::Call:
 				{
 					std::uint8_t nargs = currInstr->arg1();
-					Function callee = program.functions[currInstr->arg2x()];
+					auto funcIdx = currInstr->arg2();
+					Function callee = program.functions[funcIdx];
 
 					if(nargs != callee.first)
 						throw std::runtime_error("Invalid number of arguments!");
@@ -615,7 +618,7 @@ namespace dbr
 						// "+ 1" for twoX being inclusive
 						returns.resize(twoX - one + 1);
 
-						// copy returns out
+						// copy the returns out
 						auto& registry = currFrame.getRegistry();
 						std::copy(registry.begin() + one, registry.begin() + twoX, returns.begin());
 					}
@@ -632,8 +635,8 @@ namespace dbr
 
 				case Instruction::Type::Jump:
 				{
-					Int instIdx = currFrame.read(currInstr->arg1x());
-					currFrame.jump(instIdx);
+					Int instOff = currInstr->arg1xs();
+					currFrame.jump(instOff);
 					break;
 				}
 

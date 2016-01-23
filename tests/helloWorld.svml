@@ -2,24 +2,31 @@
 const "hello, world"
 const "goodbye, world"
 const true
-const 10
-const 11
 
-loadc $0 $0
-loadc $1 $1
-loadc $2 $2
-loadc $3 $3
-loadc $4 $4
+hello: 0
+	loadc $0 $0
+	print $0
+end
 
-print $2
+bye: 0
+	loadc $0 $1
+	print $0
+end
+
+loadc $0 $2
+
+print $0
 
 # if 
-if $2		# instruction 6
-jump $3
+if $0		# instruction 6
+jump 2
 
 # then
-print $0
-jump $4
+call 0 $1
+jump 1
 
 # else
-print $1
+call 0 $2
+
+# should print the same as the earlier "print $0" because each function's registrys do not affect others
+print $0
