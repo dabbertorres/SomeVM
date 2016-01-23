@@ -18,7 +18,7 @@ loadc $0 $2
 print $0
 
 # if 
-if $0		# instruction 6
+if $0
 jump 2
 
 # then
