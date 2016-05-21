@@ -1,5 +1,5 @@
-#ifndef DBR_SVM_INSTRUCTIONS_HPP
-#define DBR_SVM_INSTRUCTIONS_HPP
+#ifndef DBR_SVM_INSTRUCTION_HPP
+#define DBR_SVM_INSTRUCTION_HPP
 
 #include <cstdint>
 #include <vector>
