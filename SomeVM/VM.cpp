@@ -20,7 +20,7 @@ namespace dbr
 	namespace svm
 	{
 		VM::VM(std::istream& in, std::ostream& out)
-		:	in(in),
+			: in(in),
 			out(out)
 		{}
 
@@ -115,12 +115,12 @@ namespace dbr
 
 			for(std::uint32_t i = 0; i < numFunctions; ++i)
 			{
-				// number of arguments the function takes
+				std::uint8_t nrets;
 				std::uint8_t nargs;
 
-				// length of the function in Instructions
 				std::uint32_t numInstrs;
 
+				fin.read(reinterpret_cast<char*>(&nrets), sizeof(nrets));
 				fin.read(reinterpret_cast<char*>(&nargs), sizeof(nargs));
 				fin.read(reinterpret_cast<char*>(&numInstrs), sizeof(numInstrs));
 
@@ -128,7 +128,7 @@ namespace dbr
 
 				fin.read(reinterpret_cast<char*>(code.data()), numInstrs * sizeof(Instruction));
 
-				out.functions.emplace_back(nargs, StackFrame(std::move(code)));
+				out.functions.emplace_back(nrets, nargs, StackFrame(code));
 			}
 
 			return out;
@@ -178,9 +178,10 @@ namespace dbr
 
 			for(auto& f : program.functions)
 			{
-				fout.write(reinterpret_cast<const char*>(&f.first), sizeof(f.first));
-				
-				auto& code = f.second.getBytecode();
+				fout.write(reinterpret_cast<const char*>(&f.numReturns), sizeof(f.numReturns));
+				fout.write(reinterpret_cast<const char*>(&f.numArgs), sizeof(f.numArgs));
+
+				auto& code = f.frame.getBytecode();
 				std::uint32_t numInstrs = code.size();
 
 				fout.write(reinterpret_cast<const char*>(&numInstrs), sizeof(numInstrs));
@@ -191,7 +192,7 @@ namespace dbr
 
 		void VM::run(const Program& program)
 		{
-			callStack.push(program.functions.front().second);
+			callStack.push(program.functions.front().frame);
 
 			while(!callStack.empty())
 			{
@@ -220,12 +221,12 @@ namespace dbr
 			{
 				out << "\n> ";
 				std::getline(in, line);
-				
+
 				try
 				{
 					std::istringstream iss(line);
 
-					il::Assembler::run(iss, out, program);
+					Assembler::run(iss, out, program);
 
 					StackFrame& currFrame = callStack.top();
 
@@ -235,7 +236,7 @@ namespace dbr
 
 					if(callStack.empty())
 						callStack.emplace();
-			}
+				}
 				catch(const std::exception& e)
 				{
 					out << "\nError: " << e.what() << std::endl;
@@ -578,7 +579,7 @@ namespace dbr
 				}
 
 				/* conditions */
-				case Instruction::Type::If:
+				case Instruction::Type::JmpT:
 				{
 					Bool one = currFrame.read(currInstr->arg1x());
 
@@ -596,13 +597,13 @@ namespace dbr
 					auto funcIdx = currInstr->arg2();
 					Function callee = program.functions[funcIdx];
 
-					if(nargs != callee.first)
+					if(nargs != callee.numArgs)
 						throw std::runtime_error("Invalid number of arguments!");
 
 					auto beg = currFrame.regBegin();
-					callee.second.writeAll(beg, beg + nargs);
+					callee.frame.writeAll(beg, beg + nargs);
 
-					callStack.push(callee.second);
+					callStack.push(callee.frame);
 
 					break;
 				}
@@ -640,7 +641,7 @@ namespace dbr
 					break;
 				}
 
-				case Instruction::Type::Noop:
+				case Instruction::Type::Nop:
 				{
 					break;
 				}

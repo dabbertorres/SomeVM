@@ -5,7 +5,7 @@ namespace dbr
 	namespace svm
 	{
 		Array::Array(std::size_t len)
-		:	lengthVal(len),
+			: lengthVal(len),
 			data(nullptr)
 		{}
 

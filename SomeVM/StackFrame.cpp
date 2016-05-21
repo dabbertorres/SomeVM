@@ -5,33 +5,33 @@ namespace dbr
 	namespace svm
 	{
 		StackFrame::StackFrame()
-		:	code(),
+			: code(),
 			currInstr(code.begin()),
 			registry(registrySize),
 			nextFree(registry.begin())
 		{}
 
 		StackFrame::StackFrame(Bytecode bc)
-		:	code(bc),
+			: code(bc),
 			currInstr(code.begin()),
 			registry(registrySize),
 			nextFree(registry.begin())
 		{}
 
 		StackFrame::StackFrame(Bytecode bc, Registry::const_iterator begin, Registry::const_iterator end)
-		:	StackFrame(bc)
+			: StackFrame(bc)
 		{
 			nextFree = std::copy(begin, end, registry.begin());
 		}
 
 		StackFrame::StackFrame(const StackFrame& other)
-		:	StackFrame()
+			: StackFrame()
 		{
 			*this = other;
 		}
 
 		StackFrame::StackFrame(StackFrame&& other)
-		:	StackFrame()
+			: StackFrame()
 		{
 			*this = std::move(other);
 		}
@@ -111,7 +111,7 @@ namespace dbr
 		void StackFrame::writeAll(std::size_t idx, Registry::const_iterator begin, Registry::const_iterator end)
 		{
 			auto endCopy = std::copy(begin, end, registry.begin() + idx);
-			
+
 			// move nextFree only if the copy went past it
 			if(endCopy > nextFree)
 				nextFree = endCopy;

@@ -45,42 +45,42 @@ namespace dbr
 		}
 
 		Value::Value()
-		:	value(nullptr),
+			: value(nullptr),
 			typeVal(Type::Nil)
 		{}
 
 		Value::Value(Bool b)
-		:	Value()
+			: Value()
 		{
 			set(b);
 		}
 
 		Value::Value(Int i)
-		:	Value()
+			: Value()
 		{
 			set(i);
 		}
 
 		Value::Value(Float f)
-		:	Value()
+			: Value()
 		{
 			set(f);
 		}
 
 		Value::Value(const String& str)
-		:	Value()
+			: Value()
 		{
 			set(str);
 		}
 
 		Value::Value(const Value& other)
-		:	Value()
+			: Value()
 		{
 			*this = other;
 		}
 
 		Value::Value(Value&& other)
-		:	Value()
+			: Value()
 		{
 			*this = other;
 		}
