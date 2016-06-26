@@ -4,7 +4,7 @@
 #include "Assembler.hpp"
 #include "VM.hpp"
 
-int main(int argc, char** argv)
+int main(int argc, char** argv) try
 {
 	using namespace dbr;
 
@@ -12,45 +12,41 @@ int main(int argc, char** argv)
 
 	switch(argc)
 	{
-		// no arguments, run repl mode
-		case 1:
-			vm.repl();
-			break;
-
 		// 1 filename, a binary file to execute
 		case 2:
-			try
-			{
-				auto program = svm::VM::loadBinary(argv[1]);
-				vm.run(program);
-			}
-			catch(const std::exception& e)
-			{
-				std::cout << "Exception: " << e.what() << std::endl;
-			}
+		{
+			svm::Program program;
+			program.load(argv[1]);
+
+			vm.load(program);
+			vm.run();
+
 			break;
+		}
 
 		// 2 filenames, input code file (1), and output binary file (2)
 		case 3:
-			try
-			{
-				std::ifstream fin(argv[1]);
-				auto program = svm::Assembler::run(fin, std::cout);
-				svm::VM::writeBinary(program, argv[2]);
-			}
-			catch(const std::exception& e)
-			{
-				std::cout << "Exception: " << e.what() << std::endl;
-			}
+		{
+			std::ifstream fin(argv[1]);
+			auto program = svm::Assembler::run(fin, std::cout);
+			program.write(argv[2]);
+
 			break;
+		}
 
 		default:
 			std::cout << "Incorrect number of arguments. Must be 0 - 2\n";
 			std::cout << "0 args: repl mode\n";
 			std::cout << "1 arg: binary to execute\n";
-			std::cout << "2 args: input file to assemble, and output file to create\n\n";
+			std::cout << "2 args: input file to assemble, and output file to create\n";
+
 			break;
 	}
 
 	return 0;
+}
+catch(const std::exception& e)
+{
+	std::cout << "Exception: " << e.what() << std::endl;
+	return 1;
 }

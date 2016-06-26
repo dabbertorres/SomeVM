@@ -60,6 +60,11 @@ namespace dbr
 			return static_cast<std::uint16_t>(value & 0xFFFF);
 		}
 
+		std::int16_t Instruction::arg2xs() const
+		{
+			return static_cast<std::int16_t>(value & 0xFFFF);
+		}
+
 		std::uint8_t Instruction::arg3() const
 		{
 			return static_cast<std::uint8_t>(value & 0xFF);

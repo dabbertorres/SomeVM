@@ -9,8 +9,7 @@ namespace dbr
 {
 	namespace svm
 	{
-		using byte = std::uint8_t;
-		using Bytes = std::vector<byte>;
+		using Bytes = std::vector<std::uint8_t>;
 
 		using Nil = std::nullptr_t;
 		using Bool = bool;
@@ -21,7 +20,7 @@ namespace dbr
 		class Value
 		{
 		public:
-			enum class Type : byte
+			enum class Type : std::uint8_t
 			{
 				Nil = 0,
 				Bool = 1,

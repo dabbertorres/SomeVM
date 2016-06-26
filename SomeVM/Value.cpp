@@ -17,7 +17,7 @@ namespace
 
 	static const char* asString(Type type)
 	{
-		return typeMap[static_cast<dbr::svm::byte>(type)];
+		return typeMap[static_cast<std::uint8_t>(type)];
 	}
 
 
@@ -40,7 +40,7 @@ namespace dbr
 	{
 		bool Value::isArray(Type type)
 		{
-//			return static_cast<byte>(type) & static_cast<byte>(Type::Array);
+//			return static_cast<std::uint8_t>(type) & static_cast<std::uint8_t>(Type::Array);
 			return false;
 		}
 
@@ -288,7 +288,7 @@ namespace dbr
 
 			if(value)
 			{
-				auto byteBeg = static_cast<byte*>(value);
+				auto byteBeg = static_cast<std::uint8_t*>(value);
 
 				std::copy(byteBeg, byteBeg + ret.size(), ret.begin());
 			}

@@ -1,32 +1,19 @@
 #include "Assembler.hpp"
 
-#include <cctype>
 #include <algorithm>
 
 #include <string>
 #include <sstream>
 
+#include "Function.hpp"
+#include "Program.hpp"
 #include "VM.hpp"
+
+#include "Util.hpp"
 
 namespace
 {
-	using namespace dbr;
-
-	static void toLower(std::string& str)
-	{
-		std::transform(str.begin(), str.end(), str.begin(), std::tolower);
-	}
-
-	static std::string stringTrim(const std::string& str)
-	{
-		auto left = std::find_if_not(str.begin(), str.end(), std::isspace);
-		auto right = std::find_if_not(str.rbegin(), str.rend(), std::isspace).base();
-
-		return{left, right};
-	}
-
-	using Instruction = dbr::svm::Instruction;
-	using Assembler = dbr::svm::Assembler;
+	using namespace dbr::svm;
 
 	static Instruction oneArg(std::istream& in, Instruction::Type type)
 	{
@@ -52,37 +39,37 @@ namespace
 
 	static Instruction twoArg(std::istream& in, Instruction::Type type)
 	{
-		std::string writeToStr;
 		std::string oneStr;
+		std::string twoStr;
 
-		in >> writeToStr >> oneStr;
+		in >> oneStr >> twoStr;
 
-		std::uint8_t writeTo = Assembler::toRegister(writeToStr);
-		std::uint16_t one = Assembler::toRegister(oneStr);
+		std::uint8_t one = Assembler::toRegister(oneStr);
+		std::uint16_t two = Assembler::toRegister(twoStr);
 
-		return{type, writeTo, one};
+		return{type, one, two};
 	}
 
 	static Instruction threeArg(std::istream& in, Instruction::Type type)
 	{
-		std::string writeToStr;
 		std::string oneStr;
 		std::string twoStr;
+		std::string threeStr;
 
-		in >> writeToStr >> oneStr >> twoStr;
+		in >> oneStr >> twoStr >> threeStr;
 
-		auto writeTo = static_cast<std::uint8_t>(Assembler::toRegister(writeToStr));
 		auto one = static_cast<std::uint8_t>(Assembler::toRegister(oneStr));
 		auto two = static_cast<std::uint8_t>(Assembler::toRegister(twoStr));
+		auto three = static_cast<std::uint8_t>(Assembler::toRegister(threeStr));
 
-		return{type, writeTo, one, two};
+		return{type, one, two, three};
 	}
 
 	static void constant(std::istream& in, dbr::svm::Constants& constants)
 	{
 		std::string value;
 		std::getline(in, value);
-		value = stringTrim(value);
+		value = util::stringTrim(value);
 
 		dbr::svm::Value val;
 
@@ -95,23 +82,19 @@ namespace
 		}
 		else
 		{
-			toLower(value);
+			util::toLower(value);
 
-			svm::Bool b;
-			svm::Int i;
-			svm::Float f;
-
-			if(Assembler::strToBool(value, b))
+			if(util::isBool(value))
 			{
-				val.set(b);
+				val.set(util::strToBool(value));
 			}
-			else if(Assembler::strToInt(value, i))
+			else if(util::isInt(value))
 			{
-				val.set(i);
+				val.set(std::stoll(value));
 			}
-			else if(Assembler::strToFloat(value, f))
+			else if(util::isFloat(value))
 			{
-				val.set(f);
+				val.set(std::stod(value));
 			}
 			else
 			{
@@ -145,22 +128,7 @@ namespace dbr
 			std::size_t lineNum = 1;
 			std::string line;
 
-			// stack of number of arguments and Bytecode for each StackFrame
-			struct Frame
-			{
-				std::size_t nrets;
-				std::size_t nargs;
-				Bytecode code;
-
-				Frame() = default;
-				Frame(std::size_t nrets, std::size_t nargs, Bytecode code)
-					: nrets(nrets),
-					nargs(nargs),
-					code(code)
-				{}
-			};
-
-			std::stack<Frame> codeStack;
+			std::stack<Function> codeStack;
 
 			// top level function has no returns and 1 argument (an array of command-line parameters) (or, will at least)
 			codeStack.emplace(0, 1, Bytecode{});
@@ -178,7 +146,7 @@ namespace dbr
 				if(command.empty())
 					continue;
 
-				toLower(command);
+				util::toLower(command);
 
 				try
 				{
@@ -187,7 +155,7 @@ namespace dbr
 					if(codeStack.empty())
 						throw std::runtime_error("Unexpected end of function");
 
-					auto* top = &codeStack.top();
+					auto& top = codeStack.top();
 
 					// comment
 					if(command[0] == '#')
@@ -203,23 +171,23 @@ namespace dbr
 					else if((it = commands.find(command)) != commands.end())
 					{
 						auto inst = it->second(iss);
-						top->code.push_back(inst);
+						top.code.push_back(inst);
 					}
 					// start function
 					else if(command.back() == ':')
 					{
 						// number of returns is the first number following the colon
 						// number of arguments is the second number following the colon (with a space between them! (strict for now...))
-						std::size_t numRets = 0;
-						std::size_t numArgs = 0;
+						std::uint32_t numRets = 0;
+						std::uint32_t numArgs = 0;
 						iss >> numRets >> numArgs;
 
-						codeStack.emplace(numRets, numArgs, Bytecode{});
+						codeStack.emplace(static_cast<std::uint8_t>(numRets), static_cast<std::uint8_t>(numArgs), Bytecode{});
 					}
 					// end function
 					else if(command == "end")
 					{
-						program.functions.emplace_back(top->nrets, top->nargs, StackFrame(top->code));
+						program.functions.push_back(top);
 						codeStack.pop();
 					}
 					else
@@ -237,8 +205,7 @@ namespace dbr
 			// if the top-level function was not popped
 			if(!codeStack.empty())
 			{
-				auto& top = codeStack.top();
-				program.functions.emplace(program.functions.begin(), top.nrets, top.nargs, StackFrame(top.code));
+				program.functions.insert(program.functions.begin(), codeStack.top());
 				codeStack.pop();
 			}
 		}
@@ -251,10 +218,10 @@ namespace dbr
 			auto rest = str.substr(1);
 
 			// check decimal
-			if(isInt(rest))
+			if(util::isInt(rest))
 				return true;
 
-			if(isHex(rest))
+			if(util::isHex(rest))
 				return true;
 
 			return false;
@@ -272,131 +239,6 @@ namespace dbr
 			}
 
 			return std::stoi(regStr.substr(1));
-		}
-
-		bool Assembler::isInt(const std::string& str)
-		{
-			auto it = str.begin();
-
-			if(!std::isdigit(*it) && *it != '-' && *it != '+')
-				return false;
-
-			for(++it; it != str.end(); ++it)
-			{
-				if(!std::isdigit(*it))
-					return false;
-			}
-
-			return true;
-		}
-
-		bool Assembler::isFloat(const std::string& str)
-		{
-			auto it = str.begin();
-
-			if(!std::isdigit(*it) && *it != '-' && *it != '.' && *it != '+')
-				return false;
-
-			// enforcing floats to actually need a decimal point
-			if(str.find('.') == std::string::npos)
-				return false;
-
-			for(++it; it != str.end(); ++it)
-			{
-				if(!std::isdigit(*it) && *it != '.')
-					return false;
-			}
-
-			return true;
-		}
-
-		bool Assembler::isBool(const std::string& str)
-		{
-			return str == "true" || str == "false";
-		}
-
-		bool Assembler::isHex(const std::string& str)
-		{
-			if(str[0] != '0' || str[1] != 'x')
-				return false;
-
-			for(auto it = str.begin() + 2; it != str.end(); ++it)
-			{
-				if(!std::isxdigit(*it))
-					return false;
-			}
-
-			return true;
-		}
-
-		bool Assembler::strToInt(const std::string& str, Int& i)
-		{
-			if(!isInt(str))
-				return false;
-
-			auto it = str.begin();
-
-			bool neg = *it == '-';
-			bool pos = *it == '+';
-			bool sign = neg || pos;
-
-			auto place = str.length() - 1 - sign;	// "- 1" for base 0, and subtract another if a positive/negative character exists
-			i = 0;
-
-			if(sign)
-				++it;
-
-			for(; it != str.end(); ++it, --place)
-			{
-				i += (*it - '0') * static_cast<std::size_t>(std::pow(10, place));
-			}
-
-			if(neg)
-				i *= -1;
-
-			return true;
-		}
-
-		bool Assembler::strToFloat(const std::string& str, Float& f)
-		{
-			if(!isFloat(str))
-				return false;
-
-			auto it = str.begin();
-
-			bool neg = *it == '-';
-			bool pos = *it == '+';
-			bool sign = neg || pos;
-
-			auto decimalPos = str.find('.');
-			auto place = str.length() - decimalPos - 1 - sign;	// "- 1" for base 0, and subtract another if a positive/negative character exists
-			f = 0;
-
-			if(sign)
-				++it;
-
-			for(; it != str.end(); ++it, --place)
-			{
-				if(*it == '.')
-					continue;
-
-				f += (*it - '0') * static_cast<float>(std::pow(10, place));
-			}
-
-			if(neg)
-				f *= -1;
-
-			return true;
-		}
-
-		bool Assembler::strToBool(const std::string& str, Bool& b)
-		{
-			if(!isBool(str))
-				return false;
-
-			b = str[0] == 't';
-
-			return true;
 		}
 
 		const std::unordered_map<std::string, Instruction(*)(std::istream&)> Assembler::commands =
@@ -456,50 +298,18 @@ namespace dbr
 			{"bsl", [](std::istream& in) { return threeArg(in, Instruction::Type::Bsl); }},
 			{"bsr", [](std::istream& in) { return threeArg(in, Instruction::Type::Bsr); }},
 
+			/* conditional branching */
+			{"jmpt", [](std::istream& in) { return twoArg(in, Instruction::Type::JmpT); }},
+			{"jmpf", [](std::istream& in) { return twoArg(in, Instruction::Type::JmpF); }},
+
+			{"rjmpt", [](std::istream& in) { return twoArg(in, Instruction::Type::RJmpT); }},
+			{"rjmpf", [](std::istream& in) { return twoArg(in, Instruction::Type::RJmpF); }},
+
 			/* branching */
-			{"jmpt", [](std::istream& in) { return oneArgX(in, Instruction::Type::JmpT); }},
-			{"jmpf", [](std::istream& in) { return oneArgX(in, Instruction::Type::JmpF); }},
-
-			/* jumps */
-			{"call", [](std::istream& in)
-						{
-							std::string numArgsStr;
-							std::string funcRegStr;
-
-							in >> numArgsStr >> funcRegStr;
-
-							Int numArgs = 0;
-							if(!strToInt(numArgsStr, numArgs))
-								throw std::runtime_error("Invalid argument #0 to call (must be positive int)");
-
-							auto funcReg = toRegister(funcRegStr);
-
-							return Instruction(Instruction::Type::Call, static_cast<std::uint8_t>(numArgs), funcReg, 0);
-						}
-			},
+			{"call", [](std::istream& in) { return threeArg(in, Instruction::Type::Call); }},
 			{"ret", [](std::istream& in) { return twoArg(in, Instruction::Type::Ret); }},
-			{"jump", [](std::istream& in)
-						{
-							// 24 bit maxes/mins
-							constexpr auto maxUnsigned = 0xffffff;
-							constexpr auto maxSigned = maxUnsigned / 2;
-							constexpr auto minSigned = maxSigned - maxUnsigned;
-
-							std::string jumpOffStr;
-
-							in >> jumpOffStr;
-
-							Int jumpOff;
-							if(!strToInt(jumpOffStr, jumpOff))
-								throw std::runtime_error("Invalid argument to jump (must be an int)");
-
-							// check bounds
-							if(jumpOff < minSigned || jumpOff > maxSigned)
-								throw std::runtime_error("Invalid argument to jump (Out of bounds! Must fit in (signed) 24 bits)");
-
-							return Instruction(Instruction::Type::Jump, static_cast<std::uint32_t>(jumpOff));
-						}
-			},
+			{"jmp", [](std::istream& in) { return oneArgX(in, Instruction::Type::Jmp); }},
+			{"rjmp", [](std::istream& in) { return oneArgX(in, Instruction::Type::RJmp); }},
 
 			/* misc */
 			{"nop", [](std::istream& in) { return Instruction(Instruction::Type::Nop, 0); }},

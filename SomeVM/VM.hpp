@@ -5,63 +5,45 @@
 #include <iostream>
 
 #include "StackFrame.hpp"
+#include "Program.hpp"
 
 namespace dbr
 {
 	namespace svm
 	{
-		namespace
-		{
-			constexpr std::size_t strLen(const char* str)
-			{
-				return str[0] != 0 ? strLen(str + 1) + 1 : 0;
-			}
-		}
-
-		// number of returns, StackFrame, number of arguments
-		struct Function
-		{
-			std::size_t numReturns;
-			std::size_t numArgs;
-			StackFrame frame;
-
-			Function() = default;
-			Function(std::size_t nrets, std::size_t nargs, StackFrame frame)
-				: numReturns(nrets),
-				numArgs(nargs),
-				frame(frame)
-			{}
-		};
-
-		struct Program
-		{
-			Constants constants;
-			std::vector<Function> functions;
-		};
-
 		class VM
 		{
 		public:
-			VM(std::istream& in, std::ostream& out);
+			VM(std::istream& in, std::ostream& out, std::size_t initialRegistrySize = 256);
 			~VM() = default;
 
-			static Program loadBinary(const std::string& file);
-			static void writeBinary(const Program& program, const std::string& file);
+			void load(const Program& program);
 
-			void run(const Program& program);
-
-			void repl();
+			void run();
 
 			std::size_t callStackSize() const;
+			std::size_t registrySize() const;
 
-			static constexpr const char* BINARY_ID = ".svm";
+			// implicit write - writes 'val' to the first unused register
+			// if the registry is full, resizes it
+			void write(Value val);
+
+			// explicit write - writes 'val' to the provided register number 'idx'
+			void write(std::size_t idx, Value val);
+
+			Value read(std::size_t idx) const;
 
 		private:
-			void interpret(const Program& program, StackFrame& currFrame, Bytecode::const_iterator& currInstr);
+			void interpret();
 
 			std::stack<StackFrame> callStack;
 
-			std::vector<Value> returns;
+			Registry registry;
+			Registry::iterator nextFree;
+
+			Registry constants;
+
+			std::vector<Function> functions;
 
 			std::istream& in;
 			std::ostream& out;

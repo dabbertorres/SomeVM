@@ -81,16 +81,20 @@ namespace dbr
 				Bsl,		// "bitwise shift left" 1: write-to, 2: registry index to shift, 3: registry index amount to shift by
 				Bsr,		// "bitwise shift right" 1: write-to, 2: registry index to shift, 3: registry index amount to shift by
 
-				/* conditions */
-				JmpT,			// 1: registry index, 2: Label to jump to
-				JmpF,			// 1: registry index, 2: Label to jump to
-				// next instruction is a jump, executed if argument is false (the "else")
-				// if argument is true, jump is skipped (the "then"). If an "else" exists, the end of the "then" will have a jump
+				/* conditional branching */
+				// absolute jumps (relative to current stack frame)
+				JmpT,			// 1: registry index, 2x: instruction index
+				JmpF,			// 1: registry index, 2x: instruction index
+
+				// relative jumps (relative to current instruction)
+				RJmpT,			// 1: registry index, 2xs: instruction offset
+				RJmpF,			// 1: registry index, 2xs: instruction offset
 
 				/* branching */
-				Call,		// 1: number of arguments to call with (from $0), 2x: function index
-				Ret,		// "return" 1: starting registry index to return values from, 2x: ending registry index to return values from. If 2x is greater than 255, nothing is returned
-				Jump,		// 1x: instruction index (can only jump within current stack frame)
+				Call,		// 1: number of arguments to call with, 2: registry index of start of arguments, 3: function index
+				Ret,		// "return" 1: number of returns, 2: registry index of start of return values
+				Jmp,		// 1x: instruction index (relative to current stack frame)
+				RJmp,		// 1xs: instruction offset (relative to current instruction)
 
 				/* misc */
 				Nop,		// "No operation". Any arguments are ignored
@@ -104,12 +108,15 @@ namespace dbr
 			Instruction(Type t, std::uint8_t, std::uint8_t, std::uint8_t);
 
 			Type type() const;
+
 			std::uint8_t arg1() const;
 			std::uint32_t arg1x() const;
-			// signed
-			std::int32_t arg1xs() const;
+			std::int32_t arg1xs() const;	// signed
+
 			std::uint8_t arg2() const;
 			std::uint16_t arg2x() const;
+			std::int16_t arg2xs() const;	// signed
+
 			std::uint8_t arg3() const;
 
 		private:
