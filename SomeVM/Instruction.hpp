@@ -9,12 +9,11 @@ namespace dbr
 	namespace svm
 	{
 		/*
-			An instruction is encoded in 4 bytes.
+			An instruction is encoded in 8 bytes.
 
 			byte 0:	instruction type (may be shrunk in the future. Not even coming close to using the whole byte)
-			byte 1: arg 1 - usually the registry write-to index
-			byte 2: arg 2
-			byte 3: arg 3
+			
+			The rest of the bytes are the arguments, of which size and count depend on the argument
 
 			bytes 1, 2, & 3 can be used as "arg 1x", returning a uint (32 bits), with a max of 24 bits being used
 
@@ -82,19 +81,31 @@ namespace dbr
 				Bsr,		// "bitwise shift right" 1: write-to, 2: registry index to shift, 3: registry index amount to shift by
 
 				/* conditional branching */
-				// absolute jumps (relative to current stack frame)
+				// absolute jumps (relative to current call frame)
 				JmpT,			// 1: registry index, 2x: instruction index
 				JmpF,			// 1: registry index, 2x: instruction index
+				
+				// constant index versions
+				JmpTC,
+				JmpFC,
 
 				// relative jumps (relative to current instruction)
 				RJmpT,			// 1: registry index, 2xs: instruction offset
 				RJmpF,			// 1: registry index, 2xs: instruction offset
+				
+				// constant index versions
+				RJmpTC,
+				RJmpFC,
 
 				/* branching */
 				Call,		// 1: number of arguments to call with, 2: registry index of start of arguments, 3: function index
 				Ret,		// "return" 1: number of returns, 2: registry index of start of return values
 				Jmp,		// 1x: instruction index (relative to current stack frame)
 				RJmp,		// 1xs: instruction offset (relative to current instruction)
+				
+				// constant index versions
+				JmpC,
+				RJmpC,
 
 				/* misc */
 				Nop,		// "No operation". Any arguments are ignored
@@ -102,25 +113,26 @@ namespace dbr
 			};
 
 			Instruction();
-			Instruction(std::uint32_t val);
-			Instruction(Type t, std::uint32_t);
-			Instruction(Type t, std::uint8_t, std::uint16_t);
-			Instruction(Type t, std::uint8_t, std::uint8_t, std::uint8_t);
+			Instruction(std::uint64_t val);
+			Instruction(Type t, std::uint64_t);
+			Instruction(Type t, std::uint32_t, std::uint32_t);
+			Instruction(Type t, std::uint16_t, std::uint16_t, std::uint16_t);
 
 			Type type() const;
 
-			std::uint8_t arg1() const;
-			std::uint32_t arg1x() const;
-			std::int32_t arg1xs() const;	// signed
+			// arg<index>_<size bits>
+			// where index is left to right
+			std::uint64_t arg1_56() const;
 
-			std::uint8_t arg2() const;
-			std::uint16_t arg2x() const;
-			std::int16_t arg2xs() const;	// signed
+			std::uint32_t arg1_24() const;
+			std::uint32_t arg2_32() const;
 
-			std::uint8_t arg3() const;
+			std::uint16_t arg1_16() const;
+			std::uint16_t arg2_16() const;
+			std::uint16_t arg3_16() const;
 
 		private:
-			std::uint32_t value;
+			std::uint64_t value;
 		};
 
 		using Bytecode = std::vector<Instruction>;

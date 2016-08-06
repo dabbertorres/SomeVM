@@ -31,7 +31,7 @@ namespace dbr
 			{
 				std::size_t idx = 0;
 
-				while((idx = str.find_first_not_of("0123456789", idx)) != std::string::npos)
+				while((idx = str.find_first_not_of("0123456789", idx + 1)) != std::string::npos)
 				{
 					if(idx == 0 && (str[0] == '+' || str[0] == '-'))
 						continue;

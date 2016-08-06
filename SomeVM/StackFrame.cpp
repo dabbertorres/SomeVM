@@ -28,11 +28,7 @@ namespace dbr
 
 		Bytecode::const_iterator StackFrame::next()
 		{
-			// if we haven't reached the end, increment before returning
-			if(currentInstruction != function.end())
-				return currentInstruction++;
-			else
-				return function.end();
+			return currentInstruction++;
 		}
 
 		bool StackFrame::complete() const

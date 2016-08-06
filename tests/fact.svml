@@ -1,40 +1,25 @@
-# value to compute factorial of
-const 25
-
-# once we reach 1, we're done
-const 1
-
-# continue jump index
-const 5
-
-# finished jump index
-const 11
-
 # register 0 is the counter
 # register 1 is the factorial
 # register 2 stores the test's result
 # register 3 is the counter bound/subtract amount
-# register 4 is our continue the for loop jump index
-# register 5 is our finished jump index
-loadc $0 $0
-loadc $1 $0
-loadc $3 $1
-loadc $4 $2
-loadc $5 $3
+load $0 4
+load $1 4
+load $3 1
 
 # for loop
 
 # test
 gt $2 $0 $3
 
+print $0
+
 # if
-if $2
-jump $5
+rjmpf $2 3
 
 # then
 sub $0 $0 $3
 mult $1 $1 $0
-jump $4
+rjmp -6
 
 # else
 print $1	# print result

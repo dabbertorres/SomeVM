@@ -20,7 +20,6 @@ namespace
 		return typeMap[static_cast<std::uint8_t>(type)];
 	}
 
-
 	static std::runtime_error errorBuilder(Type asked, Type is)
 	{
 		std::ostringstream oss;
@@ -45,7 +44,7 @@ namespace dbr
 		}
 
 		Value::Value()
-			: value(nullptr),
+			: value(0),
 			typeVal(Type::Nil)
 		{}
 
@@ -67,7 +66,7 @@ namespace dbr
 			set(f);
 		}
 
-		Value::Value(const String& str)
+		Value::Value(String str)
 			: Value()
 		{
 			set(str);
@@ -80,149 +79,93 @@ namespace dbr
 		}
 
 		Value::Value(Value&& other)
-			: Value()
+			: value(other.value),
+			typeVal(other.typeVal)
 		{
-			*this = other;
+			*this = std::move(other);
 		}
 
 		Value& Value::operator=(const Value& other)
 		{
-			clean();
-
 			switch(other.typeVal)
 			{
 				case Type::Nil:
+					set(nullptr);
 					break;
 
 				case Type::Bool:
-					value = new Bool(*static_cast<Bool*>(other.value));
+					set(reinterpret_cast<Bool>(other.value));
 					break;
 
 				case Type::Int:
-					value = new Int(*static_cast<Int*>(other.value));
+					set(reinterpret_cast<Int>(other.value));
+					break;
 
 				case Type::Float:
-					value = new Float(*static_cast<Float*>(other.value));
+					set(*reinterpret_cast<const Float*>(&other.value));
 					break;
 
 				case Type::String:
-					value = new String(*static_cast<String*>(other.value));
+					set(*static_cast<String*>(other.value));
 					break;
 			}
-
-			typeVal = other.typeVal;
-
+			
 			return *this;
 		}
 
 		Value& Value::operator=(Value&& other)
 		{
-			clean();
-
 			value = other.value;
-
 			typeVal = other.typeVal;
+
+			other.value = 0;
+			other.typeVal = Type::Nil;
 
 			return *this;
 		}
 
 		Value::~Value()
 		{
-			clean();
-		}
-
-		std::size_t Value::sizeOf() const
-		{
-			switch(typeVal)
+			if(value)
 			{
-				case Type::Nil:
-					return 1;
-
-				case Type::Bool:
-					return sizeof(Bool);
-
-				case Type::Int:
-					return sizeof(Int);
-
-				case Type::Float:
-					return sizeof(Float);
-
-				case Type::String:
-					return value ? static_cast<String*>(value)->size() : 0;
+				checkString();
+				value = 0;
 			}
-
-			return 0;
 		}
 
 		void Value::set(Nil)
 		{
-			clean();
-
+			checkString();
 			typeVal = Type::Nil;
 		}
 
 		void Value::set(Bool b)
 		{
-			if(typeVal != Type::Bool)
-			{
-				clean();
-
-				value = new Bool(b);
-
-				typeVal = Type::Bool;
-			}
-			else
-			{
-				*static_cast<Bool*>(value) = b;
-			}
+			checkString();
+			reinterpret_cast<Bool&>(value) = b;
+			typeVal = Type::Bool;
 		}
 
 		void Value::set(Int i)
 		{
-			if(typeVal != Type::Int)
-			{
-				clean();
-
-				value = new Int(i);
-
-				typeVal = Type::Int;
-			}
-			else
-			{
-				*static_cast<Int*>(value) = i;
-			}
+			checkString();
+			reinterpret_cast<Int&>(value) = i;
+			typeVal = Type::Int;
 		}
 
 		void Value::set(Float f)
 		{
-			if(typeVal != Type::Float)
-			{
-				clean();
-
-				value = new Float(f);
-
-				typeVal = Type::Float;
-			}
-			else
-			{
-				*static_cast<Float*>(value) = f;
-			}
+			checkString();
+			reinterpret_cast<Float&>(value) = f;
+			typeVal = Type::Float;
 		}
 
-		void Value::set(const String& str)
+		void Value::set(String str)
 		{
-			if(typeVal != Type::String)
-			{
-				clean();
-
-				value = new String(str);
-
-				typeVal = Type::String;
-			}
-			else
-			{
-				*static_cast<String*>(value) = str;
-			}
+			checkString();
+			// store a pointer to a String
+			value = new String(str);
+			typeVal = Type::String;
 		}
 
 		Value::operator Nil() const
@@ -240,10 +183,7 @@ namespace dbr
 			if(typeVal != Type::Bool)
 				throw errorBuilder(Type::Bool, typeVal);
 #endif
-			if(value)
-				return *static_cast<Bool*>(value);
-			else
-				return false;
+			return reinterpret_cast<Bool>(value);
 		}
 
 		Value::operator Int() const
@@ -252,10 +192,7 @@ namespace dbr
 			if(typeVal != Type::Int)
 				throw errorBuilder(Type::Int, typeVal);
 #endif
-			if(value)
-				return *static_cast<Int*>(value);
-			else
-				return 0;
+			return reinterpret_cast<Int>(value);
 		}
 
 		Value::operator Float() const
@@ -264,10 +201,7 @@ namespace dbr
 			if(typeVal != Type::Float)
 				throw errorBuilder(Type::Float, typeVal);
 #endif
-			if(value)
-				return *static_cast<Float*>(value);
-			else
-				return 0;
+			return *reinterpret_cast<const Float*>(&value);
 		}
 
 		Value::operator String() const
@@ -276,28 +210,43 @@ namespace dbr
 			if(typeVal != Type::String)
 				throw errorBuilder(Type::String, typeVal);
 #endif
-			if(value)
-				return *static_cast<String*>(value);
-			else
-				return "";
+			return *static_cast<String*>(value);
 		}
 
 		Value::operator Bytes() const
 		{
-			Bytes ret(sizeOf());
-
-			if(value)
+			switch(typeVal)
 			{
-				auto byteBeg = static_cast<std::uint8_t*>(value);
+				case Type::Nil:
+					return{};
 
-				std::copy(byteBeg, byteBeg + ret.size(), ret.begin());
-			}
-			else
-			{
-				std::fill(ret.begin(), ret.end(), 0);
-			}
+				case Type::Bool:
+					return{static_cast<std::uint8_t>(reinterpret_cast<Bool>(value))};
 
-			return ret;
+				case Type::Int:
+				case Type::Float:
+				{
+					Bytes ret(MEM_SIZE);
+
+					std::memcpy(ret.data(), &value, MEM_SIZE);
+
+					return ret;
+				}
+
+				case Type::String:
+				{
+					String* str = static_cast<String*>(value);
+
+					Bytes ret(str->size());
+
+					std::memcpy(ret.data(), str->data(), str->size());
+
+					return ret;
+				}
+
+				default:
+					return{};
+			}
 		}
 
 		Value::Type Value::type() const
@@ -310,13 +259,10 @@ namespace dbr
 			return isArray(typeVal);
 		}
 
-		void Value::clean()
+		void Value::checkString()
 		{
-			if(value)
-			{
-				delete value;
-				value = nullptr;
-			}
+			if(typeVal == Type::String)
+				delete static_cast<String*>(value);
 		}
 	}
 }

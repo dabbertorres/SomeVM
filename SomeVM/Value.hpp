@@ -29,13 +29,15 @@ namespace dbr
 				String = 4,
 			};
 
+			static constexpr std::uint64_t MEM_SIZE = sizeof(void*);
+
 			static bool isArray(Type type);
 
 			Value();
 			Value(Bool b);
 			Value(Int i);
 			Value(Float f);
-			Value(const String& str);
+			Value(String str);
 
 			Value(const Value& other);
 			Value(Value&& other);
@@ -45,13 +47,11 @@ namespace dbr
 
 			~Value();
 
-			std::size_t sizeOf() const;
-
 			void set(Nil);
 			void set(Bool b);
 			void set(Int i);
 			void set(Float f);
-			void set(const String& str);
+			void set(String str);
 
 			operator Nil() const;
 			operator Bool() const;
@@ -65,7 +65,7 @@ namespace dbr
 			bool isArray() const;
 
 		private:
-			void clean();
+			void checkString();
 
 			void* value;
 			Type typeVal;

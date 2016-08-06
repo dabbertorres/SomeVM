@@ -10,9 +10,31 @@ namespace dbr
 	{
 		namespace util
 		{
+			namespace priv
+			{
+				template<typename T, typename T1, typename... Ts>
+				constexpr std::size_t maxSize(std::size_t max)
+				{
+					return maxSize<T1, Ts...>(max >= sizeof(T) ? max : sizeof(T));
+				}
+
+				template<typename T>
+				constexpr std::size_t maxSize(std::size_t max)
+				{
+					return max >= sizeof(T) ? max : sizeof(T);
+				}
+
+			}
+
 			constexpr std::size_t strlen(const char* str)
 			{
 				return str[0] != 0 ? strlen(str + 1) + 1 : 0;
+			}
+
+			template<typename... Ts>
+			constexpr std::size_t maxSize()
+			{
+				return priv::maxSize<Ts...>(0);
 			}
 
 			void toLower(std::string& str);

@@ -16,7 +16,9 @@ int main(int argc, char** argv) try
 		case 2:
 		{
 			svm::Program program;
-			program.load(argv[1]);
+			auto bytes = program.load(argv[1]);
+
+			std::cout << "Loaded " << bytes << " bytes.\n";
 
 			vm.load(program);
 			vm.run();
@@ -29,7 +31,9 @@ int main(int argc, char** argv) try
 		{
 			std::ifstream fin(argv[1]);
 			auto program = svm::Assembler::run(fin, std::cout);
-			program.write(argv[2]);
+			auto bytes = program.write(argv[2]);
+
+			std::cout << "Wrote " << bytes << " bytes.\n";
 
 			break;
 		}
@@ -42,6 +46,9 @@ int main(int argc, char** argv) try
 
 			break;
 	}
+
+	std::cout << "Press <Enter> to continue...";
+	std::cin.get();
 
 	return 0;
 }

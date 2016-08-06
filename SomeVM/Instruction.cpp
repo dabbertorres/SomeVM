@@ -8,66 +8,74 @@ namespace dbr
 			: Instruction(Type::Nop, 0)
 		{}
 
-		Instruction::Instruction(std::uint32_t val)
+		Instruction::Instruction(std::uint64_t val)
 			: value(val)
 		{}
 
-		Instruction::Instruction(Type t, std::uint32_t oneX)
+		Instruction::Instruction(Type t, std::uint64_t one)
 			: value(0)
 		{
-			value = (static_cast<std::uint8_t>(t) << 24 & 0xFF000000) | (oneX & 0xFFFFFF);
+			value = static_cast<std::uint8_t>(t);
+			value <<= 56;
+
+			value |= one & 0x00ffffffffffffff;
 		}
 
-		Instruction::Instruction(Type t, std::uint8_t one, std::uint16_t twoX)
+		Instruction::Instruction(Type t, std::uint32_t one, std::uint32_t two)
 			: value(0)
 		{
-			value = (static_cast<std::uint8_t>(t) << 24 & 0xFF000000) | (one << 16 & 0xFF0000) | twoX;
+			value = static_cast<std::uint8_t>(t);
+			value <<= 56;
+
+			value |= static_cast<std::uint64_t>(one & 0x00ffffff) << 32;
+
+			value |= two;
 		}
 
-		Instruction::Instruction(Type t, std::uint8_t one, std::uint8_t two, std::uint8_t three)
+		Instruction::Instruction(Type t, std::uint16_t one, std::uint16_t two, std::uint16_t three)
 			: value(0)
 		{
-			value = (static_cast<std::uint8_t>(t) << 24 & 0xFF000000) | (one << 16 & 0xFF0000) | (two << 8 & 0xFF00) | three;
+			value = static_cast<std::uint8_t>(t);
+			value <<= 56;
+
+			value |= static_cast<std::uint64_t>(one) << 32;
+			value |= static_cast<std::uint64_t>(two) << 16;
+			value |= three;
 		}
 
 		Instruction::Type Instruction::type() const
 		{
-			return static_cast<Type>(value >> 24 & 0xFF);
+			return static_cast<Type>(value >> 56 & 0xff);
 		}
 
-		std::uint8_t Instruction::arg1() const
+		std::uint64_t Instruction::arg1_56() const
 		{
-			return static_cast<std::uint8_t>(value >> 16 & 0xFF);
+			return value & 0x00ffffffffffffff;
 		}
 
-		std::uint32_t Instruction::arg1x() const
+		std::uint32_t Instruction::arg1_24() const
 		{
-			return static_cast<std::uint32_t>(value & 0xFFFFFF);
+			return static_cast<std::uint32_t>(value >> 32 & 0x00ffffff);
 		}
 
-		std::int32_t Instruction::arg1xs() const
+		std::uint32_t Instruction::arg2_32() const
 		{
-			return value & 0xFFFFFF;
+			return static_cast<std::uint32_t>(value & 0xffffffff);
 		}
 
-		std::uint8_t Instruction::arg2() const
+		std::uint16_t Instruction::arg1_16() const
 		{
-			return static_cast<std::uint8_t>(value >> 8 & 0xFF);
+			return static_cast<std::uint16_t>(value >> 32 & 0xffff);
 		}
 
-		std::uint16_t Instruction::arg2x() const
+		std::uint16_t Instruction::arg2_16() const
 		{
-			return static_cast<std::uint16_t>(value & 0xFFFF);
+			return static_cast<std::uint16_t>(value >> 16 & 0xffff);
 		}
 
-		std::int16_t Instruction::arg2xs() const
+		std::uint16_t Instruction::arg3_16() const
 		{
-			return static_cast<std::int16_t>(value & 0xFFFF);
-		}
-
-		std::uint8_t Instruction::arg3() const
-		{
-			return static_cast<std::uint8_t>(value & 0xFF);
+			return static_cast<std::uint16_t>(value & 0xffff);
 		}
 	}
 }

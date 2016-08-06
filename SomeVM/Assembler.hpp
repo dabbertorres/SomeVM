@@ -26,10 +26,10 @@ namespace dbr
 			static void run(std::istream& in, std::ostream& out, Program& program);
 
 			static bool isRegister(const std::string& str);
-			static std::uint8_t toRegister(const std::string& regStr);
+			static std::uint16_t toRegister(const std::string& regStr);
 
 		private:
-			static const std::unordered_map<std::string, dbr::svm::Instruction(*)(std::istream&)> commands;
+			static const std::unordered_map<std::string, dbr::svm::Instruction(*)(std::istream&, Program&)> commands;
 		};
 	}
 }

@@ -10,12 +10,14 @@ namespace dbr
 {
 	namespace svm
 	{
-		void Program::load(const std::string& file)
+		std::size_t Program::load(const std::string& file)
 		{
 			std::ifstream fin(file, std::ios::binary);
 
 			if(!fin)
 				throw std::runtime_error("Unable to open input file");
+
+			auto startPos = fin.tellg();
 
 			std::string identifier(4, 0);
 			fin.read(&identifier[0], util::strlen(BINARY_ID));
@@ -112,14 +114,18 @@ namespace dbr
 
 				functions.emplace_back(nrets, nargs, code);
 			}
+
+			return fin.tellg() - startPos;
 		}
 
-		void Program::write(const std::string& file)
+		std::size_t Program::write(const std::string& file)
 		{
 			std::ofstream fout(file, std::ios::binary);
 
 			if(!fout)
 				throw std::runtime_error("Unable to open output file");
+
+			auto startPos = fout.tellp();
 
 			// file type identifier
 			fout.write(BINARY_ID, util::strlen(BINARY_ID));
@@ -171,6 +177,8 @@ namespace dbr
 				fout.write(reinterpret_cast<const char*>(&numInstrs), sizeof(numInstrs));
 				fout.write(reinterpret_cast<const char*>(code.data()), numInstrs * sizeof(Instruction));
 			}
+
+			return fout.tellp() - startPos;
 		}
 	}
 }

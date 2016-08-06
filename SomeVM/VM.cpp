@@ -80,17 +80,17 @@ namespace dbr
 				/* memory ops */
 				case Instruction::Type::Load:
 				{
-					auto dest = instr->arg1();
-					auto src = instr->arg2();
+					auto dest = instr->arg1_24();
+					auto src = instr->arg2_32();
 					registry.at(dest) = registry.at(src);
 					break;
 				}
 
 				case Instruction::Type::LoadC:
 				{
-					auto dest = instr->arg1();
-					auto src = instr->arg2x();
-					registry.at(dest) = constants[src];
+					auto dest = instr->arg1_24();
+					auto src = instr->arg2_32();
+					registry.at(dest) = constants.at(src);
 					break;
 				}
 
@@ -98,116 +98,116 @@ namespace dbr
 				// integer
 				case Instruction::Type::Add:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one + two};
+					registry.at(instr->arg1_16()) = {one + two};
 					break;
 				}
 
 				case Instruction::Type::Sub:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
-
-					registry.at(instr->arg1()) = {one - two};
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
+					
+					registry.at(instr->arg1_16()) = {one - two};
 					break;
 				}
 
 				case Instruction::Type::Mult:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one * two};
+					registry.at(instr->arg1_16()) = {one * two};
 					break;
 				}
 
 				case Instruction::Type::Div:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one / two};
+					registry.at(instr->arg1_16()) = {one / two};
 					break;
 				}
 
 				case Instruction::Type::Mod:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one % two};
+					registry.at(instr->arg1_16()) = {one % two};
 					break;
 				}
 
 				case Instruction::Type::Neg:
 				{
-					Int one = registry.at(instr->arg2());
+					Int one = registry.at(instr->arg2_16());
 
-					registry.at(instr->arg1()) = {-one};
+					registry.at(instr->arg1_16()) = {-one};
 					break;
 				}
 
 				// Float
 				case Instruction::Type::FAdd:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one + two};
+					registry.at(instr->arg1_16()) = {one + two};
 					break;
 				}
 
 				case Instruction::Type::FSub:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one - two};
+					registry.at(instr->arg1_16()) = {one - two};
 					break;
 				}
 
 				case Instruction::Type::FMult:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one * two};
+					registry.at(instr->arg1_16()) = {one * two};
 					break;
 				}
 
 				case Instruction::Type::FDiv:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one / two};
+					registry.at(instr->arg1_16()) = {one / two};
 					break;
 				}
 
 				case Instruction::Type::FNeg:
 				{
-					Float one = registry.at(instr->arg2());
+					Float one = registry.at(instr->arg2_16());
 
-					registry.at(instr->arg1()) = {-one};
+					registry.at(instr->arg1_16()) = {-one};
 					break;
 				}
 
 				// misc
 				case Instruction::Type::CastI:
 				{
-					Float one = registry.at(instr->arg2());
+					Float one = registry.at(instr->arg2_32());
 
-					registry.at(instr->arg1()) = {static_cast<Int>(one)};
+					registry.at(instr->arg1_24()) = {static_cast<Int>(one)};
 					break;
 				}
 
 				case Instruction::Type::CastF:
 				{
-					Int one = registry.at(instr->arg2());
+					Int one = registry.at(instr->arg2_32());
 
-					registry.at(instr->arg1()) = {static_cast<Float>(one)};
+					registry.at(instr->arg1_24()) = {static_cast<Float>(one)};
 					break;
 				}
 
@@ -215,200 +215,200 @@ namespace dbr
 				// integer
 				case Instruction::Type::Lt:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one < two};
+					registry.at(instr->arg1_16()) = {one < two};
 					break;
 				}
 
 				case Instruction::Type::LtEq:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one <= two};
+					registry.at(instr->arg1_16()) = {one <= two};
 					break;
 				}
 
 				case Instruction::Type::Gt:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one > two};
+					registry.at(instr->arg1_16()) = {one > two};
 					break;
 				}
 
 				case Instruction::Type::GtEq:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one >= two};
+					registry.at(instr->arg1_16()) = {one >= two};
 					break;
 				}
 
 				case Instruction::Type::Eq:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one == two};
+					registry.at(instr->arg1_16()) = {one == two};
 					break;
 				}
 
 				case Instruction::Type::Neq:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one != two};
+					registry.at(instr->arg1_16()) = {one != two};
 					break;
 				}
 
 				// Float
 				case Instruction::Type::FLt:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one < two};
+					registry.at(instr->arg1_16()) = {one < two};
 					break;
 				}
 
 				case Instruction::Type::FLtEq:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one <= two};
+					registry.at(instr->arg1_16()) = {one <= two};
 					break;
 				}
 
 				case Instruction::Type::FGt:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one > two};
+					registry.at(instr->arg1_16()) = {one > two};
 					break;
 				}
 
 				case Instruction::Type::FGtEq:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one >= two};
+					registry.at(instr->arg1_16()) = {one >= two};
 					break;
 				}
 
 				case Instruction::Type::FEq:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one == two};
+					registry.at(instr->arg1_16()) = {one == two};
 					break;
 				}
 
 				case Instruction::Type::FNeq:
 				{
-					Float one = registry.at(instr->arg2());
-					Float two = registry.at(instr->arg3());
+					Float one = registry.at(instr->arg2_16());
+					Float two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one != two};
+					registry.at(instr->arg1_16()) = {one != two};
 					break;
 				}
 
 				/* logical ops */
 				case Instruction::Type::Not:
 				{
-					Bool one = registry.at(instr->arg2());
+					Bool one = registry.at(instr->arg2_32());
 
-					registry.at(instr->arg1()) = {!one};
+					registry.at(instr->arg1_24()) = {!one};
 					break;
 				}
 
 				case Instruction::Type::And:
 				{
-					Bool one = registry.at(instr->arg2());
-					Bool two = registry.at(instr->arg3());
+					Bool one = registry.at(instr->arg2_16());
+					Bool two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one && two};
+					registry.at(instr->arg1_16()) = {one && two};
 					break;
 				}
 
 				case Instruction::Type::Or:
 				{
-					Bool one = registry.at(instr->arg2());
-					Bool two = registry.at(instr->arg3());
+					Bool one = registry.at(instr->arg2_16());
+					Bool two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one || two};
+					registry.at(instr->arg1_16()) = {one || two};
 					break;
 				}
 
 				case Instruction::Type::Xor:
 				{
-					Bool one = registry.at(instr->arg2());
-					Bool two = registry.at(instr->arg3());
+					Bool one = registry.at(instr->arg2_16());
+					Bool two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one != two};
+					registry.at(instr->arg1_16()) = {one != two};
 					break;
 				}
 
 				/* bitwise ops */
 				case Instruction::Type::BAnd:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one & two};
+					registry.at(instr->arg1_16()) = {one & two};
 					break;
 				}
 
 				case Instruction::Type::BOr:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one | two};
+					registry.at(instr->arg1_16()) = {one | two};
 					break;
 				}
 
 				case Instruction::Type::BXor:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one ^ two};
+					registry.at(instr->arg1_16()) = {one ^ two};
 					break;
 				}
 
 				case Instruction::Type::Bsl:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one << two};
+					registry.at(instr->arg1_16()) = {one << two};
 					break;
 				}
 
 				case Instruction::Type::Bsr:
 				{
-					Int one = registry.at(instr->arg2());
-					Int two = registry.at(instr->arg3());
+					Int one = registry.at(instr->arg2_16());
+					Int two = registry.at(instr->arg3_16());
 
-					registry.at(instr->arg1()) = {one >> two};
+					registry.at(instr->arg1_16()) = {one >> two};
 					break;
 				}
 
 				/* conditional branching */
 				case Instruction::Type::JmpT:
 				{
-					Bool b = registry.at(instr->arg1());
-					Int idx = registry.at(instr->arg2x());
+					Bool b = registry.at(instr->arg1_24());
+					Int idx = registry.at(instr->arg2_32());
 
 					// if true, skip the next instruction (the jump to the "else")
 					if(b)
@@ -419,19 +419,44 @@ namespace dbr
 
 				case Instruction::Type::JmpF:
 				{
-					Bool b = registry.at(instr->arg1());
-					Int idx = registry.at(instr->arg2x());
+					Bool b = registry.at(instr->arg1_24());
+					Int idx = registry.at(instr->arg2_32());
 
-					// if true, skip the next instruction (the jump to the "else")
+					// if false, skip the next instruction (the jump to the "else")
 					if(!b)
 						frame.jump(idx);
 
 					break;
 				}
+
+				case Instruction::Type::JmpTC:
+				{
+					Bool b = registry.at(instr->arg1_24());
+					Int idx = constants.at(instr->arg2_32());
+
+					// if true, skip the next instruction (the jump to the "else")
+					if(b)
+						frame.jump(idx);
+
+					break;
+				}
+
+				case Instruction::Type::JmpFC:
+				{
+					Bool b = registry.at(instr->arg1_24());
+					Int idx = constants.at(instr->arg2_32());
+
+					// if false, skip the next instruction (the jump to the "else")
+					if(!b)
+						frame.jump(idx);
+
+					break;
+				}
+
 				case Instruction::Type::RJmpT:
 				{
-					Bool b = registry.at(instr->arg1());
-					Int off = registry.at(instr->arg2x());
+					Bool b = registry.at(instr->arg1_24());
+					Int off = registry.at(instr->arg2_32());
 
 					// if true, skip the next instruction (the jump to the "else")
 					if(b)
@@ -442,10 +467,34 @@ namespace dbr
 
 				case Instruction::Type::RJmpF:
 				{
-					Bool b = registry.at(instr->arg1());
-					Int off = registry.at(instr->arg2x());
+					Bool b = registry.at(instr->arg1_24());
+					Int off = registry.at(instr->arg2_32());
+
+					// if false, skip the next instruction (the jump to the "else")
+					if(!b)
+						frame.rjump(off);
+
+					break;
+				}
+
+				case Instruction::Type::RJmpTC:
+				{
+					Bool b = registry.at(instr->arg1_24());
+					Int off = constants.at(instr->arg2_32());
 
 					// if true, skip the next instruction (the jump to the "else")
+					if(b)
+						frame.rjump(off);
+
+					break;
+				}
+
+				case Instruction::Type::RJmpFC:
+				{
+					Bool b = registry.at(instr->arg1_24());
+					Int off = constants.at(instr->arg2_32());
+
+					// if false, skip the next instruction (the jump to the "else")
 					if(!b)
 						frame.rjump(off);
 
@@ -455,9 +504,9 @@ namespace dbr
 				/* branching */
 				case Instruction::Type::Call:
 				{
-					Int nargs = registry.at(instr->arg1());
-					Int argIdx = registry.at(instr->arg2());
-					Int funcIdx = registry.at(instr->arg3());
+					Int nargs = registry.at(instr->arg1_16());
+					Int argIdx = registry.at(instr->arg2_16());
+					Int funcIdx = registry.at(instr->arg3_16());
 
 					const Function& callee = functions[funcIdx];
 
@@ -470,8 +519,8 @@ namespace dbr
 
 				case Instruction::Type::Ret:
 				{
-					auto nrets = registry.at(instr->arg1());
-					auto retIdx = registry.at(instr->arg2());
+					auto nrets = registry.at(instr->arg1_24());
+					auto retIdx = registry.at(instr->arg2_32());
 
 					callStack.pop();
 					break;
@@ -479,14 +528,28 @@ namespace dbr
 
 				case Instruction::Type::Jmp:
 				{
-					Int off = registry.at(instr->arg1x());
-					frame.jump(off);
+					Int idx = registry.at(instr->arg1_56());
+					frame.jump(idx);
 					break;
 				}
 
 				case Instruction::Type::RJmp:
 				{
-					Int off = registry.at(instr->arg1xs());
+					Int off = registry.at(instr->arg1_56());
+					frame.rjump(off);
+					break;
+				}
+
+				case Instruction::Type::JmpC:
+				{
+					Int idx = constants.at(instr->arg1_56());
+					frame.jump(idx);
+					break;
+				}
+
+				case Instruction::Type::RJmpC:
+				{
+					Int off = constants.at(instr->arg1_56());
 					frame.rjump(off);
 					break;
 				}
@@ -498,7 +561,7 @@ namespace dbr
 
 				case Instruction::Type::Print:
 				{
-					auto& val = registry.at(instr->arg1());
+					auto& val = registry.at(instr->arg1_56());
 
 					switch(val.type())
 					{

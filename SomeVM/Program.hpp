@@ -17,8 +17,9 @@ namespace dbr
 			Registry constants;
 			std::vector<Function> functions;
 
-			void load(const std::string& file);
-			void write(const std::string& file);
+			// return the amount of bytes read/written
+			std::size_t load(const std::string& file);
+			std::size_t write(const std::string& file);
 
 			static constexpr const char* BINARY_ID = ".svm";
 			static constexpr std::uint32_t VERSION = 0;
