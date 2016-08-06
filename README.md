@@ -7,7 +7,7 @@ Has two modes:
   * REPL mode (though the Print part is manual!).
   * Run mode(?) (like reading from a file and just running it, etc)
 
-~~REPL mode is functional,~~ with a currently assembly-like sort of intermediate language (IL).
+~~REPL mode is functional,~~ with a currently assembly-like sort of intermediate language (IL).  
 (Apparently I removed REPL mode at some point...)
 example hello world:
 ```asm
