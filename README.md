@@ -8,7 +8,7 @@ Has two modes:
   * Run mode(?) (like reading from a file and just running it, etc)
 
 ~~REPL mode is functional,~~ with a currently assembly-like sort of intermediate language (IL).  
-(Apparently I removed REPL mode at some point...)
+(Apparently I removed REPL mode at some point...)  
 example hello world:
 ```asm
   > load $0 "hello, world"
