@@ -285,7 +285,7 @@ namespace dbr
 				throw std::runtime_error(msg);
 			}
 
-			return std::stoi(regStr.substr(1));
+			return static_cast<std::uint16_t>(std::stoi(regStr.substr(1)));
 		}
 
 		const std::unordered_map<std::string, Instruction(*)(std::istream&, Program&)> Assembler::commands =
@@ -359,7 +359,7 @@ namespace dbr
 			{"rjmp", [](std::istream& in, Program& prog) { return oneArgConst(in, Instruction::Type::RJmp, Instruction::Type::RJmpC, prog); }},
 
 			/* misc */
-			{"nop", [](std::istream& in, Program&) { return Instruction(Instruction::Type::Nop, 0); }},
+			{"nop", [](std::istream&, Program&) { return Instruction(Instruction::Type::Nop, 0); }},
 			{"print", [](std::istream& in, Program&) { return oneArg(in, Instruction::Type::Print); }},
 		};
 	}

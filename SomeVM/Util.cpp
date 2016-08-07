@@ -44,7 +44,7 @@ namespace dbr
 
 			bool isFloat(const std::string& str)
 			{
-				std::size_t idx = -1;
+				std::size_t idx = std::numeric_limits<std::size_t>::max();
 				bool hasDecimal = false;
 
 				while((idx = str.find_first_not_of("0123456789", idx + 1)) != std::string::npos)

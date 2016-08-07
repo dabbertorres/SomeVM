@@ -359,6 +359,14 @@ namespace dbr
 				}
 
 				/* bitwise ops */
+				case Instruction::Type::BNot:
+				{
+					Int value = registry.at(instr->arg2_32());
+
+					registry.at(instr->arg1_24()) = ~value;
+					break;
+				}
+
 				case Instruction::Type::BAnd:
 				{
 					Int one = registry.at(instr->arg2_16());
@@ -561,7 +569,7 @@ namespace dbr
 
 				case Instruction::Type::Print:
 				{
-					auto& val = registry.at(instr->arg1_56());
+					const auto& val = registry.at(instr->arg1_56());
 
 					switch(val.type())
 					{
@@ -582,7 +590,7 @@ namespace dbr
 							break;
 
 						case Value::Type::String:
-							out << static_cast<String>(val);
+							out << val.operator String();
 							break;
 					}
 

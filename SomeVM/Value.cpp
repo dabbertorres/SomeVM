@@ -94,7 +94,7 @@ namespace dbr
 					break;
 
 				case Type::Bool:
-					set(reinterpret_cast<Bool>(other.value));
+					set(reinterpret_cast<const Bool&>(other.value));
 					break;
 
 				case Type::Int:
@@ -183,7 +183,7 @@ namespace dbr
 			if(typeVal != Type::Bool)
 				throw errorBuilder(Type::Bool, typeVal);
 #endif
-			return reinterpret_cast<Bool>(value);
+			return reinterpret_cast<const Bool&>(value);
 		}
 
 		Value::operator Int() const
@@ -221,7 +221,7 @@ namespace dbr
 					return{};
 
 				case Type::Bool:
-					return{static_cast<std::uint8_t>(reinterpret_cast<Bool>(value))};
+					return{static_cast<std::uint8_t>(reinterpret_cast<const Bool&>(value))};
 
 				case Type::Int:
 				case Type::Float:
