@@ -45,6 +45,12 @@ namespace dbr
 				FDiv,		// "division" 1: write-to, 2: registry index, 3: registry index
 				FNeg,		// "negative" 1: write-to, 2: registry index
 
+				// SIMD (Single-Instruction Multiple-Data)
+				simdAdd,
+				simdSub,
+				simdMult,
+				simdDiv,
+
 				// misc
 				CastI,		// "cast to int" 1: write-to, 2: index
 				CastF,		// "cast to float" 1: write-to, 2: index

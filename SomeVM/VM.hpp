@@ -11,15 +11,23 @@ namespace dbr
 {
 	namespace svm
 	{
+		struct Breakpoint
+		{
+			std::size_t functionIndex;
+			std::size_t instructionIndex;
+		};
+
 		class VM
 		{
 		public:
-			VM(std::istream& in, std::ostream& out, std::size_t initialRegistrySize = 256);
+			VM(std::istream& inStream, std::ostream& outStream, std::size_t initialRegistrySize = 256);
 			~VM() = default;
 
 			void load(const Program& program);
 
 			void run();
+
+			void debug(const std::vector<Breakpoint>& breakpoints);
 
 			std::size_t callStackSize() const;
 			std::size_t registrySize() const;
@@ -33,8 +41,10 @@ namespace dbr
 
 			Value read(std::size_t idx) const;
 
+			void print(const Value& val) const;
+
 		private:
-			void interpret();
+			void interpret(Instruction instr, StackFrame& frame);
 
 			std::stack<StackFrame> callStack;
 
@@ -45,8 +55,8 @@ namespace dbr
 
 			std::vector<Function> functions;
 
-			std::istream& in;
-			std::ostream& out;
+			std::istream& inStream;
+			std::ostream& outStream;
 		};
 	}
 }
