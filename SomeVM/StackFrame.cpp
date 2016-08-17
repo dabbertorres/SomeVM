@@ -6,20 +6,23 @@ namespace dbr
 {
 	namespace svm
 	{
-		StackFrame::StackFrame(const Function& function, std::size_t argsIdx)
+		StackFrame::StackFrame(const Function& function, std::size_t functionIndex, std::size_t argsIdx)
 		:	function(function),
+			functionIndex(functionIndex),
 			argsIdx(argsIdx),
 			currentInstruction(function.begin())
 		{}
 
 		StackFrame::StackFrame(const StackFrame& other)
 		:	function(other.function),
+			functionIndex(other.functionIndex),
 			argsIdx(other.argsIdx),
 			currentInstruction(function.begin() + std::distance(other.function.begin(), other.currentInstruction))
 		{}
 
 		StackFrame::StackFrame(StackFrame&& other)
 		:	function(other.function),
+			functionIndex(other.functionIndex),
 			argsIdx(other.argsIdx),
 			currentInstruction(function.begin() + std::distance(other.function.begin(), other.currentInstruction))
 		{

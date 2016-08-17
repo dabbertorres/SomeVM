@@ -16,7 +16,7 @@ namespace dbr
 		class StackFrame
 		{
 		public:
-			StackFrame(const Function& function, std::size_t argsIdx);
+			StackFrame(const Function& function, std::size_t functionIndex, std::size_t argsIdx);
 
 			StackFrame(const StackFrame& other);
 			StackFrame(StackFrame&& other);
@@ -38,6 +38,7 @@ namespace dbr
 			std::size_t length() const;
 
 			const Function& function;
+			std::size_t functionIndex;
 
 		private:
 			std::size_t argsIdx;
