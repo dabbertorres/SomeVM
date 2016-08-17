@@ -133,6 +133,36 @@ namespace dbr
 			}
 		}
 
+		Value& Value::operator=(Nil)
+		{
+			set(nullptr);
+			return *this;
+		}
+
+		Value& Value::operator=(Bool b)
+		{
+			set(b);
+			return *this;
+		}
+
+		Value& Value::operator=(Int i)
+		{
+			set(i);
+			return *this;
+		}
+
+		Value& Value::operator=(Float f)
+		{
+			set(f);
+			return *this;
+		}
+
+		Value& Value::operator=(String str)
+		{
+			set(str);
+			return *this;
+		}
+
 		void Value::set(Nil)
 		{
 			checkString();

@@ -47,6 +47,12 @@ namespace dbr
 
 			~Value();
 
+			Value& operator=(Nil);
+			Value& operator=(Bool b);
+			Value& operator=(Int i);
+			Value& operator=(Float f);
+			Value& operator=(String str);
+
 			void set(Nil);
 			void set(Bool b);
 			void set(Int i);
