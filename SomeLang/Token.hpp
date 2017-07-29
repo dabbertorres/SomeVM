@@ -1,117 +1,54 @@
-#ifndef DBR_SVM_IL_TOKEN_HPP
-#define DBR_SVM_IL_TOKEN_HPP
+#pragma once
 
-#include <cstdint>
-#include <cstddef>
+#include <string>
+#include <iosfwd>
 
-namespace dbr
+namespace sl
 {
-	namespace sl
-	{
-		using byte = std::uint8_t;
+    struct Token
+    {
+        enum class Type
+        {
+            // literals
+            Number,
+            String,
+            Bool,
 
-		class Token
-		{
-			public:
-				enum class Type : std::size_t
-				{
-					// Primitive Values
-					ValueInteger,
-					ValueFloat,
-					ValueChar,
-					ValueString,
-					ValueBool,
+            // symbols
+            Semicolon,
+            Colon,
+            Comma,
+            ParenLeft,
+            ParenRight,
+            Newline,
+            Dollar,
 
-					// Type modifiers
-					TypePointer,
-					TypeFunction,
-					TypeArray,
+            // keywords
+            Func,
+            If,
+            Switch,
+            Case,
+            Else,
+            While,
 
-					// Memory Operations
-					MemoryAllocate,
-					MemoryDeallocate,
+            Identifier,
 
-					/* Operators */
+            End,
 
-					// arithmetic
-					OperatorAdd,
-					OperatorSub,
-					OperatorMult,
-					OperatorDiv,
-					OperatorMod,
+            Unknown,
+        };
 
-					// Bitwise
-					OperatorBitwiseAnd,
-					OperatorBitwiseOr,
-					OperatorBitwiseXor,
-					OperatorBitwiseNot,
+        std::string value;
+        Type type;
+        size_t line;
+        size_t position;
 
-					// Bitshift
-					OperatorBitshiftLeft,
-					OperatorBitshiftRight,
+        Token(size_t line, size_t position);
+        Token(std::string value, Type type, size_t line, size_t position);
 
-					// Relational
-					OperatorEqual,
-					OperatorNotEqual,
-					OperatorLesser,
-					OperatorGreater,
-					OperatorLesserEqual,
-					OperatorGreaterEqual,
+        bool valid() const;
+    };
 
-					// Logical
-					OperatorAnd,
-					OperatorOr,
-					OperatorXor,
-					OperatorNot,
-
-					// Assignment
-					OperatorAssign,
-					OperatorAddAssign,
-					OperatorSubAssign,
-					OperatorMultAssign,
-					OperatorDivAssign,
-					OperatorModAssign,
-					OperatorBitwiseAndAssign,
-					OperatorBitwiseOrAssign,
-					OperatorBitwiseXorAssign,
-					OperatorBitwiseNotAssign,
-					OperatorBitshiftLeftAssign,
-					OperatorBitshiftRightAssign,
-
-					// increment/decrement
-					Increment,
-					Decrement,
-
-					// Memory
-					OperatorAddressOf,
-					OperatorDereference,
-
-					// Comments
-					LineComment,
-					BlockComment,
-
-					// Symbols
-					SymbolOpenParen,
-					SymbolEndParen,
-					SymbolOpenSquareBracket,
-					SymbolEndSquareBracket,
-					SymbolOpenCurlyBrace,
-					SymbolEndCurlyBrace,
-					SymbolOpenAngleBracket,
-					SymbolEndAngleBracket,
-					SymbolSingleQuote,
-					SymbolDoubleQuote,
-
-					Identifier,
-				};
-
-				Token(Type t);
-
-				const Type type;
-
-				const char* asString();
-		};
-	}
+    std::ostream& operator<<(std::ostream& os, const Token& t);
+    std::ostream& operator<<(std::ostream& os, Token::Type t);
 }
-
-#endif

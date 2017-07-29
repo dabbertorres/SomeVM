@@ -15,65 +15,57 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="someIL.bnf">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="someIL.dot">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\tests\fact.svml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\tests\helloWorld.svml">
-      <Filter>Resource Files</Filter>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Assembler.hpp">
+    <ClInclude Include="Array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Disassembler.hpp">
+    <ClInclude Include="Debugger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Lexer.hpp">
+    <ClInclude Include="Function.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Parser.hpp">
+    <ClInclude Include="Instruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Statement.hpp">
+    <ClInclude Include="Program.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Token.hpp">
+    <ClInclude Include="StackFrame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Util.hpp">
+    <ClInclude Include="SysCall.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Value.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="VM.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libSomeVM.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Assembler.cpp">
+    <ClCompile Include="Debugger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Disassembler.cpp">
+    <ClCompile Include="Function.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Lexer.cpp">
+    <ClCompile Include="Instruction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="Program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Parser.cpp">
+    <ClCompile Include="StackFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Statement.cpp">
+    <ClCompile Include="Value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Token.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Util.cpp">
+    <ClCompile Include="VM.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

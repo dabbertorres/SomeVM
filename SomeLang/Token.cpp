@@ -1,111 +1,100 @@
 #include "Token.hpp"
 
-namespace
+#include <ostream>
+
+namespace sl
 {
-	static constexpr const char* typeMap[] =
-	{
-		// Primitive Values
-		"ValueInteger",
-		"ValueFloat",
-		"ValueChar",
-		"ValueString",
-		"ValueBool",
+    Token::Token(size_t line, size_t position)
+        : value{},
+        type{ Type::Unknown },
+        line{ line },
+        position{ position }
+    {}
 
-		// Type modifiers
-		"TypePointer",
-		"TypeFunction",
-		"TypeArray",
+    Token::Token(std::string value, Type type, size_t line, size_t position)
+        : value{ value },
+        type{ type },
+        line{ line },
+        position{ position }
+    {}
 
-		// Memory Operations
-		"MemoryAllocate",
-		"MemoryDeallocate",
+    bool Token::valid() const
+    {
+        return type != Type::Unknown;
+    }
 
-		/* Operators */
+    std::ostream& operator<<(std::ostream& os, const Token& t)
+    {
+        os << "Token:\n"
+            << "{\n"
+            << "\tvalue:     '" << t.value << "'\n"
+            << "\ttype:      " << t.type << '\n'
+            << "\tline:      " << t.line << '\n'
+            << "\tcharacter: " << t.position << '\n'
+            << "}\n";
+        return os;
+    }
 
-		// arithmetic
-		"OperatorAdd",
-		"OperatorSub",
-		"OperatorMult",
-		"OperatorDiv",
-		"OperatorMod",
+    std::ostream& operator<<(std::ostream& os, Token::Type t)
+    {
+        switch (t)
+        {
+            case Token::Type::Number:
+                return os << "Number";
 
-		// Bitwise
-		"OperatorBitwiseAnd",
-		"OperatorBitwiseOr",
-		"OperatorBitwiseXor",
-		"OperatorBitwiseNot",
+            case Token::Type::String:
+                return os << "String";
 
-		// Bitshift
-		"OperatorBitshiftLeft",
-		"OperatorBitshiftRight",
+            case Token::Type::Bool:
+                return os << "Bool";
 
-		// Relational
-		"OperatorEqual",
-		"OperatorNotEqual",
-		"OperatorLesser",
-		"OperatorGreater",
-		"OperatorLesserEqual",
-		"OperatorGreaterEqual",
+            case Token::Type::Semicolon:
+                return os << "Semicolon";
 
-		// Logical
-		"OperatorAnd",
-		"OperatorOr",
-		"OperatorXor",
-		"OperatorNot",
+            case Token::Type::Colon:
+                return os << "Colon";
 
-		// Assignment
-		"OperatorAssign",
-		"OperatorAddAssign",
-		"OperatorSubAssign",
-		"OperatorMultAssign",
-		"OperatorDivAssign",
-		"OperatorModAssign",
-		"OperatorBitwiseAndAssign",
-		"OperatorBitwiseOrAssign",
-		"OperatorBitwiseXorAssign",
-		"OperatorBitwiseNotAssign",
-		"OperatorBitshiftLeftAssign",
-		"OperatorBitshiftRightAssign",
+            case Token::Type::Comma:
+                return os << "Comma";
 
-		// increment/decrement
-		"Increment",
-		"Decrement",
+            case Token::Type::ParenLeft:
+                return os << "ParenLeft";
 
-		// Memory
-		"OperatorAddressOf",
-		"OperatorDereference",
+            case Token::Type::ParenRight:
+                return os << "ParenRight";
 
-		// Comments
-		"LineComment",
-		"BlockComment",
+            case Token::Type::Newline:
+                return os << "Newline";
 
-		// Symbols
-		"SymbolOpenParen",
-		"SymbolEndParen",
-		"SymbolOpenSquareBracket",
-		"SymbolEndSquareBracket",
-		"SymbolOpenCurlyBrace",
-		"SymbolEndCurlyBrace",
-		"SymbolOpenAngleBracket",
-		"SymbolEndAngleBracket",
-		"SymbolSingleQuote",
-		"SymbolDoubleQuote",
+            case Token::Type::Dollar:
+                return os << "Dollar";
 
-		"Identifier",
-	};
-}
+            case Token::Type::Func:
+                return os << "Func";
 
-namespace dbr
-{
-	namespace sl
-	{
-		Token::Token(Type t)
-		:	type(t)
-		{}
+            case Token::Type::If:
+                return os << "If";
 
-		const char* Token::asString()
-		{
-			return typeMap[static_cast<std::size_t>(type)];
-		}
-	}
+            case Token::Type::Switch:
+                return os << "Switch";
+
+            case Token::Type::Case:
+                return os << "Class";
+
+            case Token::Type::Else:
+                return os << "Else";
+
+            case Token::Type::While:
+                return os << "While";
+
+            case Token::Type::Identifier:
+                return os << "Identifier";
+
+            case Token::Type::End:
+                return os << "End";
+
+            default:
+                return os << "Unknown";
+        }
+    }
 }

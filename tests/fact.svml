@@ -1,25 +1,14 @@
-# register 0 is the counter
-# register 1 is the factorial
-# register 2 stores the test's result
-# register 3 is the counter bound/subtract amount
-load $0 4
-load $1 4
-load $3 1
+# change value to what you want to calculate the factorial of
+load $factorial 4
 
-# for loop
+load $continue true
+load $counter $factorial
 
-# test
-gt $2 $0 $3
+while $continue:
+	sub $counter $counter 1
+	mult $factorial $factorial $counter
 
-print $0
+	gt $continue $counter 1
+;
 
-# if
-rjmpf $2 3
-
-# then
-sub $0 $0 $3
-mult $1 $1 $0
-rjmp -6
-
-# else
-print $1	# print result
+print $factorial

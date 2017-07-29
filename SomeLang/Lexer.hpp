@@ -1,33 +1,12 @@
-#ifndef DBR_SVM_IL_LEXER_HPP
-#define DBR_SVM_IL_LEXER_HPP
+#pragma once
 
 #include <vector>
 #include <string>
+#include <iosfwd>
 
 #include "Token.hpp"
 
-namespace dbr
+namespace sl
 {
-	namespace sl
-	{
-		class Lexer
-		{
-			public:
-				using TokenCode = std::vector<Token>;
-					
-				enum class State
-				{
-						
-				};
-					
-				Lexer() = default;
-				~Lexer() = default;
-					
-				TokenCode run(const std::string& input);
-					
-			private:
-		};
-	}
+	std::vector<Token> lex(std::istream& in);
 }
-
-#endif

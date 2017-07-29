@@ -1,33 +1,25 @@
-#ifndef DBR_SVM_IL_PARSER_HPP
-#define DBR_SVM_IL_PARSER_HPP
+#pragma once
 
+#include <stdexcept>
+#include <sstream>
 #include <vector>
-#include <unordered_map>
-#include <string>
-#include <functional>
 
-#include "Lexer.hpp"
+#include "Token.hpp"
+#include "Statement.hpp"
 
-namespace dbr
+namespace sl
 {
-	namespace sl
-	{
-		class Parser
-		{
-			public:
-				using VarMap = std::unordered_map<std::string, std::size_t>;
+    std::vector<Statement> parse(const std::string& stream, const std::vector<Token>& tokens);
 
-				Parser() = default;
-				~Parser() = default;
+    class ParseError : public std::exception
+    {
+    public:
+        ParseError(const std::string& stream, const Token& tok, const std::string& context, const std::string& expected);
+        ~ParseError() = default;
 
-				// maybe return something else. AST?
-				// really should at least organize the raw TokenCode
-				Lexer::TokenCode run(const Lexer::TokenCode&);
+        const char* what() const override;
 
-			private:
-				VarMap variables;
-		};
-	}
+    private:
+        std::string error;
+    };
 }
-
-#endif

@@ -1,345 +1,319 @@
 #include "Lexer.hpp"
 
-#include <stdexcept>
+#include <istream>
+#include <sstream>
 
-namespace
+namespace sl
 {
-	using TokenCheck = bool(const std::string& input);
-
-	static TokenCheck isIntegerValue;
-	static TokenCheck isFloatValue;
-	static TokenCheck isCharValue;
-	static TokenCheck isStringValue;
-	static TokenCheck isBoolValue;
-
-	static TokenCheck isPointer;
-	static TokenCheck isFunction;
-	static TokenCheck isArray;
-
-	static TokenCheck isMemoryAllocation;
-	static TokenCheck isMemoryDeallocation;
-	
-	static TokenCheck isOperatorAdd;
-	static TokenCheck isOperatorSub;
-	static TokenCheck isOperatorMult;
-	static TokenCheck isOperatorDiv;
-	static TokenCheck isOperatorMod;
-
-	static TokenCheck isOperatorBitwiseAnd;
-	static TokenCheck isOperatorBitwiseOr;
-	static TokenCheck isOperatorBitwiseXor;
-	static TokenCheck isOperatorBitwiseNot;
-
-	static TokenCheck isOperatorBitshiftLeft;
-	static TokenCheck isOperatorBitshiftRight;
-
-	static TokenCheck isOperatorEqual;
-	static TokenCheck isOperatorNotEqual;
-	static TokenCheck isOperatorLesser;
-	static TokenCheck isOperatorGreater;
-	static TokenCheck isOperatorLesserEqual;
-	static TokenCheck isOperatorGreaterEqual;
-
-	static TokenCheck isOperatorAnd;
-	static TokenCheck isOperatorOr;
-	static TokenCheck isOperatorXor;
-	static TokenCheck isOperatorNot;
-
-	static TokenCheck isOperatorAssign;
-	static TokenCheck isOperatorAddAssign;
-	static TokenCheck isOperatorSubAssign;
-	static TokenCheck isOperatorMultAssign;
-	static TokenCheck isOperatorDivAssign;
-	static TokenCheck isOperatorModAssign;
-	static TokenCheck isOperatorBitwiseAndAssign;
-	static TokenCheck isOperatorBitwiseOrAssign;
-	static TokenCheck isOperatorBitXorAssign;
-	static TokenCheck isOperatorBitwiseNotAssign;
-	static TokenCheck isOperatorBitshiftLeftAssign;
-	static TokenCheck isOperatorBitshiftRightAssign;
-
-	static TokenCheck isOperatorIncrement;
-	static TokenCheck isOperatorDecrement;
-
-	static TokenCheck isOperatorAddressOf;
-	static TokenCheck isOperatorDereference;
-
-	static TokenCheck isLineComment;
-	static TokenCheck isBlockComment;
-
-	static TokenCheck isIdentifier;
-}
-
-namespace dbr
-{
-	namespace sl
-	{
-		Lexer::TokenCode Lexer::run(const std::string& input)
-		{
-			TokenCode tokens;
-
-			// I probably need to go character by character in a string first. If I find a Token::Type::Symbol*,
-			// I should split the string there. I could maybe even "pre-process" it. Before this for loop, iterate
-			// over the input, and modify and insert strings into input as needed to do this.
-			for(auto i = 0u; i < input.size(); ++i)
-			{
-
-			}
-
-			return tokens;
-		}
-	}
-}
-
-namespace
-{
-	bool isIntegerValue(const std::string& input)
-	{
-
-	}
-
-	bool isFloatValue(const std::string& input)
-	{
-
-	}
-
-	bool isCharValue(const std::string& input)
-	{
-
-	}
-
-	bool isStringValue(const std::string& input)
-	{
-
-	}
-
-	bool isBoolValue(const std::string& input)
-	{
-
-	}
-
-	bool isPointer(const std::string& input)
-	{
-
-	}
-
-	bool isFunction(const std::string& input)
-	{
-
-	}
-
-	bool isArray(const std::string& input)
-	{
-
-	}
-
-	bool isMemoryAllocation(const std::string& input)
-	{
-
-	}
-
-	bool isMemoryDeallocation(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorAdd(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorSub(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorMult(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorDiv(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorMod(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseAnd(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseOr(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseXor(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseNot(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitshiftLeft(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitshiftRight(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorEqual(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorNotEqual(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorLesser(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorGreater(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorLesserEqual(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorGreaterEqual(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorAnd(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorOr(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorXor(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorNot(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorAddAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorSubAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorMultAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorDivAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorModAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseAndAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseOrAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitXorAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitwiseNotAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitshiftLeftAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorBitshiftRightAssign(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorIncrement(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorDecrement(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorAddressOf(const std::string& input)
-	{
-
-	}
-
-	bool isOperatorDereference(const std::string& input)
-	{
-
-	}
-
-	bool isLineComment(const std::string& input)
-	{
-
-	}
-
-	bool isBlockComment(const std::string& input)
-	{
-
-	}
-
-	bool isIdentifier(const std::string& input)
-	{
-
-	}
+    static sl::Token number(char first, std::istream& in, size_t line, size_t position);
+    static sl::Token string(char first, std::istream& in, size_t line, size_t position);
+    static sl::Token boolean(char first, std::istream& in, size_t line, size_t position);
+    static sl::Token variable(char first, std::istream& in, size_t line, size_t position);
+    static sl::Token func(char first, std::istream& in, size_t line, size_t position);
+    static sl::Token identifier(char first, std::istream& in, size_t line, size_t position);
+
+    std::vector<Token> lex(std::istream& in)
+    {
+        std::vector<Token> ret;
+
+        size_t lineNumber = 1;
+        size_t position = 0;
+
+        char ch;
+        while (in.get(ch))
+        {
+            ++position;
+
+            switch (ch)
+            {
+            // number literal
+                case '+':
+                case '-':
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    ret.push_back(number(ch, in, lineNumber, position));
+                    break;
+
+                // start of string
+                case '"':
+                    ret.push_back(string(ch, in, lineNumber, position));
+                    break;
+
+                // possible start of boolean literal
+                case 't':
+                case 'f':
+                {
+                    auto t = boolean(ch, in, lineNumber, position);
+                    if (t.valid())
+                        ret.push_back(t);
+
+                    t = func(ch, in, lineNumber, position);
+                    if (t.valid())
+                        ret.push_back(t);
+                    else
+                        ret.push_back(identifier(ch, in, lineNumber, position));
+
+                    break;
+                }
+
+                case '#':
+                    // for comments, skip until we find a newline
+                    while (in.get(ch) && ch != '\n');
+                    ++lineNumber;
+                    position = 0;
+                    break;
+
+                case '$':
+                    ret.push_back(variable(ch, in, lineNumber, position));
+                    break;
+
+                case ';':
+                    ret.emplace_back(";", Token::Type::Semicolon, lineNumber, position);
+                    break;
+
+                case ':':
+                    ret.emplace_back(":", Token::Type::Colon, lineNumber, position);
+                    break;
+
+                case ',':
+                    ret.emplace_back(",", Token::Type::Comma, lineNumber, position);
+                    break;
+
+                case '(':
+                    ret.emplace_back("(", Token::Type::ParenLeft, lineNumber, position);
+                    break;
+
+                case ')':
+                    ret.emplace_back(")", Token::Type::ParenRight, lineNumber, position);
+                    break;
+
+                // whitespace
+                case '\n':
+                    ++lineNumber;
+                    position = 0;
+                    ret.emplace_back("", Token::Type::Newline, lineNumber, position);
+                    break;
+
+                case '\r':
+                case '\t':
+                case ' ':
+                    break;
+
+                // if it's not one of the above, it's likely an identifier
+                default:
+                    ret.push_back(identifier(ch, in, lineNumber, position));
+                    break;
+            }
+        }
+
+        ret.emplace_back("\0", Token::Type::End, lineNumber, position + 1);
+
+        return ret;
+    }
+    
+    sl::Token number(char first, std::istream& in, size_t line, size_t position)
+    {
+        sl::Token ret{ line, position };
+
+        bool hasPeriod = first == '.';
+
+        auto start = in.tellg();
+        bool done = false;
+        char ch;
+
+        while (!done && in.get(ch))
+        {
+            switch (ch)
+            {
+                case '.':
+                    if (!hasPeriod)
+                    {
+                        hasPeriod = true;
+                    }
+                    else
+                    {
+                        done = true;
+                        in.unget();
+                    }
+                    break;
+
+                case '0':
+                case '1':
+                case '2':
+                case '3':
+                case '4':
+                case '5':
+                case '6':
+                case '7':
+                case '8':
+                case '9':
+                    // don't need to do anything!
+                    break;
+
+                default:
+                    done = true;
+                    in.unget();
+                    break;
+            }
+        }
+
+        auto end = in.tellg();
+
+        auto length = end - start;
+
+        // 'start' is actually the character after 'first'
+        ret.value.resize(length + 1);
+
+        ret.value[0] = first;
+        in.seekg(start);
+        in.read(&ret.value[1], length);
+
+        ret.type = sl::Token::Type::Number;
+
+        return ret;
+    }
+
+    Token string(char first, std::istream& in, size_t line, size_t position)
+    {
+        Token ret{ line, position };
+
+        auto start = in.tellg();
+
+        // simply loop until we find the close quote
+        char ch;
+        while (in.get(ch) && ch != '"');
+
+        auto end = in.tellg();
+        auto length = end - start;
+
+        // 'start' is actually the character after 'first'
+        ret.value.resize(length + 1);
+        ret.value[0] = first;
+
+        in.seekg(start);
+        in.read(&ret.value[1], length);
+
+        ret.type = Token::Type::String;
+
+        return ret;
+    }
+
+    Token boolean(char first, std::istream& in, size_t line, size_t position)
+    {
+        Token ret{ line, position };
+
+        if (first == 't')
+        {
+            char rue[3] = { '\0' };
+            in.read(rue, sizeof(rue));
+
+            if (std::strncmp(rue, "rue", sizeof(rue)) == 0)
+            {
+                ret.value = "true";
+                ret.type = Token::Type::Bool;
+            }
+            else
+            {
+                in.seekg(-4, std::ios::cur);
+            }
+        }
+        else
+        {
+            char alse[4] = { '\0' };
+            in.read(alse, sizeof(alse));
+
+            if (std::strncmp(alse, "alse", sizeof(alse)) == 0)
+            {
+                ret.value = "false";
+                ret.type = Token::Type::Bool;
+            }
+            else
+            {
+                in.seekg(-5, std::ios::cur);
+            }
+        }
+
+        return ret;
+    }
+
+    bool alpha(char ch)
+    {
+        return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z';
+    }
+
+    bool validIdentifier(char ch)
+    {
+        return alpha(ch) || '0' <= ch && ch <= '9' || ch == '_';
+    }
+
+    Token variable(char first, std::istream& in, size_t line, size_t position)
+    {
+        char next;
+        in.get(next);
+
+        auto ret = identifier(next, in, line, position);
+        ret.value.insert(ret.value.begin(), first);
+        ret.type = Token::Type::Dollar;
+        --ret.position;
+
+        return ret;
+    }
+
+    Token func(char first, std::istream& in, size_t line, size_t position)
+    {
+        Token ret{ line, position };
+
+        char unc[3] = { '\0' };
+        in.read(unc, sizeof(unc));
+
+        if (std::strncmp(unc, "unc", sizeof(unc)) == 0)
+        {
+            ret.value = "func";
+            ret.type = Token::Type::Func;
+        }
+        else
+        {
+            in.seekg(-4, std::ios::cur);
+        }
+
+        return ret;
+    }
+
+    Token identifier(char first, std::istream& in, size_t line, size_t position)
+    {
+        Token ret{ line, position };
+
+        if (alpha(first))
+        {
+            auto start = in.tellg();
+
+            // greedy grab
+            char ch;
+            while (in.get(ch) && validIdentifier(ch));
+
+            // remove trailing failed character
+            in.unget();
+
+            auto end = in.tellg();
+            auto length = end - start;
+
+            // 'start' is the character after 'first'
+            ret.value.resize(length + 1);
+            ret.value[0] = first;
+            in.seekg(start);
+            in.read(&ret.value[1], length);
+
+            ret.type = Token::Type::Identifier;
+        }
+
+        return ret;
+    }
 }

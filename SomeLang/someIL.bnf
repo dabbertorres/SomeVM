@@ -1,0 +1,35 @@
+<program> ::= { <statement> | <function> }
+
+<statement> ::= <instruction> | <conditional> | <loop>
+
+<instruction> ::= <identifier> { <value> } <newline>
+
+<identifier> ::= <letter> { <letter> | <digit> }
+
+<value> ::= <literal> | <variable>
+
+<literal> ::= <number> | <string> | <bool>
+
+<number> ::= [ "+" | "-" ] <digit> { <digit> } [ "." <digit> { <digit> } ]
+
+<string> ::= """ { <character> } """
+
+<bool> ::= "true" | "false"
+
+<variable> ::= "$" <identifier>
+
+<conditional> ::= <conditional_if> | <conditional_switch> [ <conditional_else> ] ";"
+
+<conditional_if> ::= "if" <value> ":" { <statement> }
+
+<conditional_switch> ::= "switch" [ <value> ] ":" { <conditional_case> }
+
+<conditional_case> ::= "case" <value> ":" { <statement> } ";"
+
+<conditional_else> ::= "else" ":" { <statement> }
+
+<loop> ::= "while" <value> ":" { <statement> } ";"
+
+<function> ::= "func" <variable-list> <identifier> <variable-list> ":" { <statement> } ";"
+
+<variable-list> ::= "(" [ <variable> { "," <variable> } ] ")"

@@ -1,0 +1,35 @@
+digraph SomeIL
+{
+	program ->
+	{
+		instruction;
+		function;
+		end;
+	}
+
+	instruction -> identifier -> value -> newline;
+
+	value ->
+	{
+		value;
+		literal;
+		variable;
+	}
+
+	literal ->
+	{
+		number;
+		string;
+		bool;
+	}
+
+	variable -> dollar -> identifier;
+
+	function -> identifier -> variableList -> "->" -> variableList -> ":" -> functionBody -> ";";
+
+	variableList -> "(" -> ")";
+	variableList -> "(" -> variable -> ")";
+	variableList -> "(" -> variable -> "," -> variable -> ")";
+
+	functionBody -> instruction -> instruction;
+}

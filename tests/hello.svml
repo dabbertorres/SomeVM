@@ -1,2 +1,1 @@
-load $0 "hello, world!"
-print $0
+print "hello, world!"

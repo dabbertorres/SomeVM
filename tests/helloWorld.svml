@@ -1,20 +1,8 @@
 # this is a comment
-const 0
-const 1
-const 2
-const "hello, world"
-const "goodbye, world"
-const true
 
-hello: 0 0
-	loadc $5 $3
-	print $5
-end
+func () hello (): print "hello, world" ;
 
-bye: 0 0
-	loadc $5 $4
-	print $5
-end
+func () bye (): print "goodbye, world" ;
 
 # flag
 loadc $0 $5
@@ -30,14 +18,10 @@ loadc $3 $1
 
 print $0
 
-# if 
-rjmpt $0 $2
-
-# then
-call $1 $1 $2
-rjmp $3
-
-# else
-call $1 $1 $3
+if $0:
+	call hello
+else:
+	call bye
+;
 
 print $0
