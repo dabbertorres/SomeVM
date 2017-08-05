@@ -1,10 +1,8 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include <stack>
 
-#include "StackFrame.hpp"
+#include "Frame.hpp"
 
 namespace svm
 {
@@ -12,10 +10,17 @@ namespace svm
 
 	using Registry = std::vector<Value>;
 
-	class SVM_API VM
+	class VM
 	{
 	public:
 		VM(std::uint64_t initialRegistrySize = 256);
+
+        VM(VM&&) = default;
+        VM& operator=(VM&&) = default;
+
+        VM(const VM&) = delete;
+        VM& operator=(const VM&) = delete;
+
 		~VM() = default;
 
 		void load(const Program& program);
@@ -35,9 +40,9 @@ namespace svm
 		Value read(std::uint64_t idx) const;
 
 	private:
-		void interpret(Instruction instr, StackFrame& frame);
+		void interpret(Instruction instr, Frame& frame);
 
-		std::stack<StackFrame> callStack;
+		std::stack<Frame> callStack;
 
 		Registry registry;
 		Registry::iterator nextFree;

@@ -19,6 +19,9 @@ namespace sl
         size_t lineNumber = 1;
         size_t position = 0;
 
+        //std::streampos lineStart = in.tellg();
+        //std::streampos lineEnd = lineStart;
+
         char ch;
         while (in.get(ch))
         {
@@ -26,7 +29,7 @@ namespace sl
 
             switch (ch)
             {
-            // number literal
+                // number literal
                 case '+':
                 case '-':
                 case '0':
@@ -40,11 +43,13 @@ namespace sl
                 case '8':
                 case '9':
                     ret.push_back(number(ch, in, lineNumber, position));
+                    position += ret.back().value.length();
                     break;
 
                 // start of string
                 case '"':
                     ret.push_back(string(ch, in, lineNumber, position));
+                    position += ret.back().value.length();
                     break;
 
                 // possible start of boolean literal
@@ -53,13 +58,19 @@ namespace sl
                 {
                     auto t = boolean(ch, in, lineNumber, position);
                     if (t.valid())
+                    {
                         ret.push_back(t);
-
-                    t = func(ch, in, lineNumber, position);
-                    if (t.valid())
-                        ret.push_back(t);
+                    }
                     else
-                        ret.push_back(identifier(ch, in, lineNumber, position));
+                    {
+                        t = func(ch, in, lineNumber, position);
+                        if (t.valid())
+                            ret.push_back(t);
+                        else
+                            ret.push_back(identifier(ch, in, lineNumber, position));
+                    }
+
+                    position += ret.back().value.length();
 
                     break;
                 }
@@ -72,7 +83,8 @@ namespace sl
                     break;
 
                 case '$':
-                    ret.push_back(variable(ch, in, lineNumber, position));
+                    ret.emplace_back("$", Token::Type::Dollar, lineNumber, position);
+                    //ret.push_back(variable(ch, in, lineNumber, position));
                     break;
 
                 case ';':
@@ -110,6 +122,7 @@ namespace sl
                 // if it's not one of the above, it's likely an identifier
                 default:
                     ret.push_back(identifier(ch, in, lineNumber, position));
+                    position += ret.back().value.length();
                     break;
             }
         }
@@ -118,7 +131,7 @@ namespace sl
 
         return ret;
     }
-    
+
     sl::Token number(char first, std::istream& in, size_t line, size_t position)
     {
         sl::Token ret{ line, position };
@@ -222,7 +235,7 @@ namespace sl
             }
             else
             {
-                in.seekg(-4, std::ios::cur);
+                in.seekg(-3, std::ios::cur);
             }
         }
         else
@@ -237,7 +250,7 @@ namespace sl
             }
             else
             {
-                in.seekg(-5, std::ios::cur);
+                in.seekg(-4, std::ios::cur);
             }
         }
 
@@ -281,7 +294,7 @@ namespace sl
         }
         else
         {
-            in.seekg(-4, std::ios::cur);
+            in.seekg(-3, std::ios::cur);
         }
 
         return ret;
@@ -296,20 +309,20 @@ namespace sl
             auto start = in.tellg();
 
             // greedy grab
-            char ch;
-            while (in.get(ch) && validIdentifier(ch));
+            char ch = 0;
+            size_t adv = 1;
+            while (in.get(ch) && validIdentifier(ch))
+                ++adv;
 
             // remove trailing failed character
-            in.unget();
-
-            auto end = in.tellg();
-            auto length = end - start;
+            if(adv > 1)
+                in.unget();
 
             // 'start' is the character after 'first'
-            ret.value.resize(length + 1);
+            ret.value.resize(adv + 1);
             ret.value[0] = first;
             in.seekg(start);
-            in.read(&ret.value[1], length);
+            in.read(&ret.value[1], adv);
 
             ret.type = Token::Type::Identifier;
         }

@@ -1,5 +1,4 @@
-#ifndef DBR_SVM_DISASSEMBLER_HPP
-#define DBR_SVM_DISASSEMBLER_HPP
+#pragma once
 
 #include <iosfwd>
 
@@ -12,5 +11,3 @@ namespace sl
 {
     void disassemble(const svm::Program& prog, std::ostream& os);
 }
-
-#endif

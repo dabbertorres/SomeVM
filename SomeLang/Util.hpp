@@ -1,5 +1,4 @@
-#ifndef DBR_SVM_UTIL_HPP
-#define DBR_SVM_UTIL_HPP
+#pragma once
 
 #include <string>
 
@@ -41,5 +40,3 @@ namespace sl
         bool strToBool(const std::string& str);
     }
 }
-
-#endif

@@ -46,7 +46,7 @@ namespace svm
 
 		while (!callStack.empty())
 		{
-			StackFrame& frame = callStack.top();
+			Frame& frame = callStack.top();
 
 			if (!frame.complete())
 				interpret(*frame.next(), frame);
@@ -88,7 +88,7 @@ namespace svm
 		return registry.at(idx);
 	}
 
-	void VM::interpret(Instruction instr, StackFrame& frame)
+	void VM::interpret(Instruction instr, Frame& frame)
 	{
 		switch (instr.type())
 		{
@@ -414,8 +414,12 @@ namespace svm
 			switch (funcIdx)
 			{
 			case SysCall::Print:
-				for (; argIdx < argIdx + nargs; ++argIdx)
-					std::printf(registry.at(argIdx), registry.at(++argIdx));
+                for (; argIdx < argIdx + nargs; ++argIdx)
+                {
+                    //auto& s = registry.at(argIdx);
+                    //auto& v = registry.at(++argIdx);
+                    //std::printf(s, v);
+                }
 				break;
 
 			default:

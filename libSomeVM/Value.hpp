@@ -1,7 +1,5 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include <cstdint>
 #include <stdexcept>
 
@@ -39,7 +37,7 @@ namespace svm
 	// Actually they will! 64-bit machines only use 48-bits for pointers!
 
 #ifdef DEBUG
-	enum class SVM_API Type : std::uint8_t
+	enum class Type : std::uint8_t
 	{
 		Nil = 0,
 		Bool = 1,
@@ -48,7 +46,7 @@ namespace svm
 	};
 #endif
 
-	class SVM_API Value
+	class Value
 	{
 	public:
 		Value();

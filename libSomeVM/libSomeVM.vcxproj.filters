@@ -30,9 +30,6 @@
     <ClInclude Include="Program.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StackFrame.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="SysCall.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -42,7 +39,7 @@
     <ClInclude Include="VM.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="libSomeVM.hpp">
+    <ClInclude Include="Frame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -59,13 +56,13 @@
     <ClCompile Include="Program.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StackFrame.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Value.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,13 +1,11 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include <memory>
 
 namespace svm
 {
 	template<typename T>
-	class SVM_API Array
+	class Array
 	{
 	public:
 		Array();

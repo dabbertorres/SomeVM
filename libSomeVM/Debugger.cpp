@@ -17,7 +17,7 @@ namespace svm
 
 		//while(!callStack.empty())
 		//{
-		//	StackFrame& frame = callStack.top();
+		//	Frame& frame = callStack.top();
 
 		//	if(!frame.complete())
 		//	{

@@ -24,6 +24,22 @@ namespace sl
         VariableList,
     };
 
+    static ParseLevel parseProgram(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseStatement(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseInstruction(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseIdentifier(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseValue(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseLiteral(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseVariable(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseConditional(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseConditionalIf(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseConditionalSwitch(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseConditionalCase(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseConditionalElse(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseLoop(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseFunction(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+    static ParseLevel parseVariableList(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it);
+
     static bool isValue(Token tok);
     static bool isLiteral(Token tok);
 
@@ -39,140 +55,115 @@ namespace sl
     static bool startsFunction(Token tok);
     static bool startsVariableList(Token tok);
 
-    static ParseLevel parseProgram(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseStatement(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseInstruction(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseIdentifier(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseValue(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseLiteral(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseVariable(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseConditional(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseConditionalIf(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseConditionalSwitch(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseConditionalCase(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseConditionalElse(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseLoop(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseFunction(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-    static ParseLevel parseVariableList(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it);
-
-    std::vector<Statement> parse(const std::string& stream, const std::vector<Token>& tokens)
+    std::vector<Statement> parse(const std::string& streamName, std::istream& stream, const std::vector<Token>& tokens)
     {
         std::stack<ParseLevel> state;
-        state.push(ParseLevel::Program);
-
         std::vector<Statement> ret;
 
-        std::stringstream line;
+        // get our starting point
+        auto st = parseProgram(streamName, stream, tokens.begin());
+        state.push(st);
 
-        for (auto it = tokens.begin(); it != tokens.end(); ++it)
+        for (auto it = tokens.begin(); it != tokens.end(); )
         {
-            line << it->value << ' ';
-
             try
             {
                 switch (state.top())
                 {
-                    case ParseLevel::Program:
-                    {
-                        auto st = parseProgram(stream, line.str(), it);
-                        state.push(st);
-                        break;
-                    }
-
                     case ParseLevel::Statement:
                     {
-                        auto st = parseStatement(stream, line.str(), it);
+                        auto st = parseStatement(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Instruction:
                     {
-                        auto st = parseInstruction(stream, line.str(), it);
+                        auto st = parseInstruction(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Identifier:
                     {
-                        auto st = parseIdentifier(stream, line.str(), it);
+                        auto st = parseIdentifier(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Value:
                     {
-                        auto st = parseValue(stream, line.str(), it);
+                        auto st = parseValue(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Literal:
                     {
-                        auto st = parseLiteral(stream, line.str(), it);
+                        auto st = parseLiteral(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Variable:
                     {
-                        auto st = parseVariable(stream, line.str(), it);
+                        auto st = parseVariable(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Conditional:
                     {
-                        auto st = parseConditional(stream, line.str(), it);
+                        auto st = parseConditional(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::ConditionalIf:
                     {
-                        auto st = parseConditionalIf(stream, line.str(), it);
+                        auto st = parseConditionalIf(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::ConditionalSwitch:
                     {
-                        auto st = parseConditionalSwitch(stream, line.str(), it);
+                        auto st = parseConditionalSwitch(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::ConditionalCase:
                     {
-                        auto st = parseConditionalCase(stream, line.str(), it);
+                        auto st = parseConditionalCase(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::ConditionalElse:
                     {
-                        auto st = parseConditionalElse(stream, line.str(), it);
+                        auto st = parseConditionalElse(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Loop:
                     {
-                        auto st = parseLoop(stream, line.str(), it);
+                        auto st = parseLoop(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::Function:
                     {
-                        auto st = parseFunction(stream, line.str(), it);
+                        auto st = parseFunction(streamName, stream, it);
                         state.push(st);
                         break;
                     }
 
                     case ParseLevel::VariableList:
                     {
-                        auto st = parseVariableList(stream, line.str(), it);
+                        auto st = parseVariableList(streamName, stream, it);
                         state.push(st);
                         break;
                     }
@@ -186,6 +177,96 @@ namespace sl
         }
 
         return ret;
+    }
+
+    ParseLevel parseProgram(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        if (startsStatement(*it))
+            return ParseLevel::Statement;
+
+        if (startsFunction(*it))
+            return ParseLevel::Function;
+
+        throw ParseError(streamName, *it, stream, "start of statement or function");
+    }
+
+    ParseLevel parseStatement(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        if (startsInstruction(*it))
+            return ParseLevel::Instruction;
+
+        if (startsConditional(*it))
+            return ParseLevel::Conditional;
+
+        if (startsLoop(*it))
+            return ParseLevel::Loop;
+
+        throw ParseError(streamName, *it, stream, "start of instruction, conditional, or loop");
+    }
+
+    ParseLevel parseInstruction(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseIdentifier(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseValue(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseLiteral(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseVariable(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseConditional(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseConditionalIf(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseConditionalSwitch(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseConditionalCase(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseConditionalElse(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseLoop(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseFunction(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
+    }
+
+    ParseLevel parseVariableList(const std::string& streamName, std::istream& stream, std::vector<Token>::const_iterator it)
+    {
+        return ParseLevel::Program;
     }
 
     bool isValue(Token tok)
@@ -262,104 +343,14 @@ namespace sl
         return tok.type == Token::Type::ParenLeft;
     }
 
-    ParseLevel parseProgram(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        if (startsStatement(*it))
-            return ParseLevel::Statement;
-
-        if (startsFunction(*it))
-            return ParseLevel::Function;
-
-        throw ParseError(stream, *it, line, "start of statement or function");
-    }
-
-    ParseLevel parseStatement(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        if (startsInstruction(*it))
-            return ParseLevel::Instruction;
-
-        if (startsConditional(*it))
-            return ParseLevel::Conditional;
-
-        if (startsLoop(*it))
-            return ParseLevel::Loop;
-
-        throw ParseError(stream, *it, line, "start of instruction, conditional, or loop");
-    }
-
-    ParseLevel parseInstruction(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseIdentifier(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseValue(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseLiteral(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseVariable(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseConditional(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseConditionalIf(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseConditionalSwitch(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseConditionalCase(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseConditionalElse(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseLoop(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseFunction(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseLevel parseVariableList(const std::string& stream, const std::string& line, std::vector<Token>::const_iterator it)
-    {
-        return ParseLevel::Program;
-    }
-
-    ParseError::ParseError(const std::string& stream, const Token& tok, const std::string& context, const std::string& expected)
+    ParseError::ParseError(const std::string& streamName, const Token& tok, std::istream& stream, const std::string& expected)
     {
         std::ostringstream ss;
-        std::string pointer(tok.position + 1, ' ');
-        pointer[tok.position] = '^';
+        std::string pointer(tok.position, ' ');
+        pointer[tok.position - 1] = '^';
 
-        ss << stream << "(" << tok.line << "," << tok.position << "): ERROR: Expected " << expected << ", got: " << tok.type << '\n'
-            << context << '\n'
+        ss << "[ERROR] " << streamName << "(" << tok.line << "," << tok.position << "): Expected " << expected << ", got: " << tok.type << '\n'
+            << getLine(tok, stream) << '\n'
             << pointer << '\n';
 
         error = ss.str();
@@ -368,5 +359,23 @@ namespace sl
     const char* ParseError::what() const
     {
         return error.c_str();
+    }
+
+    std::string ParseError::getLine(const Token& tok, std::istream& stream)
+    {
+        stream.clear();
+        stream.seekg(std::ios::beg);
+
+        std::string line;
+        size_t lineNum = 0;
+
+        do
+        {
+            std::getline(stream, line);
+            ++lineNum;
+        }
+        while (lineNum != tok.line);
+
+        return line;
     }
 }

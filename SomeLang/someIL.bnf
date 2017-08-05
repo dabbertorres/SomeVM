@@ -10,26 +10,26 @@
 
 <literal> ::= <number> | <string> | <bool>
 
-<number> ::= [ "+" | "-" ] <digit> { <digit> } [ "." <digit> { <digit> } ]
+<number> ::= [ '+' | '-' ] <digit> { <digit> } [ '.' <digit> { <digit> } ]
 
-<string> ::= """ { <character> } """
+<string> ::= '"' { <character> } '"'
 
 <bool> ::= "true" | "false"
 
 <variable> ::= "$" <identifier>
 
-<conditional> ::= <conditional_if> | <conditional_switch> [ <conditional_else> ] ";"
+<conditional> ::= <conditional_if> | <conditional_switch> [ <conditional_else> ] ';'
 
-<conditional_if> ::= "if" <value> ":" { <statement> }
+<conditional_if> ::= "if" <value> ':' { <statement> }
 
-<conditional_switch> ::= "switch" [ <value> ] ":" { <conditional_case> }
+<conditional_switch> ::= "switch" [ <value> ] ':' { <conditional_case> }
 
-<conditional_case> ::= "case" <value> ":" { <statement> } ";"
+<conditional_case> ::= "case" <value> ':' { <statement> } ';'
 
-<conditional_else> ::= "else" ":" { <statement> }
+<conditional_else> ::= "else" ':' { <statement> }
 
-<loop> ::= "while" <value> ":" { <statement> } ";"
+<loop> ::= "while" <value> ':' { <statement> } ';'
 
-<function> ::= "func" <variable-list> <identifier> <variable-list> ":" { <statement> } ";"
+<function> ::= "func" <variable-list> <identifier> <variable-list> ':' { <statement> } ';'
 
-<variable-list> ::= "(" [ <variable> { "," <variable> } ] ")"
+<variable-list> ::= '(' [ <variable> { ',' <variable> } ] ')'

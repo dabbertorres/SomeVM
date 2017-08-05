@@ -1,17 +1,17 @@
-#include "StackFrame.hpp"
+#include "Frame.hpp"
 
 #include "Function.hpp"
 
 namespace svm
 {
-	StackFrame::StackFrame(const Function& function, std::uint64_t functionIndex, std::uint64_t argsIdx)
+	Frame::Frame(const Function& function, std::uint64_t functionIndex, std::uint64_t argsIdx)
 		: function(function),
 		functionIndex(functionIndex),
 		argsIdx(argsIdx),
 		currentInstruction(function.begin())
 	{}
 
-	StackFrame::StackFrame(StackFrame&& other)
+	Frame::Frame(Frame&& other)
 		: function(other.function),
 		functionIndex(other.functionIndex),
 		argsIdx(other.argsIdx),
@@ -20,22 +20,23 @@ namespace svm
 		other.currentInstruction = other.function.begin();
 	}
 
-    StackFrame& StackFrame::operator=(StackFrame&& other)
+    Frame& Frame::operator=(Frame&&/* other*/)
     {
+        // TODO
         return *this;
     }
 
-	Bytecode::const_iterator StackFrame::next()
+	Bytecode::const_iterator Frame::next()
 	{
 		return currentInstruction++;
 	}
 
-	bool StackFrame::complete() const
+	bool Frame::complete() const
 	{
 		return currentInstruction == function.end();
 	}
 
-	void StackFrame::jump(std::uint64_t instIdx)
+	void Frame::jump(std::uint64_t instIdx)
 	{
 		if (instIdx < function.length())
 			currentInstruction = function.begin() + instIdx;
@@ -43,7 +44,7 @@ namespace svm
 			throw std::out_of_range("Attempt to jump out of bounds");
 	}
 
-	void StackFrame::rjump(std::int64_t instOff)
+	void Frame::rjump(std::int64_t instOff)
 	{
 		auto next = static_cast<std::uint64_t>(std::distance(function.begin(), currentInstruction) + instOff);
 
@@ -53,17 +54,17 @@ namespace svm
 			throw std::out_of_range("Attempt to relative jump out of bounds");
 	}
 
-	Bytecode::const_iterator StackFrame::begin() const
+	Bytecode::const_iterator Frame::begin() const
 	{
 		return function.begin();
 	}
 
-	Bytecode::const_iterator StackFrame::end() const
+	Bytecode::const_iterator Frame::end() const
 	{
 		return function.end();
 	}
 
-	std::uint64_t StackFrame::length() const
+	std::uint64_t Frame::length() const
 	{
 		return function.length();
 	}

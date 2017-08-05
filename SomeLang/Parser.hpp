@@ -1,7 +1,9 @@
 #pragma once
 
 #include <stdexcept>
+#include <string>
 #include <sstream>
+#include <iosfwd>
 #include <vector>
 
 #include "Token.hpp"
@@ -9,17 +11,19 @@
 
 namespace sl
 {
-    std::vector<Statement> parse(const std::string& stream, const std::vector<Token>& tokens);
+    std::vector<Statement> parse(const std::string& streamName, std::istream& stream, const std::vector<Token>& tokens);
 
     class ParseError : public std::exception
     {
     public:
-        ParseError(const std::string& stream, const Token& tok, const std::string& context, const std::string& expected);
+        ParseError(const std::string& streamName, const Token& tok, std::istream& stream, const std::string& expected);
         ~ParseError() = default;
 
         const char* what() const override;
 
     private:
         std::string error;
+        
+        static std::string getLine(const Token& tok, std::istream& stream);
     };
 }

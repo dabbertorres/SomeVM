@@ -1,5 +1,4 @@
-#ifndef DBR_SVM_ASSEMBLER_HPP
-#define DBR_SVM_ASSEMBLER_HPP
+#pragma once
 
 #include <iosfwd>
 #include <unordered_map>
@@ -31,5 +30,3 @@ namespace sl
 		static const std::unordered_map<std::string, svm::Instruction(*)(std::istream&, svm::Program&)> commands;
 	};
 }
-
-#endif

@@ -1,7 +1,5 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include <vector>
 #include <iosfwd>
 
@@ -10,7 +8,7 @@
 
 namespace svm
 {
-	struct SVM_API Program
+	struct Program
 	{
 		std::vector<Value> constants;
 		std::vector<Function> functions;

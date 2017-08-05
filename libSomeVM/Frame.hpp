@@ -1,7 +1,5 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include "Instruction.hpp"
 #include "Value.hpp"
 
@@ -9,15 +7,15 @@ namespace svm
 {
 	class Function;
 
-	class SVM_API StackFrame
+	class Frame
 	{
 	public:
-		StackFrame(const Function& function, std::uint64_t functionIndex, std::uint64_t argsIdx);
+		Frame(const Function& function, std::uint64_t functionIndex, std::uint64_t argsIdx);
 
-		StackFrame(StackFrame&& other);
-        StackFrame& operator=(StackFrame&& other);
+		Frame(Frame&& other);
+        Frame& operator=(Frame&& other);
 
-		~StackFrame() = default;
+		~Frame() = default;
 
 		Bytecode::const_iterator next();
 		bool complete() const;

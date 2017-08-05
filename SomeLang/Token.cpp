@@ -27,7 +27,7 @@ namespace sl
     {
         os << "Token:\n"
             << "{\n"
-            << "\tvalue:     '" << t.value << "'\n"
+            << "\tvalue:     " << t.value << '\n'
             << "\ttype:      " << t.type << '\n'
             << "\tline:      " << t.line << '\n'
             << "\tcharacter: " << t.position << '\n'

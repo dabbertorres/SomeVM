@@ -1,12 +1,10 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include "Instruction.hpp"
 
 namespace svm
 {
-	class SVM_API Function
+	class Function
 	{
 	public:
 		Function(std::uint8_t nrets, std::uint8_t nargs, Bytecode code);

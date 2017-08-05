@@ -1,7 +1,5 @@
 #pragma once
 
-#include "libSomeVM.hpp"
-
 #include <cstdint>
 #include <vector>
 
@@ -19,7 +17,7 @@ namespace svm
         bytes 2 & 3 can be used as "arg 2x", returning a ushort (16 bits), rather than a byte
         usually used to index into the constants table
      */
-    class SVM_API Instruction
+    class Instruction
     {
     public:
         enum class Type : std::uint8_t
