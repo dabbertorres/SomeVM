@@ -161,6 +161,7 @@
     <ClInclude Include="Array.hpp" />
     <ClInclude Include="Debugger.hpp" />
     <ClInclude Include="Function.hpp" />
+    <ClInclude Include="Registry.hpp" />
     <ClInclude Include="Instruction.hpp" />
     <ClInclude Include="Program.hpp" />
     <ClInclude Include="Frame.hpp" />
@@ -171,6 +172,7 @@
   <ItemGroup>
     <ClCompile Include="Debugger.cpp" />
     <ClCompile Include="Function.cpp" />
+    <ClCompile Include="Registry.cpp" />
     <ClCompile Include="Instruction.cpp" />
     <ClCompile Include="Program.cpp" />
     <ClCompile Include="Frame.cpp" />

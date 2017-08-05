@@ -8,8 +8,6 @@ namespace svm
 {
 	struct Program;
 
-	using Registry = std::vector<Value>;
-
 	class VM
 	{
 	public:
