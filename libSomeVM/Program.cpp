@@ -34,7 +34,9 @@ namespace svm
 
 		for (std::uint64_t i = 0; i < numConstants; ++i)
 		{
-			Type type;
+			/* TODO: better to do a 4 (?) byte number of bytes, followed by that many bytes, no matter the type
+             * We are statically-typed after all
+            Type type;
 			input.read(reinterpret_cast<char*>(&type), sizeof(type));
 
 			switch (type)
@@ -79,7 +81,7 @@ namespace svm
 
 				throw std::runtime_error(msg);
 			}
-			}
+			}*/
 		}
 
 		// functions
@@ -128,6 +130,8 @@ namespace svm
 
 		for (auto& c : constants)
 		{
+			/* TODO: better to do a 4 (?) byte number of bytes, followed by that many bytes, no matter the type
+             * We are statically-typed after all
 			auto type = c.type();
 
 			output.write(reinterpret_cast<char*>(&type), sizeof(type));
@@ -145,7 +149,7 @@ namespace svm
 
 				output.write(reinterpret_cast<char*>(&len), sizeof(len));
 				output.write(str.data(), len);
-			}
+			} */
 		}
 
 		// functions
