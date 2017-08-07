@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <iosfwd>
 
 #include "libSomeVM/Value.hpp"
 #include "libSomeVM/VM.hpp"
@@ -13,7 +13,7 @@ namespace svm
 		Repl(std::istream& input, std::ostream& output);
 		~Repl();
 
-		void print(const Value& val) const;
+		//void print(const Value& val) const;
 
 	private:
 		std::istream& input;

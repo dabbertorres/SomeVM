@@ -1,5 +1,8 @@
 #include "Repl.hpp"
 
+#include <istream>
+#include <ostream>
+
 namespace svm
 {
 	Repl::Repl(std::istream& input, std::ostream& output)
@@ -10,7 +13,7 @@ namespace svm
 	Repl::~Repl()
 	{}
 
-	void Repl::print(const Value& val) const
+	/*void Repl::print(const Value& val) const
 	{
 		switch (val.type())
 		{
@@ -31,5 +34,5 @@ namespace svm
 		}
 
 		output << std::endl;
-	}
+	}*/
 }

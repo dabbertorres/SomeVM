@@ -1,6 +1,7 @@
 #include "VM.hpp"
 
 #include <iterator>
+#include <cmath>
 
 #include "Program.hpp"
 #include "SysCall.hpp"

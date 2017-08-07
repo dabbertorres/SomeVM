@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <climits>
+#include <limits>
 #include <stdexcept>
 
 #include "Array.hpp"

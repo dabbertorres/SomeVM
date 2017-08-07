@@ -164,6 +164,7 @@ namespace svm
 
 	Value::operator Bytes() const
 	{
+#ifdef DEBUG
 		switch (typeVal)
 		{
 		case Type::Nil:
@@ -193,6 +194,9 @@ namespace svm
 		default:
 			return{ 0 };
 		}
+#else
+        return {0};
+#endif
 	}
 
 #ifdef DEBUG
