@@ -1,7 +1,7 @@
 CXX    := $(GLOBAL_CXX)
 CFLAGS := $(GLOBAL_CFLAGS) -I..
 
-LIBS := -llibSomeVM.so
+LIBS := -lSomeVM
 
 RLS_FLAGS := $(GLOBAL_RLS_FLAGS)
 DBG_FLAGS := $(GLOBAL_DBG_FLAGS)
@@ -19,10 +19,10 @@ release: $(OUT_DIR)/release/$(OUT)
 debug: $(OUT_DIR)/debug/$(OUT)
 
 $(OUT_DIR)/release/$(OUT): $(addprefix $(BUILD_DIR)/release/,$(OBJ))
-	$(CXX) $(CFLAGS) -L$@ $(RLS_FLAGS) $^ -o $(OUT_DIR)/release/$(OUT) $(LIBS)
+	$(CXX) $(CFLAGS) -L$(dir $@) $(RLS_FLAGS) $^ -o $(OUT_DIR)/release/$(OUT) $(LIBS)
 
 $(OUT_DIR)/debug/$(OUT): $(addprefix $(BUILD_DIR)/debug/,$(OBJ))
-	$(CXX) $(CFLAGS) -L$@ $(DBG_FLAGS) $^ -o $(OUT_DIR)/debug/$(OUT) $(LIBS)
+	$(CXX) $(CFLAGS) -L$(dir $@) $(DBG_FLAGS) $^ -o $(OUT_DIR)/debug/$(OUT) $(LIBS)
 
 # generate dependencies
 -include $(BUILD_DIR)$(DEP)

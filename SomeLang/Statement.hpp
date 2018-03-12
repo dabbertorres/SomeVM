@@ -1,45 +1,49 @@
 #pragma once
 
 #include <variant>
+#include <vector>
 #include <string>
 
-#include "libSomeVM/Instruction.hpp"
+#include "libSomeVM/Value.hpp"
 
 namespace sl
 {
+    using Literal = std::variant<svm::Float, std::string, bool>;
+    using Value = std::variant<Literal, std::string>;
+
     struct StatementInstruction
     {
-        svm::Instruction::Type instruction;
-        std::vector<std::string> values;
+        std::string instruction;
+        std::vector<Value> values;
     };
 
     struct StatementIf
     {
         std::string conditionValue;
-        std::vector<svm::Instruction> instructions;
+        std::vector<StatementInstruction> instructions;
     };
 
     struct StatementSwitch
     {
         std::string conditionValue;
-        std::vector<svm::Instruction> instructions;
+        std::vector<StatementInstruction> instructions;
     };
 
     struct StatementCase
     {
         std::string conditionValue;
-        std::vector<svm::Instruction> instructions;
+        std::vector<StatementInstruction> instructions;
     };
 
     struct StatementElse
     {
-        std::vector<svm::Instruction> instructions;
+        std::vector<StatementInstruction> instructions;
     };
 
     struct StatementWhile
     {
         std::string conditionIdentifier;
-        std::vector<svm::Instruction> instructions;
+        std::vector<StatementInstruction> instructions;
     };
 
     struct StatementFunction

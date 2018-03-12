@@ -2,7 +2,7 @@ PROJECTS := libSomeVM SomeVM SomeLang
 
 # compile settings for all projects
 export GLOBAL_CXX       := g++
-export GLOBAL_CFLAGS    := --std=c++17 -Wall -Wextra
+export GLOBAL_CFLAGS    := -std=c++17 -Wall -Wextra -fdiagnostics-color=always
 export GLOBAL_RLS_FLAGS := -O2
 export GLOBAL_DBG_FLAGS := -DDEBUG -O0 -g
 

@@ -2,18 +2,21 @@
 
 #include <istream>
 #include <sstream>
+#include <cstring>
 
 namespace sl
 {
     static sl::Token number(char first, std::istream& in, size_t line, size_t position);
     static sl::Token string(char first, std::istream& in, size_t line, size_t position);
     static sl::Token boolean(char first, std::istream& in, size_t line, size_t position);
-    static sl::Token variable(char first, std::istream& in, size_t line, size_t position);
     static sl::Token func(char first, std::istream& in, size_t line, size_t position);
     static sl::Token identifier(char first, std::istream& in, size_t line, size_t position);
 
     std::vector<Token> lex(std::istream& in)
     {
+        if(!in)
+            throw std::runtime_error("Unable to read input stream");
+
         std::vector<Token> ret;
 
         size_t lineNumber = 1;
@@ -259,28 +262,15 @@ namespace sl
 
     bool alpha(char ch)
     {
-        return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z';
+        return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z');
     }
 
     bool validIdentifier(char ch)
     {
-        return alpha(ch) || '0' <= ch && ch <= '9' || ch == '_';
+        return alpha(ch) || ('0' <= ch && ch <= '9') || ch == '_';
     }
 
-    Token variable(char first, std::istream& in, size_t line, size_t position)
-    {
-        char next;
-        in.get(next);
-
-        auto ret = identifier(next, in, line, position);
-        ret.value.insert(ret.value.begin(), first);
-        ret.type = Token::Type::Dollar;
-        --ret.position;
-
-        return ret;
-    }
-
-    Token func(char first, std::istream& in, size_t line, size_t position)
+    Token func(char /*first*/, std::istream& in, size_t line, size_t position)
     {
         Token ret{ line, position };
 
