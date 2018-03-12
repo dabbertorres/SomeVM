@@ -1,7 +1,59 @@
 #include "Instruction.hpp"
 
+#include <map>
+
 namespace svm
 {
+    static const std::map<std::string, Instruction::Type> stringMap = 
+    {
+        {"load", Instruction::Type::Load},
+        {"loadc", Instruction::Type::LoadC},
+        {"add", Instruction::Type::Add},
+        {"sub", Instruction::Type::Sub},
+        {"mult", Instruction::Type::Mult},
+        {"div", Instruction::Type::Div},
+        {"mod", Instruction::Type::Mod},
+        {"neg", Instruction::Type::Neg},
+        {"lt", Instruction::Type::Lt},
+        {"lteq", Instruction::Type::LtEq},
+        {"gt", Instruction::Type::Gt},
+        {"gteq", Instruction::Type::GtEq},
+        {"eq", Instruction::Type::Eq},
+        {"neq", Instruction::Type::Neq},
+        {"not", Instruction::Type::Not},
+        {"and", Instruction::Type::And},
+        {"or", Instruction::Type::Or},
+        {"xor", Instruction::Type::Xor},
+        {"jmpt", Instruction::Type::JmpT},
+        {"jmpf", Instruction::Type::JmpF},
+        {"jmptc", Instruction::Type::JmpTC},
+        {"jmpfc", Instruction::Type::JmpFC},
+        {"rjmpt", Instruction::Type::RJmpT},
+        {"rjmpf", Instruction::Type::RJmpF},
+        {"rjmptc", Instruction::Type::RJmpTC},
+        {"rjmpfc", Instruction::Type::RJmpFC},
+        {"call", Instruction::Type::Call},
+        {"ret", Instruction::Type::Ret},
+        {"jmp", Instruction::Type::Jmp},
+        {"rjmp", Instruction::Type::RJmp},
+        {"jmpc", Instruction::Type::JmpC},
+        {"rjmpc", Instruction::Type::RJmpC},
+    };
+
+    bool Instruction::type(const std::string& str, Type& type)
+    {
+        auto it = stringMap.find(str);
+        if(it != stringMap.end())
+        {
+            type = it->second;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
 	Instruction::Instruction()
 		: Instruction(Type::Nop, 0)
 	{}

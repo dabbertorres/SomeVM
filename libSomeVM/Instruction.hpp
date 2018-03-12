@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 namespace svm
 {
@@ -22,6 +23,10 @@ namespace svm
     public:
         enum class Type : std::uint8_t
         {
+            /* misc */
+            SysCall,	// 1: number of arguments to call with, 2: registry index of start of arguments, 3: function index
+            Nop,		// "No operation". Any arguments are ignored
+
             /* memory ops */
             Load,		// 1: write-to, 2: index
             LoadC,		// 1: write-to, 2x: constant index
@@ -74,11 +79,9 @@ namespace svm
             // constant index versions
             JmpC,
             RJmpC,
-
-            /* misc */
-            SysCall,	// 1: number of arguments to call with, 2: registry index of start of arguments, 3: function index
-            Nop,		// "No operation". Any arguments are ignored
         };
+
+        static bool type(const std::string& str, Type& type);
 
         Instruction();
         Instruction(std::uint64_t val);

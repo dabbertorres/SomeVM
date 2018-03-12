@@ -11,14 +11,14 @@ int main(int argc, char** argv) try
 {
     // argv[1] is a filename to compile
     if (argc < 1)
-        throw std::exception{ "Not enough arguments, must provide a filename to compile." };
+        throw std::runtime_error("Not enough arguments, must provide a filename to compile.");
 
     std::ifstream fin{ argv[1] };
 
     auto tokens = sl::lex(fin);
 
-    //for (auto& t : tokens)
-    //    std::cout << t << '\n';
+    for (auto& t : tokens)
+        std::cout << t << '\n';
 
     auto stmts = sl::parse(argv[1], fin, tokens);
 

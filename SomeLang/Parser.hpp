@@ -16,10 +16,11 @@ namespace sl
     class ParseError : public std::exception
     {
     public:
+        ParseError(const std::string& error);
         ParseError(const std::string& streamName, const Token& tok, std::istream& stream, const std::string& expected);
         ~ParseError() = default;
 
-        const char* what() const override;
+        const char* what() const noexcept override;
 
     private:
         std::string error;

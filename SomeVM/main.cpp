@@ -22,7 +22,7 @@ int main(int argc, char** argv) try
     {
         std::cout << "Incorrect number of arguments. Must be 0 - 2\n";
         std::cout << "0 args: repl mode\n";
-        std::cout << "1 arg: binary to execute\n";
+        std::cout << "1 arg:  binary to execute\n";
         std::cout << "2 args: input file to assemble, and output file to create\n";
     }
 
