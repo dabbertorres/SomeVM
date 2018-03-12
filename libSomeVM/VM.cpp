@@ -10,13 +10,14 @@ namespace
 {
 	using namespace svm;
 
-	std::int64_t getInteger(Float f)
+	int64_t getInteger(Float f)
 	{
-		constexpr auto VALUE_MASK = 0x000fffffffffffffu;
+		constexpr uint64_t VALUE_MASK = 0x000fffffffffffffu;
+        constexpr uint64_t SIGN_BIT = 1ull << 63;
 
-		auto& ir = reinterpret_cast<std::int64_t&>(f);
+		auto& ir = reinterpret_cast<int64_t&>(f);
 
-		bool sign = (ir & (1ull << 63)) != 0;
+		bool sign = (ir & SIGN_BIT) != 0;
 		// assume exponent is +1
 
 		return (ir & VALUE_MASK) * (sign ? -1 : 1);

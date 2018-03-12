@@ -3,6 +3,7 @@
 #include <stack>
 
 #include "Frame.hpp"
+#include "Registry.hpp"
 
 namespace svm
 {

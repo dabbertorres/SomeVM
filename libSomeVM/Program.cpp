@@ -174,3 +174,4 @@ namespace svm
 		return output.tellp() - startPos;
 	}
 }
+

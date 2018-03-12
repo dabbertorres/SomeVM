@@ -18,3 +18,4 @@ namespace svm
 		std::uint64_t write(std::ostream& output) const;
 	};
 }
+
