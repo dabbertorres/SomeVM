@@ -1,38 +1,79 @@
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 
-#include "libSomeVM/VM.hpp"
+#include "SomeLang/Assembler.hpp"
+#include "SomeLang/Lexer.hpp"
+#include "SomeLang/Parser.hpp"
+
 #include "libSomeVM/Program.hpp"
+#include "libSomeVM/VM.hpp"
+
+#include "Repl.hpp"
+
+void repl();
+void run(const char* input);
+void build(const char* input, const char* output);
 
 int main(int argc, char** argv) try
 {
-    if (argc == 2)
+    switch (argc)
     {
-        svm::Program program;
-        std::ifstream fin{ argv[1] };
-        auto bytes = program.load(fin);
+    case 1:
+        repl();
+        break;
 
-        std::cout << "Loaded " << bytes << " bytes.\n";
+    case 2:
+        run(argv[1]);
+        break;
 
-        svm::VM vm;
-        vm.load(program);
-        vm.run();
+    case 3:
+        build(argv[1], argv[2]);
+        break;
+
+    default:
+        throw std::runtime_error{
+            R"(Incorrect number of arguments. Must be 0 - 2:
+    0 args: repl mode
+    1 arg:  binary to execute
+    2 args: input file to build, and output file to create)"
+        };
+        break;
     }
-    else
-    {
-        std::cout << "Incorrect number of arguments. Must be 0 - 2\n";
-        std::cout << "0 args: repl mode\n";
-        std::cout << "1 arg:  binary to execute\n";
-        std::cout << "2 args: input file to assemble, and output file to create\n";
-    }
 
-    std::cout << "Press <Enter> to continue...";
-    std::cin.get();
-
-    return 0;
+    return EXIT_SUCCESS;
 }
 catch (const std::exception& e)
 {
-    std::cout << "Exception: " << e.what() << std::endl;
-    return 1;
+    std::cout << e.what() << std::endl;
+    return EXIT_FAILURE;
+}
+
+void repl()
+{
+    Repl repl{ std::cin, std::cout };
+    repl.run();
+}
+
+void run(const char* input)
+{
+    svm::VM vm;
+    svm::Program program;
+    std::ifstream fin{ input };
+
+    program.load(fin);
+    vm.load(program);
+    vm.run();
+}
+
+void build(const char* input, const char* output)
+{
+    std::ifstream fin{ input };
+    std::ofstream fout{ output };
+
+    auto tokens = sl::lex(fin);
+    auto stmts = sl::parse(input, fin, std::cout, tokens);
+    svm::Program program = sl::assemble(stmts);
+
+    program.write(fout);
 }

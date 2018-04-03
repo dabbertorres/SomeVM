@@ -2,21 +2,22 @@
 
 #include <iosfwd>
 
-#include "libSomeVM/Value.hpp"
+#include "SomeLang/Assembler.hpp"
+
+#include "libSomeVM/Program.hpp"
 #include "libSomeVM/VM.hpp"
 
-namespace svm
+class Repl
 {
-	class Repl
-	{
-	public:
-		Repl(std::istream& input, std::ostream& output);
-		~Repl();
+public:
+    Repl(std::istream& input, std::ostream& output);
+    ~Repl();
 
-		//void print(const Value& val) const;
+    void run();
 
-	private:
-		std::istream& input;
-		std::ostream& output;
-	};
-}
+private:
+    svm::VM vm;
+    svm::Program program;
+    std::istream& input;
+    std::ostream& output;
+};

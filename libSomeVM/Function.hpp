@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "Instruction.hpp"
 
 namespace svm
@@ -7,7 +9,7 @@ namespace svm
 	class Function
 	{
 	public:
-		Function(std::uint8_t nrets, std::uint8_t nargs, Bytecode code);
+		Function(uint8_t nrets, uint8_t nargs, Bytecode code);
 
 		Function(const Function& other);
 		Function(Function&& other);
@@ -18,16 +20,16 @@ namespace svm
 		Bytecode::const_iterator begin() const;
 		Bytecode::const_iterator end() const;
 
-		std::uint64_t length() const;
+		uint64_t length() const;
 
 		const Bytecode& bytecode() const;
 
-		std::uint8_t returns() const;
-		std::uint8_t args() const;
+		uint8_t returns() const;
+		uint8_t args() const;
 
 	private:
-		std::uint8_t numReturns;
-		std::uint8_t numArgs;
+		uint8_t nrets;
+		uint8_t nargs;
 		Bytecode code;
 	};
 }

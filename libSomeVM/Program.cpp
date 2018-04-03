@@ -1,177 +1,171 @@
 #include "Program.hpp"
 
+#include <cstdint>
+#include <cstring>
 #include <istream>
 #include <ostream>
+#include <variant>
 
 namespace svm
 {
-	constexpr auto* BINARY_ID = ".svm";
-	constexpr std::uint32_t VERSION = 0;
+    constexpr auto* BINARY_ID = ".svm";
+    constexpr uint32_t VERSION = 0;
 
-	std::uint64_t Program::load(std::istream& input)
-	{
-		if (!input)
-			throw std::runtime_error("Unable to access input stream");
+    Program::Program()
+        : constants{},
+        functions{}
+    {}
 
-		auto startPos = input.tellg();
+    uint64_t Program::load(std::istream& input)
+    {
+        if (!input)
+            throw std::runtime_error("Unable to access input stream");
 
-		std::string identifier(4, 0);
-		input.read(&identifier[0], std::strlen(BINARY_ID));
+        auto startPos = input.tellg();
 
-		if (identifier != BINARY_ID)
-			throw std::runtime_error("Input file is not a valid svm binary");
+        std::string identifier{ 4, '\0' };
+        input.read(&identifier[0], std::strlen(BINARY_ID));
 
-		// check version...
-		std::uint32_t version = 0;
-		input.read(reinterpret_cast<char*>(&version), sizeof(version));
+        if (identifier != BINARY_ID)
+            throw std::runtime_error("Input file is not a valid svm binary");
 
-		if (version != VERSION)
-			throw std::runtime_error("Incompatible version");
+        // check version...
+        uint32_t version = 0;
+        input.read(reinterpret_cast<char*>(&version), sizeof(version));
 
-		// constants
-		std::uint64_t numConstants = 0;
-		input.read(reinterpret_cast<char*>(&numConstants), sizeof(numConstants));
+        if (version != VERSION)
+            throw std::runtime_error("Incompatible version");
 
-		for (std::uint64_t i = 0; i < numConstants; ++i)
-		{
-			/* TODO: better to do a 4 (?) byte number of bytes, followed by that many bytes, no matter the type
-             * We are statically-typed after all
-            Type type;
-			input.read(reinterpret_cast<char*>(&type), sizeof(type));
+        // constants
+        uint64_t numConstants = 0;
+        input.read(reinterpret_cast<char*>(&numConstants), sizeof(numConstants));
 
-			switch (type)
-			{
-			case Type::Nil:
-				constants.emplace_back();
-				break;
+        for (uint64_t idx = 0; idx < numConstants; ++idx)
+        {
+            uint64_t type;
+            input.read(reinterpret_cast<char*>(&type), sizeof(type));
 
-			case Type::Bool:
-			{
-				Bool val;
-				input.read(reinterpret_cast<char*>(&val), sizeof(val));
-				constants.emplace_back(val);
-				break;
-			}
+            Bool b;
+            Int i;
+            Float f;
+            std::vector<char> s;
+            uint64_t len;
 
-			case Type::Float:
-			{
-				Float val;
-				input.read(reinterpret_cast<char*>(&val), sizeof(val));
-				constants.emplace_back(val);
-				break;
-			}
+            switch (type)
+            {
+            case typeIndex<Bool>():
+                input.read(reinterpret_cast<char*>(&b), sizeof(b));
+                constants.emplace_back(b);
+                break;
 
-			// constant arrays are assumed to be Strings
-			case Type::Array:
-			{
-				std::uint64_t len = 0;
-				input.read(reinterpret_cast<char*>(&len), sizeof(len));
+            case typeIndex<Int>():
+                input.read(reinterpret_cast<char*>(&i), sizeof(i));
+                constants.emplace_back(i);
+                break;
 
-				Array<char> val(len);
-				input.read(reinterpret_cast<char*>(&val[0]), len);
+            case typeIndex<Float>():
+                input.read(reinterpret_cast<char*>(&f), sizeof(f));
+                constants.emplace_back(f);
+                break;
 
-				constants.emplace_back(val);
-				break;
-			}
+            case typeIndex<String>():
+                input.read(reinterpret_cast<char*>(&len), sizeof(len));
+                s.resize(len);
+                input.read(s.data(), len);
+                constants.emplace_back(String{ s.data(), len });
+                break;
 
-			default:
-			{
-				std::string msg = "Unknown type: ";
-				msg += static_cast<std::uint8_t>(type);
+            default:
+                throw std::runtime_error{ "invalid type for constant" };
+            }
+        }
 
-				throw std::runtime_error(msg);
-			}
-			}*/
-		}
+        // functions
+        uint64_t numFunctions = 0;
+        input.read(reinterpret_cast<char*>(&numFunctions), sizeof(numFunctions));
 
-		// functions
-		std::uint64_t numFunctions = 0;
-		input.read(reinterpret_cast<char*>(&numFunctions), sizeof(numFunctions));
+        for (uint64_t i = 0; i < numFunctions; ++i)
+        {
+            uint8_t nrets;
+            uint8_t nargs;
 
-		for (std::uint64_t i = 0; i < numFunctions; ++i)
-		{
-			std::uint8_t nrets;
-			std::uint8_t nargs;
+            input.read(reinterpret_cast<char*>(&nrets), sizeof(nrets));
+            input.read(reinterpret_cast<char*>(&nargs), sizeof(nargs));
 
-			input.read(reinterpret_cast<char*>(&nrets), sizeof(nrets));
-			input.read(reinterpret_cast<char*>(&nargs), sizeof(nargs));
+            uint64_t numInstrs;
+            input.read(reinterpret_cast<char*>(&numInstrs), sizeof(numInstrs));
 
-			std::uint64_t numInstrs;
-			input.read(reinterpret_cast<char*>(&numInstrs), sizeof(numInstrs));
+            Bytecode code(numInstrs);
 
-			Bytecode code(numInstrs);
+            input.read(reinterpret_cast<char*>(code.data()), numInstrs * sizeof(Instruction));
 
-			input.read(reinterpret_cast<char*>(code.data()), numInstrs * sizeof(Instruction));
+            functions.emplace_back(nrets, nargs, code);
+        }
 
-			functions.emplace_back(nrets, nargs, code);
-		}
+        return input.tellg() - startPos;
+    }
 
-		return input.tellg() - startPos;
-	}
+    uint64_t Program::write(std::ostream& output) const
+    {
+        if (!output)
+            throw std::runtime_error("Unable to access output stream");
 
-	std::uint64_t Program::write(std::ostream& output) const
-	{
-		if (!output)
-			throw std::runtime_error("Unable to access output stream");
+        auto startPos = output.tellp();
 
-		auto startPos = output.tellp();
+        // file type identifier
+        output.write(BINARY_ID, std::strlen(BINARY_ID));
 
-		// file type identifier
-		output.write(BINARY_ID, std::strlen(BINARY_ID));
+        // TODO: need to figure out how I want to do versioning
+        // version
+        uint32_t version = 0;
+        output.write(reinterpret_cast<char*>(&version), sizeof(version));
 
-		// TODO: need to figure out how I want to do versioning
-		// version
-		std::uint32_t version = 0;
-		output.write(reinterpret_cast<char*>(&version), sizeof(version));
+        // constants
+        uint64_t numConstants = constants.size();
+        output.write(reinterpret_cast<char*>(&numConstants), sizeof(numConstants));
 
-		// constants
-		std::uint64_t numConstants = constants.size();
-		output.write(reinterpret_cast<char*>(&numConstants), sizeof(numConstants));
+        for (auto c : constants)
+        {
+            uint64_t type = c.index();
+            output.write(reinterpret_cast<char*>(&type), sizeof(type));
 
-		for (auto& c : constants)
-		{
-			/* TODO: better to do a 4 (?) byte number of bytes, followed by that many bytes, no matter the type
-             * We are statically-typed after all
-			auto type = c.type();
+            std::visit([&](auto&& v)
+                       {
+                           using T = std::decay_t<decltype(v)>;
 
-			output.write(reinterpret_cast<char*>(&type), sizeof(type));
+                           if constexpr (std::is_same_v<T, String>)
+                           {
+                               uint64_t len = v.length();
+                               output.write(reinterpret_cast<char*>(&len), sizeof(len));
+                               output.write(v.data(), len);
+                           }
+                           else
+                           {
+                               output.write(reinterpret_cast<char*>(&v), sizeof(T));
+                           }
+                       }, c);
+        }
 
-			if (type != Type::Array)
-			{
-				Bytes bytes = c;
-				output.write(reinterpret_cast<const char*>(bytes.data()), bytes.length());
-			}
-			else
-			{
-				// constant arrays are assumed to be Strings
-				Array<char> str = c;
-				std::uint64_t len = str.length();
+        // functions
+        uint64_t numFunctions = functions.size();
+        output.write(reinterpret_cast<char*>(&numFunctions), sizeof(numFunctions));
 
-				output.write(reinterpret_cast<char*>(&len), sizeof(len));
-				output.write(str.data(), len);
-			} */
-		}
+        for (auto& f : functions)
+        {
+            uint8_t nrets = f.returns();
+            uint8_t nargs = f.args();
 
-		// functions
-		std::uint64_t numFunctions = functions.size();
-		output.write(reinterpret_cast<char*>(&numFunctions), sizeof(numFunctions));
+            output.write(reinterpret_cast<const char*>(&nrets), sizeof(nrets));
+            output.write(reinterpret_cast<const char*>(&nargs), sizeof(nargs));
 
-		for (auto& f : functions)
-		{
-			std::uint8_t nrets = f.returns();
-			std::uint8_t nargs = f.args();
+            uint64_t numInstrs = f.length();
 
-			output.write(reinterpret_cast<const char*>(&nrets), sizeof(nrets));
-			output.write(reinterpret_cast<const char*>(&nargs), sizeof(nargs));
+            auto& code = f.bytecode();
+            output.write(reinterpret_cast<const char*>(&numInstrs), sizeof(numInstrs));
+            output.write(reinterpret_cast<const char*>(code.data()), numInstrs * sizeof(Instruction));
+        }
 
-			std::uint64_t numInstrs = f.length();
-
-			auto& code = f.bytecode();
-			output.write(reinterpret_cast<const char*>(&numInstrs), sizeof(numInstrs));
-			output.write(reinterpret_cast<const char*>(code.data()), numInstrs * sizeof(Instruction));
-		}
-
-		return output.tellp() - startPos;
-	}
+        return output.tellp() - startPos;
+    }
 }
 

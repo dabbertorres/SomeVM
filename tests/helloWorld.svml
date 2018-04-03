@@ -1,27 +1,17 @@
 # this is a comment
 
-func () hello (): print "hello, world" ;
+func hello () > (): print "hello, world" ;
 
-func () bye (): print "goodbye, world" ;
+func bye () > (): print "goodbye, world" ;
 
-# flag
-loadc $0 $5
+load $flag true
 
-# number of arguments
-loadc $1 $0
+print $flag
 
-# first jump offset
-loadc $2 $2
-
-# second jump offset
-loadc $3 $1
-
-print $0
-
-if $0:
-	call hello
+if $flag:
+	call $hello
 else:
-	call bye
+	call $bye
 ;
 
-print $0
+print $flag

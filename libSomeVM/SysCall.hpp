@@ -4,8 +4,11 @@
 
 namespace svm
 {
-	enum class SysCall : std::int64_t
-	{
-		Print = 0,
-	};
+    enum class SysCall : int16_t
+    {
+        PrintBool,
+        PrintInt,
+        PrintFloat,
+        Print,
+    };
 }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <vector>
 #include <iosfwd>
 
@@ -10,12 +11,18 @@ namespace svm
 {
 	struct Program
 	{
+        Program();
+        Program(Program&&) = default;
+        ~Program() = default;
+
 		std::vector<Value> constants;
 		std::vector<Function> functions;
 
+        // TODO (optionally) store program state (ie: registry, call stack, etc)
+
 		// return the amount of bytes read/written
-		std::uint64_t load(std::istream& input);
-		std::uint64_t write(std::ostream& output) const;
+		uint64_t load(std::istream& input);
+		uint64_t write(std::ostream& output) const;
 	};
 }
 

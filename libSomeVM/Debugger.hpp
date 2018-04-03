@@ -7,8 +7,8 @@ namespace svm
 {
 	struct Breakpoint
 	{
-		std::uint64_t functionIndex;
-		std::uint64_t instructionIndex;
+		uint64_t functionIndex;
+		uint64_t instructionIndex;
 	};
 
 	class Debugger

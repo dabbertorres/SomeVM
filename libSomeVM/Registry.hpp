@@ -1,78 +1,56 @@
 #pragma once
 
-#include <cstdint>
+#include <iterator>
+#include <mutex>
+#include <type_traits>
 #include <vector>
-#include <list>
 
-namespace sl
+#include "Register.hpp"
+#include "Value.hpp"
+
+namespace svm
 {
-    class Object
-    {
-    public:
-        Object();
-
-        Object(const Object& other);
-        Object& operator=(const Object& other);
-
-        Object(Object&& other);
-        Object& operator=(Object&& other);
-
-        ~Object();
-
-        void ref();
-        void unref();
-        size_t refCount() const;
-
-    private:
-        size_t sizeBytes;
-        size_t references;
-        void* pointer;
-    };
-
-    // may contain a value, or an object pointer
-    using Register = std::uint64_t;
-
     class Registry
     {
     public:
+        using Iterator = std::vector<Value>::iterator;
+        using ConstIterator = std::vector<Value>::const_iterator;
+
+        Registry() = default;
         Registry(size_t size);
-        
-        // delete?
+
         Registry(const Registry& other);
         Registry& operator=(const Registry& other);
 
         Registry(Registry&& other);
         Registry& operator=(Registry&& other);
 
-        ~Registry();
+        ~Registry() = default;
 
-        template<typename T>
-        T get(size_t index) const;
+        Iterator begin();
+        Iterator end();
 
-        Object* get(size_t index, const Heap& heap) const;
+        ConstIterator begin() const;
+        ConstIterator end() const;
+
+        template<typename It, typename = std::enable_if_t<std::is_same_v<std::iterator_traits<It>::value_type, Value>>>
+        void load(It begin, It end);
+
+        Value get(Register idx) const;
+        void set(Register idx, Value v);
 
     private:
-        std::vector<Register> values;
+        std::vector<Value> values;
+        mutable std::recursive_mutex mut;
+
+        using LockType = std::lock_guard<decltype(mut)>;
     };
 
-    class Heap
+    template<typename It, typename>
+    inline void Registry::load(It begin, It end)
     {
-    public:
-        Heap(size_t bytes);
-
-        // delete?
-        Heap(const Heap& other);
-        Heap& operator=(const Heap& other);
-
-        Heap(Heap&& other);
-        Heap& operator=(Heap&& other);
-
-        ~Heap();
-
-
-
-    private:
-        std::list<Object> objects;
-        void* pointer;
-    };
+        LockType lock{ mut };
+        values.resize(std::distance(begin, end));
+        std::copy(begin, end, values.begin());
+    }
 }

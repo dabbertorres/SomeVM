@@ -1,9 +1,8 @@
 #include "Assembler.hpp"
 
-#include <string>
-#include <sstream>
 #include <istream>
 #include <ostream>
+#include <sstream>
 
 #include "libSomeVM/Value.hpp"
 #include "libSomeVM/Function.hpp"
@@ -17,7 +16,7 @@ namespace
     using namespace sl;
 
     // returns the index of the added value
-    static std::uint64_t constant(std::istream& in, svm::Registry& constants)
+    static svm::Register constant(std::istream& in, std::vector<svm::Value>& constants)
     {
         std::string str;
         in >> str;
@@ -41,8 +40,8 @@ namespace
         if (isStr)
         {
             auto noquotes = str.substr(1, str.length() - 2);
-            svm::Array<char> val{ noquotes.data(), noquotes.length() };
-            constants.push_back(val);
+            svm::String val{ noquotes.data(), noquotes.length() };
+            constants.emplace_back(val);
         }
         else
         {
@@ -66,21 +65,21 @@ namespace
             }
         }
 
-        return constants.size() - 1;
+        return static_cast<svm::Register>(constants.size() - 1);
     }
 
-    static svm::Instruction oneArg(std::istream& in, svm::Instruction::Type type)
+    static svm::Instruction oneArg(std::istream& in, svm::Instruction::Code type)
     {
         std::string str;
 
         in >> str;
 
-        auto one = static_cast<std::uint64_t>(Assembler::toRegister(str));
+        auto one = Assembler::toRegister(str);
 
-        return{ type, one };
+        return{ type, one, 0, 0 };
     }
 
-    static svm::Instruction oneArgConst(std::istream& in, svm::Instruction::Type type, svm::Instruction::Type constType, svm::Program& prog)
+    static svm::Instruction oneArgConst(std::istream& in, svm::Instruction::Code type, svm::Program& prog)
     {
         std::string str;
 
@@ -89,7 +88,7 @@ namespace
 
         if (Assembler::isRegister(str))
         {
-            return{ type, Assembler::toRegister(str) };
+            return{ type, Assembler::toRegister(str), 0, 0 };
         }
         else
         {
@@ -97,24 +96,24 @@ namespace
             in.seekg(pos);
             auto idx = constant(in, prog.constants);
 
-            return{ constType, idx };
+            return{ type, idx, 0, 0 };
         }
     }
 
-    static svm::Instruction twoArg(std::istream& in, svm::Instruction::Type type)
+    static svm::Instruction twoArg(std::istream& in, svm::Instruction::Code type)
     {
         std::string oneStr;
         std::string twoStr;
 
         in >> oneStr >> twoStr;
 
-        std::uint32_t one = Assembler::toRegister(oneStr);
-        std::uint32_t two = Assembler::toRegister(twoStr);
+        auto one = Assembler::toRegister(oneStr);
+        auto two = Assembler::toRegister(twoStr);
 
-        return{ type, one, two };
+        return{ type, one, two, 0 };
     }
 
-    static svm::Instruction twoArgOptConst(std::istream& in, svm::Instruction::Type type, svm::Instruction::Type constType, svm::Program& prog)
+    static svm::Instruction twoArgOptConst(std::istream& in, svm::Instruction::Code type, svm::Instruction::Code constType, svm::Program& prog)
     {
         std::string one;
         std::string two;
@@ -128,7 +127,7 @@ namespace
 
         if (Assembler::isRegister(two))
         {
-            return{ type, dest, Assembler::toRegister(two) };
+            return{ type, dest, Assembler::toRegister(two), 0 };
         }
         else
         {
@@ -136,11 +135,11 @@ namespace
             in.seekg(pos);
             auto idx = constant(in, prog.constants);
 
-            return{ constType, dest, static_cast<std::uint32_t>(idx) };
+            return{ constType, dest, idx, 0 };
         }
     }
 
-    static svm::Instruction threeArg(std::istream& in, svm::Instruction::Type type)
+    static svm::Instruction threeArg(std::istream& in, svm::Instruction::Code type)
     {
         std::string oneStr;
         std::string twoStr;
@@ -148,9 +147,9 @@ namespace
 
         in >> oneStr >> twoStr >> threeStr;
 
-        auto one = static_cast<std::uint16_t>(Assembler::toRegister(oneStr));
-        auto two = static_cast<std::uint16_t>(Assembler::toRegister(twoStr));
-        auto three = static_cast<std::uint16_t>(Assembler::toRegister(threeStr));
+        auto one = Assembler::toRegister(oneStr);
+        auto two = Assembler::toRegister(twoStr);
+        auto three = Assembler::toRegister(threeStr);
 
         return{ type, one, two, three };
     }
@@ -163,16 +162,16 @@ namespace sl
         return {};
     }
 
-    svm::Program Assembler::run(std::istream& in, std::ostream& out)
+    svm::Program Assembler::run(std::istream& in, std::ostream& logStream)
     {
         svm::Program program;
 
-        run(in, out, program);
+        run(in, logStream, program);
 
         return program;
     }
 
-    void Assembler::run(std::istream& in, std::ostream& out, svm::Program& program)
+    void Assembler::run(std::istream& in, std::ostream& logStream, svm::Program& program)
     {
         std::uint64_t lineNum = 1;
         std::string line;
@@ -228,10 +227,10 @@ namespace sl
                     // number of returns is the first number following the colon
                     // number of arguments is the second number following the colon (with a space between them! (strict for now...))
                     std::uint32_t numRets = 0;
-                    std::uint32_t numArgs = 0;
-                    iss >> numRets >> numArgs;
+                    std::uint32_t nargs = 0;
+                    iss >> numRets >> nargs;
 
-                    codeStack.emplace(static_cast<std::uint8_t>(numRets), static_cast<std::uint8_t>(numArgs), svm::Bytecode{});
+                    codeStack.emplace(static_cast<std::uint8_t>(numRets), static_cast<std::uint8_t>(nargs), svm::Bytecode{});
                 }
                 // end function
                 else if (command == "end")
@@ -249,7 +248,7 @@ namespace sl
             }
             catch (const std::exception& e)
             {
-                out << "\nError (line: " << lineNum << "): " << e.what() << std::endl;
+                logStream << "\nError (line: " << lineNum << "): " << e.what() << std::endl;
                 throw e;
             }
         }
@@ -279,7 +278,7 @@ namespace sl
         return false;
     }
 
-    std::uint16_t Assembler::toRegister(const std::string& regStr)
+    svm::Register Assembler::toRegister(const std::string& regStr)
     {
         if (!isRegister(regStr))
         {
@@ -290,52 +289,47 @@ namespace sl
             throw std::runtime_error(msg);
         }
 
-        return static_cast<std::uint16_t>(std::stoi(regStr.substr(1)));
+        return static_cast<svm::Register>(std::stoi(regStr.substr(1)));
     }
 
     const std::unordered_map<std::string, svm::Instruction(*)(std::istream&, svm::Program&)> Assembler::commands =
-	{
-		/* memory ops */
-		{"load", [](std::istream& in, svm::Program& prog) { return twoArgOptConst(in, svm::Instruction::Type::Load, svm::Instruction::Type::LoadC, prog); }},
-		{"loadc", [](std::istream& in, svm::Program& prog) { return twoArgOptConst(in, svm::Instruction::Type::Load, svm::Instruction::Type::LoadC, prog); }},
+    {
+        /* memory ops */
+        {"load", [](std::istream& in, svm::Program& prog) { return oneArgConst(in, svm::Instruction::Code::Load, prog); }},
 
-		/* math ops */
-		{"add", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Add); }},
-		{"sub", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Sub); }},
-		{"mult", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Mult); }},
-		{"div", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Div); }},
-		{"mod", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Mod); }},
-		{"neg", [](std::istream& in, svm::Program&) { return twoArg(in, svm::Instruction::Type::Neg); }},
+        /* math ops */
+        {"add", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Add); }},
+        {"sub", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Sub); }},
+        {"mult", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Mult); }},
+        {"div", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Div); }},
+        {"mod", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Mod); }},
+        {"neg", [](std::istream& in, svm::Program&) { return twoArg(in, svm::Instruction::Code::Neg); }},
 
-		/* comparison ops */
-		{"lt", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Lt); }},
-		{"lteq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::LtEq); }},
-		{"gt", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Gt); }},
-		{"gteq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::GtEq); }},
-		{"eq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Eq); }},
-		{"neq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Neq); }},
+        /* comparison ops */
+        {"lt", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Lt); }},
+        {"lteq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::LtEq); }},
+        {"gt", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Gt); }},
+        {"gteq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::GtEq); }},
+        {"eq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Eq); }},
+        {"neq", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Neq); }},
 
-		/* logical ops */
-		{"not", [](std::istream& in, svm::Program&) { return twoArg(in, svm::Instruction::Type::Not); }},
-		{"and", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Add); }},
-		{"or", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Or); }},
-		{"xor", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Xor); }},
+        /* logical ops */
+        {"not", [](std::istream& in, svm::Program&) { return twoArg(in, svm::Instruction::Code::Not); }},
+        {"and", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Add); }},
+        {"or", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Or); }},
+        {"xor", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Xor); }},
 
-		/* conditional branching */
-		{"jmpt", [](std::istream& in, svm::Program& prog) { return twoArgOptConst(in, svm::Instruction::Type::JmpT, svm::Instruction::Type::JmpTC, prog); }},
-		{"jmpf", [](std::istream& in, svm::Program& prog) { return twoArgOptConst(in, svm::Instruction::Type::JmpF, svm::Instruction::Type::JmpFC, prog); }},
+        /* conditional branching */
+        {"jmpt", [](std::istream& in, svm::Program& prog) { return twoArg(in, svm::Instruction::Code::JmpT); }},
+        {"jmpf", [](std::istream& in, svm::Program& prog) { return twoArg(in, svm::Instruction::Code::JmpF); }},
 
-		{"rjmpt", [](std::istream& in, svm::Program& prog) { return twoArgOptConst(in, svm::Instruction::Type::RJmpT, svm::Instruction::Type::RJmpTC, prog); }},
-		{"rjmpf", [](std::istream& in, svm::Program& prog) { return twoArgOptConst(in, svm::Instruction::Type::RJmpF, svm::Instruction::Type::RJmpFC, prog); }},
+        /* branching */
+        {"call", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::Call); }},
+        {"ret", [](std::istream& in, svm::Program&) { return twoArg(in, svm::Instruction::Code::Ret); }},
+        {"jmp", [](std::istream& in, svm::Program& prog) { return oneArgConst(in, svm::Instruction::Code::Jmp, prog); }},
 
-		/* branching */
-		{"call", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::Call); }},
-		{"ret", [](std::istream& in, svm::Program&) { return twoArg(in, svm::Instruction::Type::Ret); }},
-		{"jmp", [](std::istream& in, svm::Program& prog) { return oneArgConst(in, svm::Instruction::Type::Jmp, svm::Instruction::Type::JmpC, prog); }},
-		{"rjmp", [](std::istream& in, svm::Program& prog) { return oneArgConst(in, svm::Instruction::Type::RJmp, svm::Instruction::Type::RJmpC, prog); }},
-
-		/* misc */
-		{"syscall", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Type::SysCall); }},
-		{"nop", [](std::istream&, svm::Program&) { return svm::Instruction(svm::Instruction::Type::Nop, 0); }},
-	};
+        /* misc */
+        {"syscall", [](std::istream& in, svm::Program&) { return threeArg(in, svm::Instruction::Code::SysCall); }},
+        {"nop", [](std::istream&, svm::Program&) { return svm::Instruction(svm::Instruction::Code::Nop, 0, 0, 0); }},
+    };
 }

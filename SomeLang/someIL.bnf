@@ -1,6 +1,6 @@
 <program> ::= { <statement> | <function> }
 
-<statement> ::= <instruction> | <conditional> | <loop>
+<statement> ::= <instruction> | <if> | <switch> | <while>
 
 <instruction> ::= <identifier> { <value> } <newline>
 
@@ -10,7 +10,11 @@
 
 <literal> ::= <number> | <string> | <bool>
 
-<number> ::= [ '+' | '-' ] <digit> { <digit> } [ '.' <digit> { <digit> } ]
+<number> ::= [ '+' | '-' ] <float> | <int>
+
+<float> ::= <digit> { <digit> } [ '.' <digit> { <digit> } ]
+
+<int> ::= <digit> { <digit> }
 
 <string> ::= '"' { <character> } '"'
 
@@ -18,18 +22,16 @@
 
 <variable> ::= "$" <identifier>
 
-<conditional> ::= <conditional_if> | <conditional_switch> [ <conditional_else> ] ';'
+<if> ::= "if" <value> ':' { <statement> } [ <else> ] ';'
 
-<conditional_if> ::= "if" <value> ':' { <statement> }
+<switch> ::= "switch" <value> ':' { <case> } [ <else> ] ';'
 
-<conditional_switch> ::= "switch" [ <value> ] ':' { <conditional_case> }
+<case> ::= "case" <value> ':' { <statement> } ';'
 
-<conditional_case> ::= "case" <value> ':' { <statement> } ';'
+<else> ::= "else" ':' { <statement> }
 
-<conditional_else> ::= "else" ':' { <statement> }
+<while> ::= "while" <value> ':' { <statement> } ';'
 
-<loop> ::= "while" <value> ':' { <statement> } ';'
+<function> ::= "func" <identifier> '(' [ <variable-list> ] ')' '>' '(' [ <variable-list> ] ')' ':' { <statement> } ';'
 
-<function> ::= "func" <variable-list> <identifier> <variable-list> ':' { <statement> } ';'
-
-<variable-list> ::= '(' [ <variable> { ',' <variable> } ] ')'
+<variable-list> ::= <variable> { ',' <variable> }

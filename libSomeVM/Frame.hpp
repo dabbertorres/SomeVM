@@ -1,41 +1,34 @@
 #pragma once
 
+#include <cstdint>
+
 #include "Instruction.hpp"
+#include "Registry.hpp"
 #include "Value.hpp"
 
 namespace svm
 {
-	class Function;
+    class Function;
 
-	class Frame
-	{
-	public:
-		Frame(const Function& function, std::uint64_t functionIndex, std::uint64_t argsIdx);
+    class Frame
+    {
+    public:
+        Frame(const Function& function, Register argsIdx, uint16_t nargs);
+        ~Frame() = default;
 
-		Frame(Frame&& other);
-        Frame& operator=(Frame&& other);
+        Bytecode::const_iterator begin() const;
+        Bytecode::const_iterator end() const;
 
-		~Frame() = default;
+        Bytecode::const_iterator next();
 
-		Bytecode::const_iterator next();
-		bool complete() const;
+        void jump(uint64_t instIdx);
 
-		// absolute jump
-		void jump(std::uint64_t instIdx);
+        uint64_t length() const;
 
-		// relative jump
-		void rjump(std::int64_t instOff);
-
-		Bytecode::const_iterator begin() const;
-		Bytecode::const_iterator end() const;
-
-		std::uint64_t length() const;
-
-		const Function& function;
-		std::uint64_t functionIndex;
-
-	private:
-		std::uint64_t argsIdx;
-		Bytecode::const_iterator currentInstruction;
-	};
+    private:
+        const Function& function;
+        Register argsIdx;
+        uint16_t nargs;
+        Bytecode::const_iterator currentInstruction;
+    };
 }

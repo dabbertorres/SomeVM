@@ -4,15 +4,22 @@
 
 namespace sl
 {
+    Token::Token()
+        : lexeme{},
+        type{ Type::Unknown },
+        line{ 0 },
+        position{ 0 }
+    {}
+
     Token::Token(size_t line, size_t position)
-        : value{},
+        : lexeme{},
         type{ Type::Unknown },
         line{ line },
         position{ position }
     {}
 
-    Token::Token(std::string value, Type type, size_t line, size_t position)
-        : value{ value },
+    Token::Token(std::string lexeme, Type type, size_t line, size_t position)
+        : lexeme{ lexeme },
         type{ type },
         line{ line },
         position{ position }
@@ -22,79 +29,82 @@ namespace sl
     {
         return type != Type::Unknown;
     }
+}
 
-    std::ostream& operator<<(std::ostream& os, const Token& t)
+std::ostream& operator<<(std::ostream& os, const sl::Token& t)
+{
+    os << "Token:\n"
+        << "{\n"
+        << "\tvalue:     " << t.lexeme << '\n'
+        << "\ttype:      " << t.type << '\n'
+        << "\tline:      " << t.line << '\n'
+        << "\tcharacter: " << t.position << '\n'
+        << "}\n";
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, sl::Token::Type t)
+{
+    switch (t)
     {
-        os << "Token:\n"
-            << "{\n"
-            << "\tvalue:     " << t.value << '\n'
-            << "\ttype:      " << t.type << '\n'
-            << "\tline:      " << t.line << '\n'
-            << "\tcharacter: " << t.position << '\n'
-            << "}\n";
-        return os;
-    }
+    case sl::Token::Type::Float:
+        return os << "Float";
 
-    std::ostream& operator<<(std::ostream& os, Token::Type t)
-    {
-        switch (t)
-        {
-            case Token::Type::Number:
-                return os << "Number";
+    case sl::Token::Type::Int:
+        return os << "Int";
 
-            case Token::Type::String:
-                return os << "String";
+    case sl::Token::Type::String:
+        return os << "String";
 
-            case Token::Type::Bool:
-                return os << "Bool";
+    case sl::Token::Type::Bool:
+        return os << "Bool";
 
-            case Token::Type::Semicolon:
-                return os << "Semicolon";
+    case sl::Token::Type::Semicolon:
+        return os << "Semicolon";
 
-            case Token::Type::Colon:
-                return os << "Colon";
+    case sl::Token::Type::Colon:
+        return os << "Colon";
 
-            case Token::Type::Comma:
-                return os << "Comma";
+    case sl::Token::Type::Comma:
+        return os << "Comma";
 
-            case Token::Type::ParenLeft:
-                return os << "ParenLeft";
+    case sl::Token::Type::ParenOpen:
+        return os << "ParenOpen";
 
-            case Token::Type::ParenRight:
-                return os << "ParenRight";
+    case sl::Token::Type::ParenClose:
+        return os << "ParenClose";
 
-            case Token::Type::Newline:
-                return os << "Newline";
+    case sl::Token::Type::Newline:
+        return os << "Newline";
 
-            case Token::Type::Dollar:
-                return os << "Dollar";
+    case sl::Token::Type::Dollar:
+        return os << "Dollar";
 
-            case Token::Type::Func:
-                return os << "Func";
+    case sl::Token::Type::Arrow:
+        return os << "Arrow";
 
-            case Token::Type::If:
-                return os << "If";
+    case sl::Token::Type::Func:
+        return os << "Func";
 
-            case Token::Type::Switch:
-                return os << "Switch";
+    case sl::Token::Type::If:
+        return os << "If";
 
-            case Token::Type::Case:
-                return os << "Class";
+    case sl::Token::Type::Switch:
+        return os << "Switch";
 
-            case Token::Type::Else:
-                return os << "Else";
+    case sl::Token::Type::Case:
+        return os << "Class";
 
-            case Token::Type::While:
-                return os << "While";
+    case sl::Token::Type::Else:
+        return os << "Else";
 
-            case Token::Type::Identifier:
-                return os << "Identifier";
+    case sl::Token::Type::While:
+        return os << "While";
 
-            case Token::Type::End:
-                return os << "End";
+    case sl::Token::Type::Identifier:
+        return os << "Identifier";
 
-            default:
-                return os << "Unknown";
-        }
+    default:
+        return os << "Unknown";
     }
 }

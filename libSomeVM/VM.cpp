@@ -1,441 +1,336 @@
 #include "VM.hpp"
 
-#include <iterator>
+#include <chrono>
 #include <cmath>
+#include <iterator>
 
 #include "Program.hpp"
 #include "SysCall.hpp"
+#include "util.hpp"
 
-namespace
-{
-	using namespace svm;
-
-	int64_t getInteger(Float f)
-	{
-		constexpr uint64_t VALUE_MASK = 0x000fffffffffffffu;
-        constexpr uint64_t SIGN_BIT = 1ull << 63;
-
-		auto& ir = reinterpret_cast<int64_t&>(f);
-
-		bool sign = (ir & SIGN_BIT) != 0;
-		// assume exponent is +1
-
-		return (ir & VALUE_MASK) * (sign ? -1 : 1);
-	}
-}
+using namespace std::chrono_literals;
 
 namespace svm
 {
-	VM::VM(std::uint64_t initialRegistrySize)
-		: registry(initialRegistrySize),
-		nextFree(registry.begin())
-	{}
-
-	void VM::load(const Program& program)
-	{
-		// make sure we only need to do 1 allocation while inserting
-		constants.reserve(constants.size() + program.constants.size());
-		std::copy(program.constants.begin(), program.constants.end(), std::back_inserter(constants));
-
-		// make sure we only need to do 1 allocation while inserting
-		functions.reserve(functions.size() + program.functions.size());
-		std::copy(program.functions.begin(), program.functions.end(), std::back_inserter(functions));
-	}
-
-	void VM::run()
-	{
-		callStack.emplace(functions.front(), 0, 0);
-
-		while (!callStack.empty())
-		{
-			Frame& frame = callStack.top();
-
-			if (!frame.complete())
-				interpret(*frame.next(), frame);
-			else
-				callStack.pop();
-		}
-	}
-
-	std::uint64_t VM::callStackSize() const
-	{
-		return callStack.size();
-	}
-
-	std::uint64_t VM::registrySize() const
-	{
-		return registry.size();
-	}
-
-	void VM::write(Value val)
-	{
-		if (nextFree != registry.end())
-		{
-			*nextFree++ = val;
-		}
-		else
-		{
-			registry.push_back(val);
-			nextFree = registry.end();
-		}
-	}
-
-	void VM::write(std::uint64_t idx, Value val)
-	{
-		registry.at(idx) = val;
-	}
-
-	Value VM::read(std::uint64_t idx) const
-	{
-		return registry.at(idx);
-	}
-
-	void VM::interpret(Instruction instr, Frame& frame)
-	{
-		switch (instr.type())
-		{
-			/* memory ops */
-		case Instruction::Type::Load:
-		{
-			auto dest = instr.arg1_24();
-			auto src = instr.arg2_32();
-			registry.at(dest) = registry.at(src);
-			break;
-		}
-
-		case Instruction::Type::LoadC:
-		{
-			auto dest = instr.arg1_24();
-			auto src = instr.arg2_32();
-			registry.at(dest) = constants.at(src);
-			break;
-		}
-
-		/* math ops */
-		case Instruction::Type::Add:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one + two };
-			break;
-		}
-
-		case Instruction::Type::Sub:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one - two };
-			break;
-		}
-
-		case Instruction::Type::Mult:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one * two };
-			break;
-		}
-
-		case Instruction::Type::Div:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one / two };
-			break;
-		}
-
-		case Instruction::Type::Mod:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = std::fmod(one, two);
-			break;
-		}
-
-		case Instruction::Type::Neg:
-		{
-			Float one = registry.at(instr.arg2_16());
-
-			registry.at(instr.arg1_16()) = { -one };
-			break;
-		}
-
-		/* comparison ops */
-		case Instruction::Type::Lt:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one < two };
-			break;
-		}
-
-		case Instruction::Type::LtEq:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one <= two };
-			break;
-		}
-
-		case Instruction::Type::Gt:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one > two };
-			break;
-		}
-
-		case Instruction::Type::GtEq:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one >= two };
-			break;
-		}
-
-		case Instruction::Type::Eq:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one == two };
-			break;
-		}
-
-		case Instruction::Type::Neq:
-		{
-			Float one = registry.at(instr.arg2_16());
-			Float two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one != two };
-			break;
-		}
-
-		/* logical ops */
-		case Instruction::Type::Not:
-		{
-			Bool one = registry.at(instr.arg2_32());
-
-			registry.at(instr.arg1_24()) = { !one };
-			break;
-		}
-
-		case Instruction::Type::And:
-		{
-			Bool one = registry.at(instr.arg2_16());
-			Bool two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one && two };
-			break;
-		}
-
-		case Instruction::Type::Or:
-		{
-			Bool one = registry.at(instr.arg2_16());
-			Bool two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one || two };
-			break;
-		}
-
-		case Instruction::Type::Xor:
-		{
-			Bool one = registry.at(instr.arg2_16());
-			Bool two = registry.at(instr.arg3_16());
-
-			registry.at(instr.arg1_16()) = { one != two };
-			break;
-		}
-
-		/* conditional branching */
-		case Instruction::Type::JmpT:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto idx = getInteger(constants.at(instr.arg2_32()));
-
-			// if true, skip the next instruction (the jump to the "else")
-			if (b)
-				frame.jump(idx);
-
-			break;
-		}
-
-		case Instruction::Type::JmpF:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto idx = getInteger(constants.at(instr.arg2_32()));
-
-			// if false, skip the next instruction (the jump to the "else")
-			if (!b)
-				frame.jump(idx);
-
-			break;
-		}
-
-		case Instruction::Type::JmpTC:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto idx = getInteger(constants.at(instr.arg2_32()));
-
-			// if true, skip the next instruction (the jump to the "else")
-			if (b)
-				frame.jump(idx);
-
-			break;
-		}
-
-		case Instruction::Type::JmpFC:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto idx = getInteger(constants.at(instr.arg2_32()));
-
-			// if false, skip the next instruction (the jump to the "else")
-			if (!b)
-				frame.jump(idx);
-
-			break;
-		}
-
-		case Instruction::Type::RJmpT:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto off = getInteger(constants.at(instr.arg2_32()));
-
-			// if true, skip the next instruction (the jump to the "else")
-			if (b)
-				frame.rjump(off);
-
-			break;
-		}
-
-		case Instruction::Type::RJmpF:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto off = getInteger(constants.at(instr.arg2_32()));
-
-			// if false, skip the next instruction (the jump to the "else")
-			if (!b)
-				frame.rjump(off);
-
-			break;
-		}
-
-		case Instruction::Type::RJmpTC:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto off = getInteger(constants.at(instr.arg2_32()));
-
-			// if true, skip the next instruction (the jump to the "else")
-			if (b)
-				frame.rjump(off);
-
-			break;
-		}
-
-		case Instruction::Type::RJmpFC:
-		{
-			Bool b = registry.at(instr.arg1_24());
-			auto off = getInteger(constants.at(instr.arg2_32()));
-
-			// if false, skip the next instruction (the jump to the "else")
-			if (!b)
-				frame.rjump(off);
-
-			break;
-		}
-
-		/* branching */
-		case Instruction::Type::Call:
-		{
-			auto nargs = getInteger(registry.at(instr.arg1_16()));
-			auto argIdx = getInteger(registry.at(instr.arg2_16()));
-			auto funcIdx = getInteger(registry.at(instr.arg3_16()));
-
-			const Function& callee = functions[funcIdx];
-
-			if (nargs != callee.args())
-				throw std::logic_error("Invalid number of arguments!");
-
-			callStack.emplace(callee, funcIdx, argIdx);
-			break;
-		}
-
-		case Instruction::Type::Ret:
-		{
-			// TODO: make work like it should
-//					auto nrets = getInteger(registry.at(instr.arg1_24()));
-//					auto retIdx = getInteger(registry.at(instr.arg2_32()));
-
-			callStack.pop();
-			break;
-		}
-
-		case Instruction::Type::Jmp:
-		{
-			auto idx = getInteger(registry.at(instr.arg1_56()));
-			frame.jump(idx);
-			break;
-		}
-
-		case Instruction::Type::RJmp:
-		{
-			auto off = getInteger(registry.at(instr.arg1_56()));
-			frame.rjump(off);
-			break;
-		}
-
-		case Instruction::Type::JmpC:
-		{
-			auto idx = getInteger(constants.at(instr.arg1_56()));
-			frame.jump(idx);
-			break;
-		}
-
-		case Instruction::Type::RJmpC:
-		{
-			auto off = getInteger(constants.at(instr.arg1_56()));
-			frame.rjump(off);
-			break;
-		}
-
-		case Instruction::Type::SysCall:
-		{
-			auto nargs = getInteger(registry.at(instr.arg1_16()));
-			auto argIdx = getInteger(registry.at(instr.arg2_16()));
-			auto funcIdx = static_cast<SysCall>(getInteger(registry.at(instr.arg3_16())));
-
-			switch (funcIdx)
-			{
-			case SysCall::Print:
-                for (; argIdx < argIdx + nargs; ++argIdx)
-                {
-                    //auto& s = registry.at(argIdx);
-                    //auto& v = registry.at(++argIdx);
-                    //std::printf(s, v);
-                }
-				break;
-
-			default:
-				// ignore unknown syscall ids for now
-				break;
-			}
-
-			break;
-		}
-
-		case Instruction::Type::Nop:
-		{
-			break;
-		}
-		}
-	}
+    VM::VM(size_t initialRegistrySize)
+        : registry{ initialRegistrySize },
+        program{ nullptr },
+        gc(registry, 500ms)
+    {}
+
+    void VM::load(const Program& prog)
+    {
+        while (!callStack.empty())
+            callStack.pop();
+
+        this->program = &prog;
+    }
+
+    void VM::run()
+    {
+        // TODO make REPL friendly
+        callStack.emplace(program->functions.front(), 0_r, 0_u16);
+
+        while (!callStack.empty())
+        {
+            Frame& frame = callStack.top();
+
+            if (frame.next() != frame.end())
+                interpret(*frame.next(), frame);
+            else
+                callStack.pop();
+        }
+    }
+
+    std::uint64_t VM::callStackSize() const
+    {
+        return callStack.size();
+    }
+
+    void VM::interpret(Instruction instr, Frame& frame)
+    {
+        // memory ops
+        Register dest;
+
+        // operations
+        Value lhs;
+        Value rhs;
+        Value val;
+
+        // jumps
+        Value condition;
+        Value idx;
+
+        // function calls
+        uint16_t nargs;
+        Register argIdx;
+        uint16_t funcIdx;
+
+        switch (instr.type())
+        {
+        /* memory ops */
+        case Instruction::Code::Load:
+            dest = instr.arg1();
+            val = getRegister(instr.arg2());
+            registry.set(dest, val);
+            break;
+
+        /* integer math */
+        case Instruction::Code::Add:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) + std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Sub:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) - std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Mult:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) * std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Div:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) / std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Mod:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) % std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Neg:
+            lhs = getRegister(instr.arg2());
+            registry.set(instr.arg1(), Value{ -std::get<Int>(lhs) });
+            break;
+
+        /* floating-point math */
+        case Instruction::Code::Addf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) + std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Subf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) - std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Multf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) * std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Divf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) / std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Modf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::fmod(std::get<Float>(lhs), std::get<Float>(rhs)) });
+            break;
+
+        case Instruction::Code::Negf:
+            lhs = getRegister(instr.arg2());
+            registry.set(instr.arg1(), Value{ -std::get<Float>(lhs) });
+            break;
+
+        /* integer comparison */
+        case Instruction::Code::Lt:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) < std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::LtEq:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) <= std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Gt:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) > std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::GtEq:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) >= std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Eq:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) == std::get<Int>(rhs) });
+            break;
+
+        case Instruction::Code::Neq:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Int>(lhs) != std::get<Int>(rhs) });
+            break;
+
+        /* floating-point comparison */
+        case Instruction::Code::Ltf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) < std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::LtEqf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) <= std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Gtf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) > std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::GtEqf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) >= std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Eqf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) == std::get<Float>(rhs) });
+            break;
+
+        case Instruction::Code::Neqf:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Float>(lhs) != std::get<Float>(rhs) });
+            break;
+
+        /* boolean logic */
+        case Instruction::Code::Not:
+            lhs = getRegister(instr.arg2());
+            registry.set(instr.arg1(), Value{ !std::get<Bool>(lhs) });
+            break;
+
+        case Instruction::Code::And:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Bool>(lhs) && std::get<Bool>(rhs) });
+            break;
+
+        case Instruction::Code::Or:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Bool>(lhs) || std::get<Bool>(rhs) });
+            break;
+
+        case Instruction::Code::Xor:
+            lhs = getRegister(instr.arg2());
+            rhs = getRegister(instr.arg3());
+            registry.set(instr.arg1(), Value{ std::get<Bool>(lhs) != std::get<Bool>(rhs) && (std::get<Bool>(lhs) || std::get<Bool>(rhs)) });
+            break;
+
+        /* conditional branching */
+        case Instruction::Code::JmpT:
+            condition = getRegister(instr.arg1());
+            idx = program->constants.at(instr.arg2());
+
+            // if true, skip the next instruction (the jump to the "else")
+            if (std::get<Bool>(condition))
+                frame.jump(std::get<Int>(idx));
+
+            break;
+
+        case Instruction::Code::JmpF:
+            condition = registry.get(instr.arg1());
+            idx = program->constants.at(instr.arg2());
+
+            // if false, skip the next instruction (the jump to the "else")
+            if (!std::get<Bool>(condition))
+                frame.jump(std::get<Int>(idx));
+
+            break;
+
+        /* branching */
+        case Instruction::Code::Call:
+            nargs = instr.arg1();
+            argIdx = instr.arg2();
+            funcIdx = instr.arg3();
+
+            callStack.emplace(program->functions[funcIdx], argIdx, nargs);
+            break;
+
+        case Instruction::Code::Ret:
+            // TODO
+            //nrets = getInteger(registry.at(instr.arg1_24()));
+            //retIdx = getInteger(registry.at(instr.arg2_32()));
+
+            callStack.pop();
+            break;
+
+        case Instruction::Code::Jmp:
+            idx = program->constants.at(instr.arg1());
+            frame.jump(std::get<Int>(idx));
+            break;
+
+        case Instruction::Code::SysCall:
+            switch (static_cast<SysCall>(instr.arg1()))
+            {
+            case SysCall::PrintBool:
+                val = registry.get(instr.arg2());
+                std::printf("%s", std::get<Bool>(val) ? "true" : "false");
+                break;
+
+            case SysCall::PrintInt:
+                val = registry.get(instr.arg2());
+                std::printf("%lld", std::get<Int>(val));
+                break;
+
+            case SysCall::PrintFloat:
+                val = registry.get(instr.arg2());
+                std::printf("%f", std::get<Float>(val));
+                break;
+
+            case SysCall::Print:
+                // an object that wants to be printed is going to have it's string() method
+                // called before this - so the argIdx is pointing to a string (the result)
+                val = registry.get(instr.arg2());
+                std::printf("%.*s", static_cast<int>(std::get<String>(val).length()), std::get<String>(val).data());
+                break;
+
+            default:
+                // TODO just ignore unknown syscall ids for now
+                break;
+            }
+            break;
+
+        case Instruction::Code::Nop:
+            break;
+        }
+    }
+
+    Value VM::getRegister(Register idx) const
+    {
+        if (isConstant(idx))
+            return program->constants.at(idx);
+        else
+            return registry.get(idx);
+    }
 }

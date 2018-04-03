@@ -1,127 +1,148 @@
 #pragma once
 
-#include <memory>
+#include <cstdint>
 #include <cstring>
+#include <memory>
+
+#include "GC.hpp"
 
 namespace svm
 {
-	template<typename T>
-	class Array
-	{
-	public:
-		Array();
-		Array(std::uint64_t len);
-		Array(const T* data, std::uint64_t len);
+    class Array : public GC::Handle
+    {
+        static constexpr double growthFactor = 1.5;
 
-		Array(const Array& other);
-		Array(Array&& other);
+        // a default/zero'd Array has a capacity of 0.
+        // if it is pushed to, we'll allocate at least this much
+        static constexpr size_t minCap = 8;
 
-		~Array() = default;
+    public:
+        Array();
 
-		Array& operator=(const Array& other);
-		Array& operator=(Array&& other);
+        template<typename T>
+        Array(GC& gc, size_t len);
 
-		T& operator[](std::uint64_t idx);
-		const T& operator[](std::uint64_t idx) const;
+        Array(const Array& other) = default;
+        Array(Array&& other) = default;
 
-		T* data();
-		const T* data() const;
+        ~Array() = default;
 
-		std::uint64_t length() const;
+        Array& operator=(const Array& other) = default;
+        Array& operator=(Array&& other) = default;
 
-	private:
-		std::uint64_t lengthVal;
-		std::unique_ptr<T[]> ptr;
-	};
+        Array slice(size_t from, size_t to) const;
 
-	template<typename T>
-	Array<T>::Array()
-		: lengthVal{ 0 },
-		ptr{ nullptr }
-	{}
+        void realloc(GC& gc);
 
-	template<typename T>
-	Array<T>::Array(std::uint64_t len)
-		: lengthVal{ len },
-		ptr{ std::make_unique<T[]>(len) }
-	{}
+        void* data() const;
 
-	template<typename T>
-	Array<T>::Array(const T* data, std::uint64_t len)
-		: lengthVal{ len },
-		ptr{ std::make_unique<T[]>(len) }
-	{
-		std::memcpy(ptr.get(), data, lengthVal * sizeof(T));
-	}
+        size_t length() const;
 
-	template<typename T>
-	Array<T>::Array(const Array& other)
-		: lengthVal{ other.lengthVal },
-		ptr{ std::make_unique<T[]>(other.lengthVal) }
-	{
-		std::memcpy(ptr.get(), other.ptr.get(), lengthVal * sizeof(T));
-	}
+        template<typename T>
+        T& at(size_t idx) const;
 
-	template<typename T>
-	Array<T>::Array(Array&& other)
-		: lengthVal(other.lengthVal),
-		ptr{ std::move(other.ptr) }
-	{
-		other.lengthVal = 0;
-	}
+        // returns false if the Array needs to be reallocated
+        template<typename T>
+        bool insert(size_t idx, T t);
 
-	template<typename T>
-	Array<T>& Array<T>::operator=(const Array& other)
-	{
-		lengthVal = other.lengthVal;
-		ptr = std::make_unique<T[]>(lengthVal);
-		std::memcpy(ptr.get(), other.ptr.get(), lengthVal * sizeof(T));
-		return *this;
-	}
+        // returns false if the Array needs to be reallocated
+        template<typename T>
+        bool prepend(T t);
 
-	template<typename T>
-	Array<T>& Array<T>::operator=(Array&& other)
-	{
-		lengthVal = other.lengthVal;
-		ptr = std::move(other.ptr);
-		return *this;
-	}
+        // returns false if the Array needs to be reallocated
+        template<typename T>
+        bool append(T t);
 
-	template<typename T>
-	T& Array<T>::operator[](std::uint64_t idx)
-	{
-		if (idx < lengthVal)
-			return ptr[idx];
-		else
-			throw std::out_of_range{ "Index greater-than or equal-to length of array" };
+        template<typename T>
+        void remove(size_t idx);
 
-	}
+        void popFront();
+        void popBack();
 
-	template<typename T>
-	const T& Array<T>::operator[](std::uint64_t idx) const
-	{
-		if (idx < lengthVal)
-			return ptr[idx];
-		else
-			throw std::out_of_range{};
-	}
+    private:
+        size_t offset;
+        size_t len;
+    };
 
-	template<typename T>
-	T* Array<T>::data()
-	{
-		return ptr.get();
-	}
+    template<typename T>
+    Array::Array(GC& gc, size_t len)
+        : GC::Handle(gc, len * sizeof(T)),
+        offset{ 0 },
+        len{ len }
+    {}
 
-	template<typename T>
-	const T* Array<T>::data() const
-	{
-		return ptr.get();
-	}
+    template<typename T>
+    T& Array::at(size_t idx) const
+    {
+        if (idx < len)
+            return *reinterpret_cast<T*>(ptr + (offset + idx) * sizeof(T));
+        else
+            throw std::out_of_range{ "array index out of bounds" };
+    }
 
-	template<typename T>
-	std::uint64_t Array<T>::length() const
-	{
-		return lengthVal;
-	}
+    template<typename T>
+    bool Array::insert(size_t idx, T t)
+    {
+        if (idx > len)
+            throw std::out_of_range{ "array index out of bounds" };
+
+        // check if we need to realloc
+        size_t cap = capacity();
+        if (cap == len * sizeof(T))
+            return false;
+
+        void* dest = static_cast<char*>(ptr) + (offset + idx) * sizeof(T);
+        std::memcpy(dest, static_cast<char*>(dest) + 1 * sizeof(T), (len - idx) * sizeof(T));
+        ++len;
+
+        *reinterpret_cast<T*>(dest) = t;
+        return true;
+    }
+
+    template<typename T>
+    bool Array::prepend(T t)
+    {
+        // we can just move our offset!
+        if (offset > 0)
+        {
+            *reinterpret_cast<T*>(ptr + offset * sizeof(T)) = t;
+            ++len;
+            --offset;
+            return true;
+        }
+        // gotta copy everything over
+        else
+        {
+            return insert(0, t);
+        }
+    }
+
+    template<typename T>
+    bool Array::append(T t)
+    {
+        // we can just extend our length!
+        if (len < capacity())
+        {
+            *reinterpret_cast<T*>(ptr + (offset + len) * sizeof(T)) = t;
+            ++len;
+            return true;
+        }
+        // gotta realloc
+        else
+        {
+            return false;
+        }
+    }
+
+    template<typename T>
+    void Array::remove(size_t idx)
+    {
+        if (idx >= len)
+            throw std::out_of_range{ "index is out of range" };
+
+        void* target = static_cast<char*>(ptr) + (offset + idx) * sizeof(T);
+        std::memcpy(target, static_cast<char*>(target) + 1 * sizeof(T), (len - idx) * sizeof(T));
+        --len;
+    }
 }
 

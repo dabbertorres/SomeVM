@@ -11,7 +11,8 @@ namespace sl
         enum class Type
         {
             // literals
-            Number,
+            Float,
+            Int,
             String,
             Bool,
 
@@ -19,10 +20,11 @@ namespace sl
             Semicolon,
             Colon,
             Comma,
-            ParenLeft,
-            ParenRight,
+            ParenOpen,
+            ParenClose,
             Newline,
             Dollar,
+            Arrow,
 
             // keywords
             Func,
@@ -34,22 +36,21 @@ namespace sl
 
             Identifier,
 
-            End,
-
             Unknown,
         };
 
-        std::string value;
+        std::string lexeme;
         Type type;
         size_t line;
         size_t position;
 
+        Token();
         Token(size_t line, size_t position);
-        Token(std::string value, Type type, size_t line, size_t position);
+        Token(std::string lexeme, Type type, size_t line, size_t position);
 
         bool valid() const;
     };
-
-    std::ostream& operator<<(std::ostream& os, const Token& t);
-    std::ostream& operator<<(std::ostream& os, Token::Type t);
 }
+
+std::ostream& operator<<(std::ostream& os, const sl::Token& t);
+std::ostream& operator<<(std::ostream& os, sl::Token::Type t);

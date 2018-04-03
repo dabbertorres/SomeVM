@@ -1,58 +1,79 @@
 #pragma once
 
+#include <iosfwd>
+#include <string>
 #include <variant>
 #include <vector>
-#include <string>
 
 #include "libSomeVM/Value.hpp"
 
+#include "Token.hpp"
+
 namespace sl
 {
-    using Literal = std::variant<svm::Float, std::string, bool>;
-    using Value = std::variant<Literal, std::string>;
+    struct StatementInstruction;
+    struct StatementIf;
+    struct StatementCase;
+    struct StatementSwitch;
+    struct StatementWhile;
+    struct StatementFunction;
+
+    using Statement = std::variant<StatementInstruction, StatementIf, StatementSwitch, StatementWhile, StatementFunction>;
+
+    struct Variable
+    {
+        std::string identifier;
+    };
+
+    using Value = std::variant<svm::Value, Variable>;
 
     struct StatementInstruction
     {
         std::string instruction;
-        std::vector<Value> values;
+        std::vector<Value> args;
     };
 
     struct StatementIf
     {
-        std::string conditionValue;
-        std::vector<StatementInstruction> instructions;
-    };
-
-    struct StatementSwitch
-    {
-        std::string conditionValue;
-        std::vector<StatementInstruction> instructions;
+        Value condition;
+        std::vector<Statement> trueBranch;
+        std::vector<Statement> falseBranch;
     };
 
     struct StatementCase
     {
-        std::string conditionValue;
-        std::vector<StatementInstruction> instructions;
+        Value condition;
+        std::vector<Statement> statements;
     };
 
-    struct StatementElse
+    struct StatementSwitch
     {
-        std::vector<StatementInstruction> instructions;
+        Value condition;
+        std::vector<StatementCase> cases;
+        std::vector<Statement> elseStatements;
     };
 
     struct StatementWhile
     {
-        std::string conditionIdentifier;
-        std::vector<StatementInstruction> instructions;
+        Value condition;
+        std::vector<Statement> statements;
     };
 
     struct StatementFunction
     {
         std::string identifier;
-        size_t args;
-        size_t rets;
-        std::vector<StatementInstruction> instructions;
+        std::vector<Variable> args;
+        std::vector<Variable> rets;
+        std::vector<Statement> statements;
     };
-
-    using Statement = std::variant<StatementInstruction, StatementIf, StatementSwitch, StatementCase, StatementElse, StatementWhile, StatementFunction>;
 }
+
+std::ostream& operator<<(std::ostream& os, const sl::Statement& stmt);
+std::ostream& operator<<(std::ostream& os, const sl::StatementInstruction& stmt);
+std::ostream& operator<<(std::ostream& os, const sl::StatementIf& stmt);
+std::ostream& operator<<(std::ostream& os, const sl::StatementCase& stmt);
+std::ostream& operator<<(std::ostream& os, const sl::StatementSwitch& stmt);
+std::ostream& operator<<(std::ostream& os, const sl::StatementWhile& stmt);
+std::ostream& operator<<(std::ostream& os, const sl::StatementFunction& stmt);
+
+std::ostream& operator<<(std::ostream& os, const sl::Value& value);

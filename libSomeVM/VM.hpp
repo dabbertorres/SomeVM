@@ -1,53 +1,37 @@
 #pragma once
 
+#include <cstdint>
 #include <stack>
 
 #include "Frame.hpp"
+#include "GC.hpp"
+#include "Instruction.hpp"
 #include "Registry.hpp"
 
 namespace svm
 {
-	struct Program;
+    struct Program;
 
-	class VM
-	{
-	public:
-		VM(std::uint64_t initialRegistrySize = 256);
+    class VM
+    {
+    public:
+        VM(size_t initialRegistrySize = 256);
 
-        VM(VM&&) = default;
-        VM& operator=(VM&&) = default;
+        void load(const Program& program);
 
-        VM(const VM&) = delete;
-        VM& operator=(const VM&) = delete;
+        void run();
 
-		~VM() = default;
+        uint64_t callStackSize() const;
 
-		void load(const Program& program);
+    private:
+        void interpret(Instruction instr, Frame& frame);
+        Value getRegister(Register idx) const;
 
-		void run();
+        std::stack<Frame> callStack;
 
-		std::uint64_t callStackSize() const;
-		std::uint64_t registrySize() const;
+        Registry registry;
+        const Program* program;
 
-		// implicit write - writes 'val' to the first unused register
-		// if the registry is full, resizes it
-		void write(Value val);
-
-		// explicit write - writes 'val' to the provided register number 'idx'
-		void write(std::uint64_t idx, Value val);
-
-		Value read(std::uint64_t idx) const;
-
-	private:
-		void interpret(Instruction instr, Frame& frame);
-
-		std::stack<Frame> callStack;
-
-		Registry registry;
-		Registry::iterator nextFree;
-
-		Registry constants;
-
-		std::vector<Function> functions;
-	};
+        GC gc;
+    };
 }
