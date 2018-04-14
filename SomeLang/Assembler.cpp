@@ -4,9 +4,10 @@
 #include <ostream>
 #include <sstream>
 
-#include "libSomeVM/Value.hpp"
 #include "libSomeVM/Function.hpp"
+#include "libSomeVM/Instruction.hpp"
 #include "libSomeVM/Program.hpp"
+#include "libSomeVM/Value.hpp"
 #include "libSomeVM/VM.hpp"
 
 #include "Util.hpp"
@@ -157,9 +158,61 @@ namespace
 
 namespace sl
 {
+    struct Environment
+    {
+        std::unordered_map<std::string, svm::Register> identifiers;
+    };
+
+    void assemble(svm::Program& prog, Environment& env, std::vector<Statement>::const_iterator& it, const StatementInstruction& stmt)
+    {
+
+    }
+
+    void assemble(svm::Program& prog, Environment& env, std::vector<Statement>::const_iterator& it, const StatementIf& stmt)
+    {
+
+    }
+
+    void assemble(svm::Program& prog, Environment& env, std::vector<Statement>::const_iterator& it, const StatementCase& stmt)
+    {
+
+    }
+
+    void assemble(svm::Program& prog, Environment& env, std::vector<Statement>::const_iterator& it, const StatementSwitch& stmt)
+    {
+
+    }
+
+    void assemble(svm::Program& prog, Environment& env, std::vector<Statement>::const_iterator& it, const StatementWhile& stmt)
+    {
+
+    }
+
+    void assemble(svm::Program& prog, Environment& env, std::vector<Statement>::const_iterator& it, const StatementFunction& stmt)
+    {
+        env.identifiers.emplace(stmt.identifier, prog.functions.size() + 1);
+
+        svm::Bytecode code;
+
+        for (auto& st : stmt.statements)
+        {
+            std::visit([&](auto&& arg) { assemble(prog, env, it, *st); });
+        }
+
+        prog.functions.emplace_back(stmt.args.size(), stmt.rets.size(), code);
+    }
+
     svm::Program assemble(const std::vector<Statement>& stmts)
     {
-        return {};
+        svm::Program prog;
+        Environment env;
+
+        for (auto it = stmts.begin(); it != stmts.end();)
+        {
+            std::visit([&](auto&& arg) { assemble(prog, env, it, arg); }, *it);
+        }
+
+        return prog;
     }
 
     svm::Program Assembler::run(std::istream& in, std::ostream& logStream)

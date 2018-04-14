@@ -4,14 +4,16 @@ func hello () > (): print "hello, world" ;
 
 func bye () > (): print "goodbye, world" ;
 
-load $flag true
+func main () > ():
+    load $flag true
 
-print $flag
+    print $flag
 
-if $flag:
-	call $hello
-else:
-	call $bye
+    if $flag:
+        call $hello
+    else:
+        call $bye
+    ;
+
+    print $flag
 ;
-
-print $flag

@@ -73,7 +73,7 @@ void build(const char* input, const char* output)
 
     auto tokens = sl::lex(fin);
     auto stmts = sl::parse(input, fin, std::cout, tokens);
-    svm::Program program = sl::assemble(stmts);
+    auto program = sl::assemble(stmts);
 
     program.write(fout);
 }
